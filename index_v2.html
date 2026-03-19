@@ -604,12 +604,13 @@ function deepMerge(base, override) {
 // SESSION
 // ═══════════════════════════════════════════════════════════════
 const Session = {
-  rounds: [],       // rounds to play
-  idx: 0,           // current index
-  results: [],      // completed results
-  hintLevel: 0,     // 0-4 hints shown this round
+  rounds: [],
+  idx: 0,
+  results: [],
+  hintLevel: 0,
   currentRound: null,
   generatedHTML: '',
+  apiUnavailable: false,  // set true when quota/auth error detected this session
 
   start(rounds) {
     this.rounds = shuffle([...rounds]);
@@ -617,6 +618,7 @@ const Session = {
     this.results = [];
     this.currentRound = null;
     this.generatedHTML = '';
+    // don't reset apiUnavailable — quota stays exhausted for the whole day
   },
 
   current() { return this.rounds[this.idx]; },
@@ -1027,7 +1029,18 @@ function renderSummary() {
 function updateNavStats() {
   const el = document.getElementById('nav-rounds-done');
   const hasKey = !!State.get('apiKey');
-  if (el) el.innerHTML = `Rounds: <strong>${State.data.totalRounds}</strong> &nbsp;·&nbsp; <span style="color:${hasKey?'var(--green)':'var(--text3)'}">${hasKey?'AI mode':'Local mode'}</span>`;
+  let modeLabel, modeColor;
+  if (Session.apiUnavailable) {
+    modeLabel = 'Quota exhausted — get new key';
+    modeColor = 'var(--yellow)';
+  } else if (hasKey) {
+    modeLabel = 'AI mode';
+    modeColor = 'var(--green)';
+  } else {
+    modeLabel = 'Local mode';
+    modeColor = 'var(--text3)';
+  }
+  if (el) el.innerHTML = `Rounds: <strong>${State.data.totalRounds}</strong> &nbsp;·&nbsp; <span style="color:${modeColor}">${modeLabel}</span>`;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1126,7 +1139,7 @@ function scoreLocally(prompt, round) {
 // ═══════════════════════════════════════════════════════════════
 async function runEvaluation(userPrompt) {
   const round = Session.currentRound;
-  const hasKey = !!(State.get('apiKey'));
+  const hasKey = !!(State.get('apiKey')) && !Session.apiUnavailable;
   Router.go('evaluating');
 
   const steps = [1,2,3,4,5];
@@ -1142,7 +1155,7 @@ async function runEvaluation(userPrompt) {
     document.getElementById('eval-progress-fill').style.width = progress[n-1] + '%';
   }
 
-  // ── LOCAL MODE (no API key) ──────────────────────────────────
+  // ── LOCAL MODE (no API key or quota exhausted) ───────────────
   if (!hasKey) {
     activateStep(1); await sleep(350);
     activateStep(4); await sleep(400);
@@ -1162,7 +1175,7 @@ async function runEvaluation(userPrompt) {
     return;
   }
 
-  // ── API MODE (Gemini key present) ────────────────────────────
+  // ── API MODE (Gemini key present and not known-exhausted) ────
   try {
     activateStep(1); await sleep(400);
     activateStep(2);
@@ -1193,12 +1206,27 @@ async function runEvaluation(userPrompt) {
     Session.record(result);
     Router.go('feedback');
   } catch(err) {
-    // API failed — fall back to local scoring silently
+    // Detect quota / auth errors — stop retrying for this session
+    const msg = err.message || '';
+    const isQuota = msg.includes('quota') || msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED');
+    const isAuth = msg.includes('API_KEY') || msg.includes('401') || msg.includes('403');
+    if (isQuota || isAuth) {
+      Session.apiUnavailable = true;
+      updateNavStats();
+      const tip = isQuota
+        ? 'Daily quota exhausted — get a fresh free key at aistudio.google.com, then update it in ⚙ Settings.'
+        : 'API key invalid — update it in ⚙ Settings.';
+      showToast(tip);
+    } else {
+      showToast('Gemini error — switched to local scoring for this session.');
+      Session.apiUnavailable = true;
+      updateNavStats();
+    }
+    // Fall back to local scoring
     Session.generatedHTML = '';
     const evaluation = scoreLocally(userPrompt, round);
     const result = { roundId: round.id, score: evaluation.overall, scores: evaluation.scores, elementsFound: evaluation.elementsFound, habitTip: evaluation.habitTip, strengths: evaluation.strengths, improvements: evaluation.improvements, prompt: userPrompt, localMode: true };
     Session.record(result);
-    showToast('Gemini unavailable — using local scoring instead');
     Router.go('feedback');
   }
 }
