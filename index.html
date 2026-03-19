@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Deliberate practice for prompting skills. Score yourself on conciseness, context, tone, and examples.">
+  <title>PromptGym — Train Your Prompting Instincts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script src="data/rounds.js"></script>
+  <style>
+    :root {
+      --bg: #FAFAF9;
+      --surface: #FFFFFF;
+      --text: #1A1A2E;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --border-focus: #1A1A2E;
+      --accent: #F59E0B;
+      --habit-conciseness: #6366F1;
+      --habit-context: #10B981;
+      --habit-tone: #F59E0B;
+      --habit-examples: #EF4444;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.5; }
+    .hidden { display: none !important; }
+    .screen { min-height: 100vh; }
+    a { color: inherit; }
+
+    /* Buttons */
+    button { cursor: pointer; font-family: 'DM Sans', sans-serif; border: none; outline: none; }
+    .btn-primary {
+      background: var(--text); color: #fff; height: 52px; border-radius: 10px;
+      font-size: 16px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      padding: 0 24px; transition: background 150ms, box-shadow 150ms, transform 100ms;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 44px; border: none;
+    }
+    .btn-primary:hover { background: #2D2D4E; box-shadow: var(--shadow-md); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .btn-secondary {
+      background: #fff; border: 2px solid var(--accent); color: var(--text);
+      height: 52px; border-radius: 10px; font-size: 16px; font-weight: 600;
+      padding: 0 24px; transition: background 150ms; display: inline-flex;
+      align-items: center; justify-content: center; gap: 8px; min-height: 44px;
+    }
+    .btn-secondary:hover { background: #FEF3C7; }
+    .btn-secondary:active { transform: scale(0.97); }
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      height: 44px; border-radius: 10px; font-size: 14px; font-weight: 500;
+      padding: 0 20px; transition: border-color 150ms, color 150ms; display: inline-flex;
+      align-items: center; justify-content: center; gap: 8px; min-height: 44px;
+    }
+    .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+    .btn-ghost:active { transform: scale(0.97); }
+    .btn-danger {
+      background: #EF4444; color: #fff; height: 44px; border-radius: 10px;
+      font-size: 14px; font-weight: 600; padding: 0 20px; display: inline-flex;
+      align-items: center; justify-content: center; min-height: 44px;
+    }
+    .btn-danger:hover { background: #DC2626; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+    /* Overlay / dialog */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .dialog {
+      background: var(--surface); border-radius: var(--radius-lg); padding: 28px;
+      max-width: 400px; width: 100%; position: relative; box-shadow: var(--shadow-md);
+    }
+    .dialog-close {
+      position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;
+      background: none; border: none; cursor: pointer; font-size: 18px; color: var(--muted);
+      display: flex; align-items: center; justify-content: center; border-radius: 6px;
+    }
+    .dialog-close:hover { background: var(--bg); color: var(--text); }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute; background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); box-shadow: var(--shadow-md); padding: 8px 12px;
+      max-width: 240px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+      z-index: 2000; pointer-events: none; line-height: 1.4;
+    }
+
+    /* Error banner */
+    .error-banner {
+      background: #FEE2E2; border: 1px solid #EF4444; border-radius: var(--radius-sm);
+      padding: 10px 14px; font-size: 13px; color: #991B1B;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      animation: fadeIn 200ms ease;
+    }
+    .error-banner a { color: #991B1B; font-weight: 600; text-decoration: underline; cursor: pointer; }
+    .warn-banner {
+      background: #FEF3C7; border: 1px solid #F59E0B; border-radius: var(--radius-sm);
+      padding: 10px 14px; font-size: 13px; color: #92400E;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.8s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-6px); }
+      40%,80% { transform: translateX(6px); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    @keyframes barFill { from { width: 0; } }
+
+    /* Skeleton shimmer */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 400px 100%; animation: shimmer 1.4s infinite; border-radius: var(--radius-sm);
+    }
+
+    /* ── SETUP SCREEN ─────────────────────────────────────────────────── */
+    #screen-setup {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 24px 20px;
+    }
+    .setup-card {
+      background: var(--surface); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md); padding: 40px 36px;
+      width: 100%; max-width: 480px;
+    }
+    .setup-header { margin-bottom: 32px; text-align: center; }
+    .setup-logo { font-family: 'IBM Plex Mono', monospace; font-size: 32px; color: var(--text); display: block; }
+    .setup-sub { font-size: 16px; color: var(--muted); margin-top: 6px; }
+    .form-label { font-size: 14px; font-weight: 600; color: var(--text); display: block; margin-bottom: 8px; }
+    .input-wrap { position: relative; }
+    .key-input {
+      width: 100%; height: 48px; padding: 12px 44px 12px 16px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 14px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--bg); color: var(--text); transition: border-color 150ms, box-shadow 150ms;
+    }
+    .key-input:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(26,26,46,0.08); }
+    .key-input.valid { border-color: #10B981; }
+    .eye-btn {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 16px;
+      color: var(--muted); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    }
+    .key-helper { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .key-error { font-size: 13px; color: var(--danger); margin-top: 6px; display: none; }
+    .habit-options { margin-top: 20px; }
+    .radio-row {
+      display: flex; align-items: center; height: 48px; cursor: pointer;
+      border-radius: var(--radius-sm); padding: 0 8px; transition: background 100ms;
+    }
+    .radio-row:hover { background: var(--bg); }
+    .radio-dot {
+      width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: all 150ms;
+    }
+    .radio-dot.checked { border-color: var(--text); background: var(--text); }
+    .radio-dot.checked::after { content: ''; width: 8px; height: 8px; background: #fff; border-radius: 50%; }
+    .radio-label { font-size: 14px; margin-left: 10px; }
+    .setup-btn-row { margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .free-key-link { font-size: 13px; color: var(--muted); text-decoration: none; }
+    .free-key-link:hover { text-decoration: underline; color: var(--text); }
+
+    /* ── DASHBOARD SCREEN ─────────────────────────────────────────────── */
+    #screen-dashboard { display: flex; flex-direction: column; min-height: 100vh; }
+    .dash-header {
+      height: 56px; padding: 0 20px; display: flex; align-items: center;
+      justify-content: space-between; border-bottom: 1px solid var(--border);
+      background: var(--surface); position: sticky; top: 0; z-index: 10;
+    }
+    .dash-logo { font-family: 'IBM Plex Mono', monospace; font-size: 18px; color: var(--text); }
+    .icon-btn {
+      width: 36px; height: 36px; background: none; border: none; cursor: pointer;
+      font-size: 18px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      transition: background 150ms;
+    }
+    .icon-btn:hover { background: var(--bg); }
+    .dash-body { flex: 1; padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+    .weak-banner {
+      background: #FEF3C7; border: 1px solid #F59E0B; border-radius: var(--radius-md);
+      padding: 12px 16px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .weak-banner-text { font-size: 14px; color: #92400E; }
+    .weak-drill-link { font-size: 13px; color: #92400E; font-weight: 600; text-decoration: underline; cursor: pointer; white-space: nowrap; }
+    .radar-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+    .radar-wrap canvas { max-width: 280px; max-height: 280px; }
+    .total-reps { font-size: 13px; color: var(--muted); margin-top: 8px; text-align: center; }
+    .habit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .habit-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+      border-left: 4px solid; padding: 16px; min-height: 100px; cursor: pointer;
+      transition: border-color 150ms, transform 150ms, box-shadow 150ms; position: relative;
+    }
+    .habit-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+    .habit-card.weakest { border-style: dashed; border-left-style: dashed; border-color: var(--accent) !important; }
+    .habit-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .habit-card-label { font-size: 14px; font-weight: 600; }
+    .focus-badge {
+      font-size: 10px; background: #FEF3C7; color: #92400E;
+      border-radius: 4px; padding: 2px 6px; font-family: 'DM Sans', sans-serif;
+    }
+    .habit-score {
+      font-family: 'IBM Plex Mono', monospace; font-size: 36px; font-weight: 400;
+      line-height: 1; margin-bottom: 8px;
+    }
+    .habit-meta { font-size: 12px; color: var(--muted); }
+    .streak-fire { color: var(--accent); }
+    .session-btns { display: flex; flex-direction: column; gap: 12px; }
+    .session-btns .btn-primary, .session-btns .btn-secondary, .session-btns .btn-ghost {
+      width: 100%;
+    }
+
+    @media (min-width: 1024px) {
+      .dash-body { display: grid; grid-template-columns: 360px 1fr; gap: 32px; align-items: start; padding: 32px; }
+      .dash-left { position: sticky; top: 76px; }
+      .radar-wrap canvas { max-width: 300px; max-height: 300px; }
+      .session-btns { flex-direction: row; }
+      .session-btns .btn-primary, .session-btns .btn-secondary, .session-btns .btn-ghost {
+        width: auto; min-width: 160px; flex: 1;
+      }
+    }
+
+    /* Settings modal content */
+    .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .settings-label { font-size: 14px; font-weight: 500; }
+    .settings-value { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); }
+    .settings-link { font-size: 13px; color: var(--text); font-weight: 600; cursor: pointer; text-decoration: underline; }
+    .danger-action { font-size: 14px; color: var(--danger); cursor: pointer; padding: 12px 0; }
+    .danger-action:hover { text-decoration: underline; }
+
+    /* ── DRILL PICK SCREEN ────────────────────────────────────────────── */
+    #screen-drill-pick { padding: 0 20px 40px; min-height: 100vh; }
+    .drill-header {
+      height: 56px; display: flex; align-items: center; gap: 16px;
+      border-bottom: 1px solid var(--border); margin: 0 -20px 24px; padding: 0 20px;
+      background: var(--surface);
+    }
+    .back-link { font-size: 14px; color: var(--muted); cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .back-link:hover { color: var(--text); }
+    .drill-title { font-size: 18px; font-weight: 600; }
+    .drill-inner { max-width: 560px; margin: 0 auto; }
+    .drill-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+    .drill-habit-card {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 80px; border: 1px solid var(--border); border-left: 4px solid;
+      border-radius: var(--radius-md); padding: 0 20px; margin-bottom: 12px;
+      cursor: pointer; background: var(--surface); transition: background 150ms, border-color 150ms;
+      position: relative;
+    }
+    .drill-habit-card:hover { background: #F9FAFB; }
+    .drill-habit-card:active { transform: scale(0.99); }
+    .drill-card-left {}
+    .drill-card-name { font-size: 15px; font-weight: 600; }
+    .drill-card-def { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .drill-card-right { text-align: right; display: flex; align-items: center; gap: 8px; }
+    .drill-avg { font-family: 'IBM Plex Mono', monospace; font-size: 20px; }
+    .drill-avg-label { font-size: 12px; color: var(--muted); }
+    .weak-pill {
+      position: absolute; top: -10px; right: 12px;
+      background: var(--accent); color: var(--text); font-size: 10px;
+      font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    }
+
+    /* ── ROUND SCREEN ─────────────────────────────────────────────────── */
+    #screen-round { display: flex; flex-direction: column; min-height: 100vh; }
+    .round-header {
+      height: 56px; padding: 0 16px; display: flex; align-items: center;
+      justify-content: space-between; border-bottom: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0; position: sticky; top: 0; z-index: 10;
+    }
+    .round-center { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+    .habit-pill {
+      display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px; border: 1px solid;
+    }
+    .round-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .output-panel {
+      background: #F9FAFB; padding: 16px 20px; overflow-y: auto; max-height: 45vh;
+      border-bottom: 1px solid var(--border);
+    }
+    .meta-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .cat-badge {
+      display: inline-block; background: #E5E7EB; color: #374151; font-size: 12px;
+      border-radius: 20px; padding: 3px 10px;
+    }
+    .diff-pips { display: flex; gap: 4px; align-items: center; }
+    .pip { width: 8px; height: 8px; border-radius: 50%; }
+    .output-text {
+      font-family: 'IBM Plex Mono', monospace; font-size: 15px; line-height: 1.7;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .expand-link { display: block; margin-top: 10px; font-size: 13px; color: var(--accent); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .prompt-panel { background: var(--surface); padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .panel-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
+    .prompt-textarea {
+      width: 100%; min-height: 120px; padding: 14px 16px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 15px; line-height: 1.6;
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      resize: none; background: var(--bg); color: var(--text);
+      transition: border-color 150ms, box-shadow 150ms;
+    }
+    .prompt-textarea:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(26,26,46,0.08); }
+    .char-counter { font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: right; margin-top: 6px; transition: color 200ms; }
+    .char-counter.pulse { animation: pulse 1s infinite; }
+    .hint-row { margin-top: 8px; }
+    .hint-link { font-size: 13px; color: var(--muted); cursor: pointer; }
+    .hint-link:hover { color: var(--text); }
+    .hint-link.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .hint-box {
+      background: #FEF3C7; border: 1px solid #F59E0B; border-radius: var(--radius-sm);
+      padding: 10px 14px; font-size: 13px; color: #92400E; margin-top: 8px;
+      overflow: hidden; max-height: 0; transition: max-height 200ms ease, padding 200ms ease;
+    }
+    .hint-box.open { max-height: 120px; }
+    .submit-btn-wrap { margin-top: 12px; position: relative; }
+    .thinking-msg { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; font-family: 'DM Sans', sans-serif; }
+    .tip-bar {
+      height: 48px; padding: 0 20px; display: flex; align-items: center;
+      font-size: 13px; border-top: 1px solid; flex-shrink: 0;
+    }
+
+    @media (min-width: 1024px) {
+      .round-body { flex-direction: row; height: calc(100vh - 56px - 48px); }
+      .output-panel { max-height: none; flex: 1; border-bottom: none; border-right: 1px solid var(--border); }
+      .prompt-panel { flex: 1; }
+      .prompt-textarea { min-height: 0; flex: 1; }
+    }
+
+    /* popover */
+    .popover {
+      position: absolute; right: 0; top: 44px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md); padding: 16px; width: 260px; z-index: 100;
+    }
+    .popover h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .popover p { font-size: 14px; line-height: 1.5; color: var(--text); margin-bottom: 8px; }
+    .popover small { font-size: 13px; color: var(--muted); }
+
+    /* ── FEEDBACK SCREEN ──────────────────────────────────────────────── */
+    #screen-feedback { padding: 0 20px 60px; min-height: 100vh; }
+    .feedback-inner { max-width: 800px; margin: 0 auto; }
+    .feedback-header { padding: 24px 0 20px; display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+    .score-num { font-family: 'IBM Plex Mono', monospace; font-size: 64px; line-height: 1; }
+    .score-denom { font-family: 'IBM Plex Mono', monospace; font-size: 28px; color: var(--muted); margin-bottom: 6px; }
+    .feedback-cols { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 24px; }
+    @media (min-width: 640px) { .feedback-cols { grid-template-columns: 1fr 1fr; } }
+    .breakdown-title, .lesson-title, .diff-title, .progress-title {
+      font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 14px;
+    }
+    .bar-row { margin-bottom: 12px; }
+    .bar-row-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .bar-label { font-size: 13px; }
+    .bar-score { font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+    .bar-track { height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; width: 0; transition: width 600ms ease; }
+    .lesson-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; }
+    .lesson-row { margin-bottom: 16px; }
+    .lesson-row:last-child { margin-bottom: 0; }
+    .lesson-row-label { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .lesson-row-text { font-size: 14px; line-height: 1.5; }
+    .lesson-highlight { border-left: 3px solid var(--accent); padding-left: 12px; }
+    .diff-section { margin-bottom: 24px; }
+    .diff-row { margin-bottom: 14px; }
+    .diff-row-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .diff-text { font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+    .ann-hit { background: #D1FAE5; color: #065F46; border-radius: 3px; padding: 0 3px; cursor: default; }
+    .ann-miss { background: #FEE2E2; color: #991B1B; border-radius: 3px; padding: 0 3px; cursor: default; }
+    .ann-loose { background: #FEF3C7; color: #92400E; border-radius: 3px; padding: 0 3px; cursor: default; }
+    .progress-section { margin-bottom: 28px; }
+    .mini-radar-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
+    .mini-radar-wrap canvas { max-width: 150px; max-height: 150px; }
+    .xp-bar-label { font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin-bottom: 6px; }
+    .xp-bar-track { height: 12px; background: #E5E7EB; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+    .xp-bar-fill { height: 100%; border-radius: 6px; transition: width 600ms ease; }
+    .streak-msg { font-size: 14px; }
+    .feedback-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    @media (min-width: 640px) { .feedback-btns { flex-direction: row; } }
+
+    /* ── SUMMARY SCREEN ───────────────────────────────────────────────── */
+    #screen-summary { padding: 0 20px 60px; min-height: 100vh; }
+    .summary-inner { max-width: 600px; margin: 0 auto; }
+    .summary-header { padding: 28px 0 20px; }
+    .summary-title { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    .summary-date { font-size: 13px; color: var(--muted); }
+    .dual-radar-wrap { display: flex; justify-content: center; margin-bottom: 8px; }
+    .dual-radar-wrap canvas { max-width: 280px; max-height: 280px; }
+    .radar-legend { display: flex; justify-content: center; gap: 16px; margin-bottom: 24px; font-size: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-line { width: 24px; height: 2px; }
+    .stat-chips { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+    .stat-chip {
+      flex: 1; min-width: 120px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 14px 20px; text-align: center;
+    }
+    .stat-num { font-family: 'IBM Plex Mono', monospace; font-size: 28px; display: block; }
+    .stat-label { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; }
+    .profile-card {
+      border: 2px solid var(--accent); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 28px;
+    }
+    .profile-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .profile-row { font-size: 15px; margin-bottom: 10px; line-height: 1.5; }
+    .profile-pattern { font-size: 14px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+    .profile-next { font-size: 14px; font-style: italic; }
+    .copy-btn { margin-top: 16px; }
+    .profile-locked {
+      background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-lg);
+      padding: 28px; text-align: center; margin-bottom: 28px;
+    }
+    .profile-locked p { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+    .profile-locked .lock-icon { font-size: 24px; margin-bottom: 8px; }
+    .progress-bar-sm { height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+    .progress-bar-sm-fill { height: 100%; background: var(--accent); border-radius: 4px; }
+    .summary-btns { display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 640px) { .summary-btns { flex-direction: row; } }
+
+    /* persistent invalid key banner */
+    #invalid-key-banner {
+      background: #FEE2E2; border-bottom: 1px solid #EF4444; padding: 10px 20px;
+      font-size: 13px; color: #991B1B; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 56px; z-index: 9;
+    }
+    #invalid-key-banner a { color: #991B1B; font-weight: 600; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div id="screen-setup"      class="screen"></div>
+  <div id="screen-dashboard"  class="screen hidden"></div>
+  <div id="screen-drill-pick" class="screen hidden"></div>
+  <div id="screen-round"      class="screen hidden"></div>
+  <div id="screen-feedback"   class="screen hidden"></div>
+  <div id="screen-summary"    class="screen hidden"></div>
+  <div id="tooltip" class="tooltip hidden" aria-hidden="true"></div>
+  <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true">
+    <div id="dialog" class="dialog"></div>
+  </div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. CONSTANTS
+// ─────────────────────────────────────────────────────────────────────────────
+const HABITS = [
+  { id:'CONCISENESS', label:'Conciseness', icon:'✂️', color:'#6366F1',
+    definition:'Every word earns its place. No filler, no over-explaining.',
+    tip:'Ask: does removing this word change the meaning? If no, cut it.',
+    subDimensions:['Word Economy','Signal Density'] },
+  { id:'CONTEXT', label:'Context', icon:'🎯', color:'#10B981',
+    definition:'Right amount of background: audience, purpose, situation.',
+    tip:'Who is reading this? What are they trying to do? Give Claude that.',
+    subDimensions:['Audience Specified','Purpose Clear','Situation Given'] },
+  { id:'TONE_FORMAT', label:'Tone & Format', icon:'🎨', color:'#F59E0B',
+    definition:'Explicitly specify voice, style, and output structure.',
+    tip:'Claude defaults to bullets and formal tone. Override both explicitly.',
+    subDimensions:['Tone Word Present','Format Specified','Exclusions Given'] },
+  { id:'EXAMPLES', label:'Examples', icon:'💡', color:'#EF4444',
+    definition:'Anchor the output with a pattern, sample, or "like this".',
+    tip:'One example is worth 50 adjectives. Show the shape of what you want.',
+    subDimensions:['Pattern/Anchor Included','Example Relevance'] }
+]
+
+const DEFAULT_STATE = {
+  version:1, apiKey:null, onboardingDone:false, weakestHabit:null,
+  habitData:{
+    CONCISENESS:{scores:[],reps:0,streak:0,bestScore:0},
+    CONTEXT:{scores:[],reps:0,streak:0,bestScore:0},
+    TONE_FORMAT:{scores:[],reps:0,streak:0,bestScore:0},
+    EXAMPLES:{scores:[],reps:0,streak:0,bestScore:0}
+  },
+  totalReps:0, sessionHistory:[], currentSession:null,
+  lastPromptProfile:null, completedRoundIds:[]
+}
+
+const GEMINI_MODEL = 'gemini-1.5-flash'
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
+const GEMINI_API_URL = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent`
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. STATE MODULE
+// ─────────────────────────────────────────────────────────────────────────────
+function deepMerge(target, source) {
+  for (const key in source) {
+    if (source[key] && typeof source[key]==='object' && !Array.isArray(source[key])) {
+      if (!target[key] || typeof target[key]!=='object') target[key]={}
+      deepMerge(target[key], source[key])
+    } else { target[key]=source[key] }
+  }
+  return target
+}
+
+const State = {
+  get() {
+    try {
+      const raw=localStorage.getItem('promptgym')
+      if(!raw) return JSON.parse(JSON.stringify(DEFAULT_STATE))
+      return deepMerge(JSON.parse(JSON.stringify(DEFAULT_STATE)), JSON.parse(raw))
+    } catch { return JSON.parse(JSON.stringify(DEFAULT_STATE)) }
+  },
+  save(s){ localStorage.setItem('promptgym',JSON.stringify(s)) },
+  update(fn){ const s=this.get(); fn(s); this.save(s); return s },
+  reset(){ const s=this.get(); const k=s.apiKey; const f=JSON.parse(JSON.stringify(DEFAULT_STATE)); f.apiKey=k; f.onboardingDone=true; this.save(f) }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. UTILS
+// ─────────────────────────────────────────────────────────────────────────────
+function computeAvg(scores, last=10){
+  if(!scores||!scores.length) return 0
+  const s=scores.slice(-last)
+  return Math.round(s.reduce((a,b)=>a+b,0)/s.length)
+}
+function computeWeakest(habitData){
+  let weakest=null, low=Infinity
+  for(const [id,hd] of Object.entries(habitData)){
+    if(hd.reps>=3){ const avg=computeAvg(hd.scores); if(avg<low){low=avg;weakest=id} }
+  }
+  return weakest
+}
+function getHabit(id){ return HABITS.find(h=>h.id===id) }
+function formatDate(d){
+  const date=new Date(d)
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December']
+  const h=date.getHours(),m=date.getMinutes()
+  const ampm=h>=12?'PM':'AM', h12=h%12||12, mm=m.toString().padStart(2,'0')
+  return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()} · ${h12}:${mm} ${ampm}`
+}
+function easeOut(t){ return 1-Math.pow(1-t,3) }
+function animateCount(el,target,ms=1000){
+  const start=performance.now()
+  function frame(now){
+    const p=Math.min((now-start)/ms,1)
+    el.textContent=Math.round(easeOut(p)*target)
+    if(p<1) requestAnimationFrame(frame)
+  }
+  requestAnimationFrame(frame)
+}
+function shuffle(arr){
+  const a=[...arr]
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]] }
+  return a
+}
+function maskKey(k){ if(!k) return ''; return k.slice(0,4)+'...'+k.slice(-4) }
+function habitColor(id){
+  const map={CONCISENESS:'#6366F1',CONTEXT:'#10B981',TONE_FORMAT:'#F59E0B',EXAMPLES:'#EF4444'}
+  return map[id]||'#6B7280'
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. ROUTER
+// ─────────────────────────────────────────────────────────────────────────────
+const Router = {
+  currentScreen:null,
+  go(name, data){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'))
+    const el=document.getElementById('screen-'+name)
+    if(!el) return
+    el.classList.remove('hidden')
+    el.style.opacity='0'; el.style.transform='translateY(8px)'
+    requestAnimationFrame(()=>{
+      el.style.transition='opacity 250ms ease, transform 250ms ease'
+      el.style.opacity='1'; el.style.transform='translateY(0)'
+    })
+    this.currentScreen=name
+    const key=name.replace(/-/g,'')
+    if(Screens[key]) Screens[key].render(data)
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. RADAR
+// ─────────────────────────────────────────────────────────────────────────────
+const Radar = {
+  instances:{},
+  init(canvasId, data, opts={}){
+    const canvas=document.getElementById(canvasId)
+    if(!canvas) return null
+    if(this.instances[canvasId]){ this.instances[canvasId].destroy(); delete this.instances[canvasId] }
+    const labels=['✂️ Conciseness','🎯 Context','🎨 Tone & Format','💡 Examples']
+    const pointColors=['#6366F1','#10B981','#F59E0B','#EF4444']
+    let datasets
+    if(opts.dual && opts.allTime && opts.session){
+      datasets=[
+        { label:'All time', data:opts.allTime, fill:false, borderColor:'#6B7280', borderDash:[5,5], borderWidth:2, pointRadius:3, pointBackgroundColor:'#6B7280' },
+        { label:'This session', data:opts.session, fill:true, backgroundColor:'rgba(245,158,11,0.2)', borderColor:'#F59E0B', borderWidth:2, pointBackgroundColor:pointColors, pointRadius:5 }
+      ]
+    } else {
+      datasets=[{ data, fill:true, backgroundColor:'rgba(245,158,11,0.15)', borderColor:'#F59E0B', borderWidth:2, pointBackgroundColor:pointColors, pointRadius:5 }]
+    }
+    const chart=new Chart(canvas.getContext('2d'),{
+      type:'radar', data:{labels, datasets},
+      options:{
+        animation:{duration:opts.mini?0:800},
+        scales:{r:{min:0,max:100, ticks:{display:false,stepSize:25}, grid:{color:'#E5E7EB'}, pointLabels:{font:{family:'DM Sans',size:opts.mini?9:12},color:'#6B7280'}}},
+        plugins:{legend:{display:!!opts.dual, position:'bottom', labels:{font:{family:'DM Sans',size:12}}}}
+      }
+    })
+    this.instances[canvasId]=chart
+    return chart
+  },
+  update(canvasId, newData){
+    const c=this.instances[canvasId]; if(!c) return
+    c.data.datasets[0].data=newData; c.update()
+  },
+  destroy(canvasId){ if(this.instances[canvasId]){this.instances[canvasId].destroy(); delete this.instances[canvasId]} }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. SESSION
+// ─────────────────────────────────────────────────────────────────────────────
+let _session = null  // { mode, habitId, queue, results, hintTokens }
+
+const Session = {
+  build(mode, habitId){
+    const state=State.get()
+    let pool=[]
+    if(mode==='drill'&&habitId){
+      pool=window.ROUNDS.filter(r=>r.habitFocus===habitId)
+    } else {
+      const weak=state.weakestHabit
+      if(weak){
+        const wRounds=shuffle(window.ROUNDS.filter(r=>r.habitFocus===weak))
+        const others=HABITS.filter(h=>h.id!==weak)
+        pool=[...wRounds.slice(0,2)]
+        for(const h of others){ const r=shuffle(window.ROUNDS.filter(x=>x.habitFocus===h.id)); if(r[0]) pool.push(r[0]) }
+        pool=shuffle(pool)
+      } else {
+        for(const h of HABITS){ const r=shuffle(window.ROUNDS.filter(x=>x.habitFocus===h.id)); if(r[0]) pool.push(r[0]) }
+        const extra=shuffle(window.ROUNDS).find(r=>!pool.find(p=>p.id===r.id))
+        if(extra) pool.push(extra)
+        pool=shuffle(pool)
+      }
+    }
+    const completed=state.completedRoundIds||[]
+    let avail=pool.filter(r=>!completed.includes(r.id))
+    if(avail.length<Math.min(5,pool.length)) avail=pool
+    const queue=shuffle(avail).slice(0,5)
+    _session={ mode, habitId, queue:[...queue], results:[], hintTokens:3 }
+    State.update(s=>{ s.currentSession={ mode, habitId, results:[] } })
+    return queue
+  },
+  current(){ return _session },
+  nextRound(){
+    if(!_session||!_session.queue.length) return null
+    return _session.queue.shift()
+  },
+  recordResult(roundId, habitId, score, userPrompt){
+    if(_session) _session.results.push({roundId,habitId,score,userPrompt})
+    State.update(s=>{
+      const hd=s.habitData[habitId]
+      hd.scores.push(score); hd.reps++; hd.bestScore=Math.max(hd.bestScore,score)
+      if(score>=70) hd.streak++; else hd.streak=0
+      s.totalReps++
+      if(!s.completedRoundIds) s.completedRoundIds=[]
+      if(!s.completedRoundIds.includes(roundId)) s.completedRoundIds.push(roundId)
+      if(s.completedRoundIds.length>=40) s.completedRoundIds=[]
+      s.weakestHabit=computeWeakest(s.habitData)
+      if(s.currentSession) s.currentSession.results=(_session||{results:[]}).results
+    })
+  },
+  isFinished(){ return !_session||!_session.queue.length }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. API
+// ─────────────────────────────────────────────────────────────────────────────
+const API = {
+  async call(systemPrompt, userMessage){
+    const state=State.get()
+    const url=`${GEMINI_API_URL}?key=${state.apiKey}`
+    const res=await fetch(url,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system_instruction:{parts:[{text:systemPrompt}]},
+        contents:[{role:'user',parts:[{text:userMessage}]}],
+        generationConfig:{temperature:0.3,maxOutputTokens:1000}
+      })
+    })
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}))
+      const e=Object.assign(new Error(err.error?.message||`HTTP ${res.status}`),{status:res.status})
+      throw e
+    }
+    const data=await res.json()
+    return data.candidates[0].content.parts[0].text
+  },
+  async safeCall(sys, msg){
+    const raw=await this.call(sys,msg)
+    const clean=raw.replace(/```json|```/g,'').trim()
+    return JSON.parse(clean)
+  },
+  async scoreRound(round, habit, userPrompt){
+    const sys=`You are a prompt-writing coach evaluating a learner's prompt attempt.
+Return ONLY valid JSON. No markdown, no explanation, no code blocks, no backticks.
+Exact schema required:
+{
+  "score": <integer 0-100>,
+  "subScores": { "<subDimension>": <integer 0-100> },
+  "whatTheyGotRight": "<one sentence, max 20 words>",
+  "whatWasMissing": "<one sentence, max 20 words>",
+  "lesson": "<one actionable sentence, max 15 words>",
+  "diffAnnotations": [
+    { "phrase": "<exact phrase>", "source": "user|ideal", "type": "hit|miss|loose", "reason": "<one sentence, max 20 words>" }
+  ]
+}
+Score ONLY on the specified habit. Ignore other dimensions.
+hit=user included correctly, miss=ideal had this but user missed, loose=user included but too vaguely.`
+    const msg=`Habit being tested: ${habit.label}
+Habit definition: ${habit.definition}
+Sub-dimensions to score: ${habit.subDimensions.join(', ')}
+
+Target output shown to user:
+${round.output}
+
+Ideal prompt:
+${round.idealPrompt}
+
+User's attempt:
+${userPrompt}
+
+Score only on ${habit.label}. Return JSON only.`
+    return this.safeCall(sys,msg)
+  },
+  async getProfile(last10, avgScores){
+    const sys=`You are a prompt-writing coach analysing a learner's recent practice.
+Return ONLY valid JSON. No markdown, no backticks.
+Schema:
+{
+  "strengthHabit": "<one of: Conciseness | Context | Tone & Format | Examples>",
+  "blindSpotHabit": "<one of: Conciseness | Context | Tone & Format | Examples>",
+  "patternObservation": "<2 sentences, specific and honest, max 40 words total>",
+  "nextFocus": "<one concrete recommendation, max 20 words>"
+}`
+    const msg=`Learner's last 10 prompts (most recent first):
+${last10.map((p,i)=>`${i+1}. "${p.userPrompt}" | habit: ${p.habit} | score: ${p.score}`).join('\n')}
+
+Habit score averages:
+Conciseness:   ${avgScores.CONCISENESS||'no data'}
+Context:       ${avgScores.CONTEXT||'no data'}
+Tone & Format: ${avgScores.TONE_FORMAT||'no data'}
+Examples:      ${avgScores.EXAMPLES||'no data'}
+
+Analyse patterns and return profile JSON only.`
+    return this.safeCall(sys,msg)
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. OVERLAY / CONFIRM HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function hideOverlay(){
+  document.getElementById('overlay').classList.add('hidden')
+  document.getElementById('dialog').innerHTML=''
+}
+function showConfirm(title,body,onConfirm,confirmLabel='Confirm',danger=false){
+  const dialog=document.getElementById('dialog')
+  dialog.innerHTML=`
+    <button class="dialog-close" data-action="close-overlay" aria-label="Close">✕</button>
+    <h3 style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;margin-bottom:12px">${title}</h3>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5">${body}</p>
+    <div style="display:flex;gap:12px;justify-content:flex-end">
+      <button class="btn-ghost" data-action="close-overlay">Cancel</button>
+      <button class="${danger?'btn-danger':'btn-primary'}" id="confirm-ok">${confirmLabel}</button>
+    </div>`
+  document.getElementById('confirm-ok').onclick=()=>{hideOverlay();onConfirm()}
+  document.getElementById('overlay').classList.remove('hidden')
+}
+function showSettings(){
+  const state=State.get()
+  const dialog=document.getElementById('dialog')
+  dialog.innerHTML=`
+    <button class="dialog-close" data-action="close-overlay" aria-label="Close settings">✕</button>
+    <h3 style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;margin-bottom:20px">Settings</h3>
+    <div class="settings-row">
+      <span class="settings-label">Gemini API Key</span>
+      <span style="display:flex;align-items:center;gap:10px">
+        <span class="settings-value" id="key-display">${maskKey(state.apiKey)}</span>
+        <span class="settings-link" id="change-key-btn">Change</span>
+      </span>
+    </div>
+    <div id="change-key-area" style="display:none;padding:12px 0">
+      <input type="password" id="new-key-input" class="key-input" placeholder="AIza..." style="margin-bottom:8px">
+      <button class="btn-primary" style="width:100%;height:44px;font-size:14px" id="save-new-key">Save Key</button>
+    </div>
+    <div style="margin-top:16px">
+      <div class="danger-action" id="reset-btn">🗑 Reset all progress</div>
+    </div>`
+  document.getElementById('change-key-btn').onclick=()=>{
+    document.getElementById('change-key-area').style.display='block'
+  }
+  document.getElementById('save-new-key').onclick=()=>{
+    const k=document.getElementById('new-key-input').value.trim()
+    if(!k.startsWith('AIza')||k.length<20){ alert('Invalid key format'); return }
+    State.update(s=>{ s.apiKey=k })
+    document.getElementById('key-display').textContent=maskKey(k)
+    document.getElementById('change-key-area').style.display='none'
+  }
+  document.getElementById('reset-btn').onclick=()=>{
+    hideOverlay()
+    showConfirm('Reset everything?','This permanently deletes all your scores, reps, and history.',()=>{
+      State.reset(); Router.go('dashboard')
+    },'Yes, reset',true)
+  }
+  document.getElementById('overlay').classList.remove('hidden')
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. SCREENS
+// ─────────────────────────────────────────────────────────────────────────────
+const Screens = {
+
+  // ── SETUP ──────────────────────────────────────────────────────────────
+  setup: {
+    render(){
+      const el=document.getElementById('screen-setup')
+      el.innerHTML=`
+        <div class="setup-card">
+          <div class="setup-header">
+            <span class="setup-logo">💪 PromptGym</span>
+            <span class="setup-sub">Train your prompting instincts</span>
+          </div>
+          <div style="margin-bottom:20px">
+            <label class="form-label">🔑 Gemini API Key</label>
+            <div class="input-wrap">
+              <input type="password" id="key-input" class="key-input" placeholder="AIza..." aria-label="Gemini API Key">
+              <button class="eye-btn" data-action="toggle-eye" aria-label="Show/hide API key">👁</button>
+            </div>
+            <div id="key-error" class="key-error">That doesn't look like a Gemini API key</div>
+            <p class="key-helper">Your key stays in your browser only. Never sent to any server.</p>
+          </div>
+          <div class="habit-options">
+            <label class="form-label">Which habit feels weakest?</label>
+            ${[...HABITS.map(h=>`
+              <label class="radio-row" data-habit="${h.id}">
+                <span class="radio-dot" data-radio="${h.id}"></span>
+                <span class="radio-label">${h.icon} ${h.label}</span>
+              </label>`).join(''),`
+              <label class="radio-row" data-habit="none">
+                <span class="radio-dot checked" data-radio="none"></span>
+                <span class="radio-label">Not sure yet</span>
+              </label>`].join('')}
+          </div>
+          <div class="setup-btn-row">
+            <button class="btn-primary" style="width:100%" data-action="save-api-key" disabled>Start Training →</button>
+            <a href="https://aistudio.google.com" target="_blank" rel="noopener" class="free-key-link">Get a free API key →</a>
+          </div>
+        </div>`
+      // wire up input
+      const inp=document.getElementById('key-input')
+      const btn=document.querySelector('[data-action="save-api-key"]')
+      inp.addEventListener('input',()=>{
+        btn.disabled=inp.value.trim().length===0
+        if(inp.value.startsWith('AIza')&&inp.value.length>20) inp.classList.add('valid')
+        else inp.classList.remove('valid')
+      })
+      // radios
+      let selectedHabit='none'
+      el.querySelectorAll('.radio-row').forEach(row=>{
+        row.addEventListener('click',()=>{
+          el.querySelectorAll('.radio-dot').forEach(d=>d.classList.remove('checked'))
+          row.querySelector('.radio-dot').classList.add('checked')
+          selectedHabit=row.dataset.habit
+        })
+      })
+      btn.addEventListener('click',()=>{
+        const k=inp.value.trim()
+        const errEl=document.getElementById('key-error')
+        if(!k.startsWith('AIza')||k.length<20){ errEl.style.display='block'; return }
+        errEl.style.display='none'
+        State.update(s=>{
+          s.apiKey=k; s.onboardingDone=true
+          if(selectedHabit!=='none') s.weakestHabit=selectedHabit
+        })
+        Router.go('dashboard')
+      })
+    }
+  },
+
+  // ── DASHBOARD ──────────────────────────────────────────────────────────
+  dashboard: {
+    render(){
+      const state=State.get()
+      const hd=state.habitData
+      const weak=state.weakestHabit
+      const weakHabit=weak?getHabit(weak):null
+
+      const radarData=HABITS.map(h=>computeAvg(hd[h.id].scores))
+
+      const habitCardsHTML=HABITS.map(h=>{
+        const d=hd[h.id]
+        const avg=d.reps>0?computeAvg(d.scores):null
+        const isWeak=h.id===weak
+        const streakHtml=d.streak>=3?`<span class="streak-fire">${d.streak} 🔥</span>`:d.streak
+        return `<div class="habit-card ${isWeak?'weakest':''}" style="border-color:${h.color}">
+          <div class="habit-card-top">
+            <span class="habit-card-label">${h.icon} ${h.label}</span>
+            ${isWeak?'<span class="focus-badge">← focus</span>':''}
+          </div>
+          <div class="habit-score" style="color:${h.color}">${avg!==null?avg:'—'}</div>
+          <div class="habit-meta">${d.reps} reps · streak: ${streakHtml}</div>
+        </div>`
+      }).join('')
+
+      const weakBannerHTML=weakHabit?`
+        <div class="weak-banner">
+          <span class="weak-banner-text">${weakHabit.icon} Your focus: <strong>${weakHabit.label}</strong> — ${weakHabit.definition}</span>
+          <span class="weak-drill-link" data-action="drill-weakness">Drill it →</span>
+        </div>`:''
+
+      const drillBtnHTML=weak?
+        `<button class="btn-secondary" data-action="drill-weakness">Drill ${weakHabit.icon} ${weakHabit.label}</button>`:
+        `<button class="btn-secondary" data-action="custom-drill">Drill a Habit</button>`
+
+      document.getElementById('screen-dashboard').innerHTML=`
+        <div class="dash-header">
+          <span class="dash-logo">PromptGym</span>
+          <button class="icon-btn" data-action="open-settings" aria-label="Settings">⚙️</button>
+        </div>
+        <div class="dash-body">
+          <div class="dash-left">
+            ${weakBannerHTML}
+            <div class="radar-wrap">
+              <canvas id="dash-radar" width="280" height="280" aria-label="Skill radar showing 4 habit scores"></canvas>
+              <div class="total-reps">${state.totalReps} total reps</div>
+            </div>
+          </div>
+          <div>
+            <div class="habit-grid">${habitCardsHTML}</div>
+            <div class="session-btns">
+              <button class="btn-primary" data-action="train-all">Train All</button>
+              ${drillBtnHTML}
+              <button class="btn-ghost" data-action="custom-drill">Custom Drill ▾</button>
+            </div>
+          </div>
+        </div>`
+
+      setTimeout(()=>Radar.init('dash-radar', radarData),50)
+    }
+  },
+
+  // ── DRILL PICK ─────────────────────────────────────────────────────────
+  drillpick: {
+    render(){
+      const state=State.get()
+      const hd=state.habitData
+      const weak=state.weakestHabit
+      const cardsHTML=HABITS.map(h=>{
+        const avg=hd[h.id].reps>0?computeAvg(hd[h.id].scores):null
+        const isWeak=h.id===weak
+        return `<div class="drill-habit-card" style="border-color:${h.color}" data-action="drill-habit" data-habit="${h.id}">
+          ${isWeak?'<span class="weak-pill">WEAK</span>':''}
+          <div class="drill-card-left">
+            <div class="drill-card-name">${h.icon} ${h.label}</div>
+            <div class="drill-card-def">${h.definition}</div>
+          </div>
+          <div class="drill-card-right">
+            <span class="drill-avg" style="color:${h.color}">${avg!==null?avg:'—'}</span>
+            <span class="drill-avg-label">avg</span>
+            <span style="color:var(--muted)">→</span>
+          </div>
+        </div>`
+      }).join('')
+      document.getElementById('screen-drill-pick').innerHTML=`
+        <div class="drill-header">
+          <span class="back-link" data-action="back-to-dashboard">← Back</span>
+          <span class="drill-title">Choose a Habit</span>
+        </div>
+        <div class="drill-inner">
+          <p class="drill-sub">5 rounds focused on one habit. Great for targeting a weak spot.</p>
+          ${cardsHTML}
+        </div>`
+    }
+  },
+
+  // ── ROUND ──────────────────────────────────────────────────────────────
+  round: {
+    _typewriterInterval:null,
+    _currentRound:null,
+
+    render(round){
+      if(!round){ round=Session.nextRound(); if(!round) return Router.go('dashboard') }
+      this._currentRound=round
+      const sess=Session.current()
+      const totalInSession=sess?(5-(sess.queue.length)):'?'
+      const habit=getHabit(round.habitFocus)
+      const color=habit.color
+      const pips=[1,2,3].map(i=>
+        `<span class="pip" style="background:${i<=round.difficulty?color:'transparent'};border:1.5px solid ${color}"></span>`
+      ).join('')
+      const fullText=round.output
+      const truncated=fullText.length>400
+      const displayText=truncated?fullText.slice(0,400):fullText
+
+      document.getElementById('screen-round').innerHTML=`
+        <div id="invalid-key-banner" style="display:none">
+          Invalid Gemini API key. Get a free one at
+          <a href="https://aistudio.google.com" target="_blank" rel="noopener">aistudio.google.com</a>.
+          <a href="https://aistudio.google.com" target="_blank" rel="noopener">Open AI Studio →</a>
+        </div>
+        <div class="round-header">
+          <button class="icon-btn" data-action="leave-round" aria-label="Leave round">←</button>
+          <div class="round-center">
+            <span>Round ${totalInSession} of 5</span>
+            <span class="habit-pill" style="background:${color}22;color:${color};border-color:${color}">${habit.icon} ${habit.label}</span>
+          </div>
+          <div style="position:relative">
+            <button class="icon-btn" id="habit-info-btn" aria-label="What does this habit mean?">?</button>
+            <div class="popover hidden" id="habit-popover">
+              <h4>${habit.label}</h4>
+              <p>${habit.definition}</p>
+              <small>${habit.tip}</small>
+            </div>
+          </div>
+        </div>
+        <div class="round-body">
+          <div class="output-panel">
+            <div class="meta-row">
+              <span class="cat-badge">${round.category}</span>
+              <div class="diff-pips">${pips}</div>
+            </div>
+            <div class="output-text" id="output-text"></div>
+            ${truncated?`<span class="expand-link" data-action="expand-output" data-full="${encodeURIComponent(fullText)}">[ Show full output ▾ ]</span>`:''}
+          </div>
+          <div class="prompt-panel">
+            <div class="panel-label">Your Prompt</div>
+            <textarea class="prompt-textarea" id="prompt-input" aria-label="Write your prompt attempt"
+              placeholder="Write the prompt that generated the output ↑"></textarea>
+            <div class="char-counter" id="char-counter">0 chars — Sharp ✓</div>
+            <div class="hint-row">
+              <span class="hint-link" id="hint-link" data-action="use-hint">💡 Use a hint (${sess?sess.hintTokens:3} left)</span>
+              <div class="hint-box" id="hint-box"></div>
+            </div>
+            <div class="submit-btn-wrap">
+              <button class="btn-primary" style="width:100%" id="submit-btn" data-action="submit-prompt" disabled>Submit Prompt →</button>
+            </div>
+            <div class="thinking-msg hidden" id="thinking-msg"></div>
+            <div id="submit-error"></div>
+          </div>
+        </div>
+        <div class="tip-bar" style="background:${color}1A;border-color:${color}4D;color:${color}">
+          ${habit.icon} ${habit.label}: ${habit.tip}
+        </div>`
+
+      // Typewriter
+      const outputEl=document.getElementById('output-text')
+      if(this._typewriterInterval) clearInterval(this._typewriterInterval)
+      if(displayText.length>300){ outputEl.textContent=displayText }
+      else {
+        let i=0
+        this._typewriterInterval=setInterval(()=>{
+          outputEl.textContent=displayText.slice(0,++i)
+          if(i>=displayText.length) clearInterval(this._typewriterInterval)
+        },15)
+      }
+
+      // Char counter
+      const ta=document.getElementById('prompt-input')
+      const cc=document.getElementById('char-counter')
+      const submitBtn=document.getElementById('submit-btn')
+      ta.addEventListener('input',()=>{
+        const n=ta.value.length
+        submitBtn.disabled=ta.value.trim().length===0
+        let label,color2
+        if(n<=60){label='Sharp ✓';color2='#10B981'}
+        else if(n<=120){label='Okay';color2='#F59E0B'}
+        else if(n<=200){label='Too long';color2='#EF4444'}
+        else{label='Way too long';color2='#EF4444'}
+        cc.textContent=`${n} chars — ${label}`
+        cc.style.color=color2
+        cc.classList.toggle('pulse',n>200)
+      })
+
+      // Habit info popover
+      const popBtn=document.getElementById('habit-info-btn')
+      const pop=document.getElementById('habit-popover')
+      popBtn.addEventListener('click',(e)=>{ e.stopPropagation(); pop.classList.toggle('hidden') })
+      document.addEventListener('click',()=>pop.classList.add('hidden'),{once:false})
+    }
+  },
+
+  // ── FEEDBACK ───────────────────────────────────────────────────────────
+  feedback: {
+    render({result, round, userPrompt}){
+      if(!result||!round) return Router.go('dashboard')
+      const state=State.get()
+      const habit=getHabit(round.habitFocus)
+      const color=habit.color
+      const score=result.score||0
+
+      // score color
+      let sc='#EF4444'
+      if(score>=85) sc='#6366F1'
+      else if(score>=70) sc='#10B981'
+      else if(score>=50) sc='#F59E0B'
+
+      // breakdown bars
+      const subScores=result.subScores||{}
+      const barsHTML=habit.subDimensions.map((dim,i)=>{
+        const s=subScores[dim]||0
+        return `<div class="bar-row">
+          <div class="bar-row-top">
+            <span class="bar-label">${dim}</span>
+            <span class="bar-score" style="color:${color}">${s}</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="background:${color}" data-target="${s}" data-delay="${i*150}"></div></div>
+        </div>`
+      }).join('')
+
+      // diff view
+      const buildDiffHTML=(text, annotations, source)=>{
+        if(!annotations||!annotations.length) return `<span>${text}</span>`
+        const relevant=annotations.filter(a=>a.source===source)
+        if(!relevant.length) return `<span>${text}</span>`
+        let result2=text
+        // simple approach: highlight matching phrases
+        relevant.forEach(ann=>{
+          const cls=ann.type==='hit'?'ann-hit':ann.type==='miss'?'ann-miss':'ann-loose'
+          const phrase=ann.phrase.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
+          try {
+            result2=result2.replace(new RegExp(phrase,'i'),
+              `<span class="${cls}" data-reason="${encodeURIComponent(ann.reason)}">${ann.phrase}</span>`)
+          } catch(e){}
+        })
+        return result2
+      }
+
+      const userDiff=buildDiffHTML(userPrompt,result.diffAnnotations,'user')
+      const idealDiff=buildDiffHTML(round.idealPrompt,result.diffAnnotations,'ideal')
+
+      // session progress
+      const sess=Session.current()
+      const isLast=Session.isFinished()
+      const hd=state.habitData[round.habitFocus]
+      const oldAvg=hd.scores.length>1?computeAvg(hd.scores.slice(0,-1)):0
+      const newAvg=computeAvg(hd.scores)
+      const radarData=HABITS.map(h=>computeAvg(state.habitData[h.id].scores))
+
+      const btnsHTML=isLast?`
+        <div class="feedback-btns">
+          <button class="btn-primary" data-action="see-summary">See Session Summary</button>
+          <button class="btn-ghost" data-action="back-to-dashboard">Back to Dashboard</button>
+        </div>`:
+        `<div class="feedback-btns"><button class="btn-primary" data-action="next-round">Next Round →</button></div>`
+
+      document.getElementById('screen-feedback').innerHTML=`
+        <div class="feedback-inner">
+          <div class="feedback-header">
+            <span class="score-num" id="score-display" style="color:${sc}">0</span>
+            <span class="score-denom">/100</span>
+            <span class="habit-pill" style="background:${color}22;color:${color};border-color:${color}">${habit.icon} ${habit.label}</span>
+            ${score>=85?'<span style="font-size:28px">🏆</span>':''}
+          </div>
+          <div class="feedback-cols">
+            <div>
+              <div class="breakdown-title">Breakdown</div>
+              ${barsHTML}
+            </div>
+            <div>
+              <div class="lesson-card">
+                <div class="lesson-row">
+                  <div class="lesson-row-label" style="color:#065F46">✅ What you got right</div>
+                  <div class="lesson-row-text">${result.whatTheyGotRight||'—'}</div>
+                </div>
+                <div class="lesson-row">
+                  <div class="lesson-row-label" style="color:#991B1B">❌ What was missing</div>
+                  <div class="lesson-row-text">${result.whatWasMissing||'—'}</div>
+                </div>
+                <div class="lesson-row">
+                  <div class="lesson-row-label" style="color:#92400E">💬 Lesson</div>
+                  <div class="lesson-row-text lesson-highlight">${result.lesson||'—'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="diff-section">
+            <div class="diff-title">Prompt Comparison</div>
+            <div class="diff-row">
+              <div class="diff-row-label">Your prompt:</div>
+              <div class="diff-text" id="user-diff">${userDiff}</div>
+            </div>
+            <div class="diff-row" style="margin-top:12px">
+              <div class="diff-row-label">Ideal prompt:</div>
+              <div class="diff-text" id="ideal-diff">${idealDiff}</div>
+            </div>
+          </div>
+          <div class="progress-section">
+            <div class="progress-title">Your progress</div>
+            <div class="mini-radar-wrap"><canvas id="mini-radar" width="150" height="150"></canvas></div>
+            <div class="xp-bar-label" style="color:${color}">${habit.icon} ${habit.label}: ${oldAvg} → ${newAvg} avg</div>
+            <div class="xp-bar-track"><div class="xp-bar-fill" style="background:${color}" id="xp-fill"></div></div>
+            <div class="streak-msg" style="color:${hd.streak>=1&&score>=70?'var(--accent)':'var(--muted)'}">
+              ${score>=70?`${habit.icon} Streak: ${hd.streak} 🔥`:'Streak reset'}
+            </div>
+          </div>
+          ${btnsHTML}
+        </div>`
+
+      // Animate score
+      animateCount(document.getElementById('score-display'), score)
+
+      // Animate bars
+      document.querySelectorAll('.bar-fill').forEach(bar=>{
+        const target=parseInt(bar.dataset.target)
+        const delay=parseInt(bar.dataset.delay)
+        setTimeout(()=>{ bar.style.width=target+'%' }, delay+50)
+      })
+
+      // XP bar
+      setTimeout(()=>{ document.getElementById('xp-fill').style.width=newAvg+'%' },100)
+
+      // Mini radar
+      setTimeout(()=>Radar.init('mini-radar', radarData, {mini:true}), 50)
+
+      // Tooltip on diff spans
+      const feedback=document.getElementById('screen-feedback')
+      feedback.querySelectorAll('[data-reason]').forEach(span=>{
+        span.addEventListener('mouseenter',e=>{
+          const reason=decodeURIComponent(span.dataset.reason)
+          const tip=document.getElementById('tooltip')
+          tip.textContent=reason; tip.classList.remove('hidden')
+          const rect=span.getBoundingClientRect()
+          tip.style.left=Math.max(0,rect.left+rect.width/2-120)+'px'
+          tip.style.top=(rect.top-tip.offsetHeight-8+window.scrollY)+'px'
+        })
+        span.addEventListener('mouseleave',()=>document.getElementById('tooltip').classList.add('hidden'))
+      })
+    }
+  },
+
+  // ── SUMMARY ────────────────────────────────────────────────────────────
+  summary: {
+    render(){
+      const state=State.get()
+      const sess=Session.current()
+      const results=sess?sess.results:[]
+      const avgScore=results.length?Math.round(results.reduce((a,b)=>a+b.score,0)/results.length):0
+      const best=results.reduce((a,b)=>b.score>a.score?b:a,{score:0,habitId:'—'})
+      const worst=results.reduce((a,b)=>b.score<a.score?b:a,{score:100,habitId:'—'})
+
+      const radarAllTime=HABITS.map(h=>computeAvg(state.habitData[h.id].scores))
+      const sessionByHabit={}
+      HABITS.forEach(h=>{ sessionByHabit[h.id]=[] })
+      results.forEach(r=>{ if(sessionByHabit[r.habitId]) sessionByHabit[r.habitId].push(r.score) })
+      const radarSession=HABITS.map(h=>computeAvg(sessionByHabit[h.id]))
+
+      const canShowProfile=state.totalReps>=10
+
+      // get last 10 for profile
+      const allResults=state.sessionHistory.flatMap(s=>s.results||[]).concat(results).slice(-10).reverse()
+      const avgScores={}
+      HABITS.forEach(h=>{ avgScores[h.id]=computeAvg(state.habitData[h.id].scores)||'no data' })
+
+      let profileHTML=''
+      if(canShowProfile){
+        profileHTML=`
+          <div class="profile-card" id="profile-card">
+            <div class="profile-title">Your Prompt Profile</div>
+            <div id="profile-content">
+              <div class="skeleton" style="height:80px;width:100%;margin-bottom:12px"></div>
+              <div class="skeleton" style="height:20px;width:70%"></div>
+            </div>
+            <button class="btn-ghost copy-btn hidden" id="copy-profile-btn" data-action="copy-profile" aria-label="Copy profile to clipboard">📋 Copy Profile</button>
+          </div>`
+      } else {
+        const pct=Math.round((state.totalReps/10)*100)
+        profileHTML=`
+          <div class="profile-locked">
+            <div class="lock-icon">🔒</div>
+            <p>Unlock your Prompt Profile after 10 total reps</p>
+            <div style="font-size:13px;color:var(--muted)">${state.totalReps} / 10 reps</div>
+            <div class="progress-bar-sm"><div class="progress-bar-sm-fill" style="width:${pct}%"></div></div>
+          </div>`
+      }
+
+      const bestHabit=best.habitId!=='—'?getHabit(best.habitId):null
+      const worstHabit=worst.habitId!=='—'?getHabit(worst.habitId):null
+
+      document.getElementById('screen-summary').innerHTML=`
+        <div class="summary-inner">
+          <div class="summary-header">
+            <div class="summary-title">Session Complete ✓</div>
+            <div class="summary-date">${formatDate(new Date())}</div>
+          </div>
+          <div class="dual-radar-wrap"><canvas id="summary-radar" width="280" height="280"></canvas></div>
+          <div class="radar-legend">
+            <div class="legend-item">
+              <div class="legend-line" style="background:#6B7280;border-top:2px dashed #6B7280"></div>
+              <span>All time</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-line" style="background:var(--accent)"></div>
+              <span>This session</span>
+            </div>
+          </div>
+          <div class="stat-chips">
+            <div class="stat-chip"><span class="stat-num">${results.length}</span><span class="stat-label">Rounds</span></div>
+            <div class="stat-chip"><span class="stat-num">${avgScore}</span><span class="stat-label">Avg Score</span></div>
+            <div class="stat-chip"><span class="stat-num">${best.score}</span><span class="stat-label">Best${bestHabit?`<br><span style="font-size:10px;color:var(--muted)">${bestHabit.label}</span>`:''}</span></div>
+            <div class="stat-chip"><span class="stat-num" style="font-size:14px;padding-top:8px">${worstHabit?worstHabit.label:'—'}</span><span class="stat-label">Needs Work</span></div>
+          </div>
+          ${profileHTML}
+          <div class="summary-btns">
+            <button class="btn-primary" data-action="train-again">Train Again</button>
+            <button class="btn-ghost" data-action="back-to-dashboard">Back to Dashboard</button>
+          </div>
+        </div>`
+
+      setTimeout(()=>Radar.init('summary-radar', radarAllTime, {dual:true, allTime:radarAllTime, session:radarSession}),50)
+
+      // Save session to history
+      State.update(s=>{
+        if(!s.sessionHistory) s.sessionHistory=[]
+        s.sessionHistory.push({ date:new Date().toISOString(), results, mode:sess?sess.mode:'trainall' })
+      })
+
+      // Load prompt profile async
+      if(canShowProfile && allResults.length>=5){
+        API.getProfile(allResults, avgScores).then(profile=>{
+          if(!profile) return
+          const content=document.getElementById('profile-content')
+          if(!content) return
+          content.innerHTML=`
+            <div class="profile-row">💪 Strength: <strong>${profile.strengthHabit}</strong></div>
+            <div class="profile-row">🎯 Focus on: <strong>${profile.blindSpotHabit}</strong></div>
+            <div class="profile-pattern">${profile.patternObservation}</div>
+            <div class="profile-next">Next session: ${profile.nextFocus}</div>`
+          const copyBtn=document.getElementById('copy-profile-btn')
+          if(copyBtn){
+            copyBtn.classList.remove('hidden')
+            copyBtn.dataset.profileText=`PromptGym Profile\nStrength: ${profile.strengthHabit}\nFocus: ${profile.blindSpotHabit}\n${profile.patternObservation}\nNext: ${profile.nextFocus}`
+          }
+        }).catch(()=>{
+          const content=document.getElementById('profile-content')
+          if(content) content.innerHTML='<p style="font-size:13px;color:var(--muted)">Profile analysis unavailable. Complete more rounds to try again.</p>'
+        })
+      }
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. EVENT DELEGATION
+// ─────────────────────────────────────────────────────────────────────────────
+let _currentRoundData = null  // { round, result, userPrompt }
+
+document.body.addEventListener('click', async e => {
+  const el=e.target.closest('[data-action]')
+  if(!el) {
+    // close popover on outside click
+    const pop=document.getElementById('habit-popover')
+    if(pop&&!pop.classList.contains('hidden')) pop.classList.add('hidden')
+    return
+  }
+  const action=el.dataset.action
+
+  if(action==='close-overlay'){ hideOverlay(); return }
+  if(action==='open-settings'){ showSettings(); return }
+  if(action==='back-to-dashboard'){ Router.go('dashboard'); return }
+  if(action==='custom-drill'){ Router.go('drill-pick'); return }
+
+  if(action==='toggle-eye'){
+    const inp=document.getElementById('key-input')
+    if(!inp) return
+    inp.type=inp.type==='password'?'text':'password'
+    el.textContent=inp.type==='password'?'👁':'🙈'
+    return
+  }
+
+  if(action==='train-all'){
+    Session.build('trainall',null)
+    const round=Session.nextRound()
+    Router.go('round', round)
+    return
+  }
+
+  if(action==='drill-weakness'){
+    const state=State.get()
+    if(!state.weakestHabit) return Router.go('drill-pick')
+    Session.build('drill', state.weakestHabit)
+    const round=Session.nextRound()
+    Router.go('round', round)
+    return
+  }
+
+  if(action==='drill-habit'){
+    const habitId=el.dataset.habit
+    Session.build('drill', habitId)
+    const round=Session.nextRound()
+    Router.go('round', round)
+    return
+  }
+
+  if(action==='leave-round'){
+    showConfirm('Leave this round?','Your progress for this round won\'t be saved.',
+      ()=>Router.go('dashboard'),'Leave')
+    return
+  }
+
+  if(action==='expand-output'){
+    const full=decodeURIComponent(el.dataset.full)
+    const outputEl=document.getElementById('output-text')
+    if(outputEl){ outputEl.textContent=full }
+    el.textContent='[ Show less ▴ ]'
+    el.dataset.action='collapse-output'
+    return
+  }
+
+  if(action==='collapse-output'){
+    const round=Screens.round._currentRound
+    if(round){ document.getElementById('output-text').textContent=round.output.slice(0,400) }
+    el.textContent='[ Show full output ▾ ]'
+    el.dataset.action='expand-output'
+    return
+  }
+
+  if(action==='use-hint'){
+    const sess=Session.current()
+    if(!sess||sess.hintTokens<=0) return
+    const round=Screens.round._currentRound
+    if(!round) return
+    sess.hintTokens--
+    const hintBox=document.getElementById('hint-box')
+    const hintLink=document.getElementById('hint-link')
+    if(hintBox){ hintBox.textContent=round.hintText; hintBox.classList.add('open') }
+    if(hintLink){
+      if(sess.hintTokens>0) hintLink.textContent=`💡 Hint revealed (${sess.hintTokens} left)`
+      else { hintLink.textContent='No hints left'; hintLink.classList.add('disabled') }
+    }
+    return
+  }
+
+  if(action==='submit-prompt'){
+    const ta=document.getElementById('prompt-input')
+    const submitBtn=document.getElementById('submit-btn')
+    const errorDiv=document.getElementById('submit-error')
+    const thinkingMsg=document.getElementById('thinking-msg')
+    if(!ta) return
+    const userPrompt=ta.value.trim()
+    if(!userPrompt){ submitBtn.style.animation='shake 300ms ease'; setTimeout(()=>submitBtn.style.animation='',300); return }
+    const round=Screens.round._currentRound
+    if(!round) return
+    const habit=getHabit(round.habitFocus)
+
+    // Start loading
+    submitBtn.innerHTML='<span class="spinner"></span>Evaluating...'
+    submitBtn.disabled=true
+    if(errorDiv) errorDiv.innerHTML=''
+    if(thinkingMsg) thinkingMsg.classList.add('hidden')
+
+    const t8=setTimeout(()=>{ if(thinkingMsg){ thinkingMsg.textContent='Still thinking...'; thinkingMsg.classList.remove('hidden') }},8000)
+    const t15=setTimeout(()=>{ if(thinkingMsg) thinkingMsg.innerHTML='Taking too long. <span style="cursor:pointer;text-decoration:underline" data-action="retry-submit">Retry</span>' },15000)
+
+    try {
+      const result=await API.scoreRound(round, habit, userPrompt)
+      clearTimeout(t8); clearTimeout(t15)
+      if(!result) throw new Error('No result')
+      Session.recordResult(round.id, round.habitFocus, result.score, userPrompt)
+      _currentRoundData={ result, round, userPrompt }
+      Router.go('feedback', _currentRoundData)
+    } catch(err) {
+      clearTimeout(t8); clearTimeout(t15)
+      submitBtn.innerHTML='Submit Prompt →'; submitBtn.disabled=false
+      if(thinkingMsg) thinkingMsg.classList.add('hidden')
+      let msg='Couldn\'t reach Gemini. Check your API key and connection.'
+      if(err.status===401||err.status===403){
+        msg='Invalid Gemini API key.'
+        const banner=document.getElementById('invalid-key-banner')
+        if(banner) banner.style.display='flex'
+      } else if(err.status===429){ msg='Daily limit reached (1,500 free requests). Try again tomorrow.' }
+      else if(err.status>=500){ msg='Gemini is having issues. Try again in a moment.' }
+      else if(!navigator.onLine){ msg='No connection. Check your internet.' }
+      if(errorDiv) errorDiv.innerHTML=`<div class="error-banner" style="margin-top:10px">${msg} <a data-action="submit-prompt">Retry</a></div>`
+    }
+    return
+  }
+
+  if(action==='next-round'){
+    if(Session.isFinished()){ Router.go('summary'); return }
+    const round=Session.nextRound()
+    Router.go('round', round)
+    return
+  }
+
+  if(action==='see-summary'){
+    Router.go('summary')
+    return
+  }
+
+  if(action==='train-again'){
+    const sess=Session.current()
+    const mode=sess?sess.mode:'trainall'
+    const habitId=sess?sess.habitId:null
+    Session.build(mode, habitId)
+    const round=Session.nextRound()
+    Router.go('round', round)
+    return
+  }
+
+  if(action==='copy-profile'){
+    const text=el.dataset.profileText||'PromptGym Profile'
+    navigator.clipboard.writeText(text).then(()=>{
+      const orig=el.textContent
+      el.textContent='Copied! ✓'
+      setTimeout(()=>el.textContent=orig,2000)
+    })
+    return
+  }
+})
+
+// Close overlay on outside click
+document.getElementById('overlay').addEventListener('click', e=>{
+  if(e.target===document.getElementById('overlay')) hideOverlay()
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. INIT
+// ─────────────────────────────────────────────────────────────────────────────
+;(function init(){
+  const state=State.get()
+  if(!state.apiKey||!state.onboardingDone){
+    Router.go('setup')
+  } else {
+    Router.go('dashboard')
+  }
+})()
+</script>
+</body>
+</html>
