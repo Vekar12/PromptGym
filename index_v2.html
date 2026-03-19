@@ -522,7 +522,7 @@ textarea { resize: vertical; }
       <div class="tip-header">Habit Tip</div>
       <div class="tip-box" id="habit-tip"></div>
       <div class="ideal-prompt-box">
-        <div class="ideal-prompt-label">Ideal Prompt Context</div>
+        <div class="ideal-prompt-label">Ideal Prompt</div>
         <div class="ideal-prompt-text" id="ideal-prompt-display"></div>
       </div>
       <div>
@@ -1034,56 +1034,88 @@ function updateNavStats() {
 // LOCAL SCORING — works without any API key
 // ═══════════════════════════════════════════════════════════════
 function scoreLocally(prompt, round) {
-  const p = prompt.toLowerCase();
-  const words = prompt.trim().split(/\s+/).filter(Boolean).length;
+  const p = prompt.toLowerCase().trim();
+  const words = p.split(/\s+/).filter(Boolean).length;
 
-  // CONCISENESS: 8–25 words = peak, penalise over/under
-  let conciseness;
-  if (words >= 8 && words <= 25) conciseness = 100;
-  else if (words < 8) conciseness = Math.max(0, 100 - (8 - words) * 12);
-  else conciseness = Math.max(0, 100 - (words - 25) * 3);
+  const STOP = new Set(['with','from','that','this','each','when','than','have','into','then','their','should','would','could','clearly','specified','shown','named','implied','present','based','about','which','these','those','write','make','create','build','give','using','used','does','also','some','more','very','just','only','what','your','type','like','such']);
 
-  // CONTEXT: keywords from idealPromptContext found in prompt
-  const ctxWords = [...new Set(
-    round.idealPromptContext.toLowerCase()
-      .split(/[\s,.:;()\[\]"'→]+/)
-      .filter(w => w.length > 4 && !['with','from','that','this','each','when','than','have','into','then','their','should','would','could'].includes(w))
-  )];
-  const ctxMatches = ctxWords.filter(w => p.includes(w)).length;
-  const context = Math.min(100, Math.round((ctxMatches / Math.max(ctxWords.length, 1)) * 130));
-
-  // TONE_FORMAT: format/structure keywords in prompt
-  const fmtWords = ['table','column','row','section','header','card','grid','list','bullet','format','layout','style','structured','numbered','sorted','ranked','chart','diagram','dark','template','panel','sidebar'];
-  const tone = Math.min(100, fmtWords.filter(w => p.includes(w)).length * 28);
-
-  // EXAMPLES: example anchors
-  const exPatterns = [' like ', 'e.g.', 'example:', 'format:', 'such as', 'for instance', 'sample', 'pattern', ': [', '→', '->', 'e.g', 'e.g '];
-  const examples = Math.min(100, exPatterns.filter(pat => p.includes(pat)).length * 45);
-
-  // Key elements: keyword presence check
-  const stopWords = new Set(['with','from','that','this','each','when','than','have','into','then','their','clearly','specified','explicitly','shown','named','implied','present','based']);
+  // ── Key elements matching ──────────────────────────────────
   const elementsFound = round.keyElements.map(el => {
-    const kws = el.toLowerCase().split(/[\s,.:;()\[\]"'→\-]+/).filter(w => w.length > 4 && !stopWords.has(w));
+    const kws = el.toLowerCase()
+      .split(/[\s,.:;()\[\]"'→\-/]+/)
+      .filter(w => w.length > 3 && !STOP.has(w));
     return kws.length > 0 && kws.some(kw => p.includes(kw));
   });
 
-  const elemScore = Math.round((elementsFound.filter(Boolean).length / round.keyElements.length) * 20);
-  const rawAvg = Math.round((conciseness + context + tone + examples) / 4);
-  const overall = Math.min(100, rawAvg + elemScore);
+  // ── Context: keywords from idealPromptContext ─────────────
+  const ctxWords = [...new Set(
+    round.idealPromptContext.toLowerCase()
+      .split(/[\s,.:;()\[\]"'→\-/]+/)
+      .filter(w => w.length > 4 && !STOP.has(w))
+  )];
+  const ctxMatches = ctxWords.filter(w => p.includes(w)).length;
 
-  // Habit tip: use the seed for the lowest-scoring dimension
-  const dimScores = { conciseness, context, tone_format: tone, examples };
-  const lowestDim = Object.entries(dimScores).reduce((a, b) => b[1] < a[1] ? b : a)[0];
-  const tipMap = { conciseness: 'level3', context: 'level2', tone_format: 'level3', examples: 'level2' };
+  // ── Format keywords (Tone) ────────────────────────────────
+  const FMT = ['table','column','row','section','header','card','grid','list','bullet','format','layout','style','structured','numbered','sorted','ranked','chart','diagram','template','panel','sidebar','badge','status','stage','funnel'];
+  const fmtMatches = FMT.filter(w => p.includes(w)).length;
+
+  // ── Example anchors ───────────────────────────────────────
+  const EX = ['like:','e.g.','example:','format:','such as','for instance','sample','pattern',': [','→','->','e.g ','for example'];
+  const exMatches = EX.filter(pat => p.includes(pat)).length;
+
+  // ── Relevance gate ────────────────────────────────────────
+  // Prompt must have at least some on-topic content; otherwise everything = 0
+  const elemFound = elementsFound.filter(Boolean).length;
+  const isRelevant = ctxMatches >= 1 || fmtMatches >= 1 || exMatches >= 1 || elemFound >= 2;
+
+  if (!isRelevant) {
+    return {
+      scores: { conciseness: 0, context: 0, tone: 0, examples: 0 },
+      overall: 0,
+      elementsFound,
+      habitTip: round.hintSeeds.level1,
+      strengths: 'Study the output first — what domain is it? What format does it use?',
+      improvements: round.hintSeeds.level4,
+      localMode: true
+    };
+  }
+
+  // ── Score each dimension (only when relevant) ─────────────
+  // CONCISENESS: tight prompts score higher. Only counts if prompt is on-topic.
+  let conciseness;
+  if (words <= 6) conciseness = Math.max(0, words * 10);
+  else if (words <= 25) conciseness = 100;
+  else if (words <= 50) conciseness = Math.max(0, 100 - (words - 25) * 3);
+  else conciseness = Math.max(0, 100 - (words - 50) * 5);
+
+  // CONTEXT: proportion of idealPromptContext keywords present
+  const context = Math.min(100, Math.round((ctxMatches / Math.max(Math.min(ctxWords.length, 7), 1)) * 120));
+
+  // TONE_FORMAT
+  const tone = Math.min(100, fmtMatches * 30);
+
+  // EXAMPLES
+  const examples = Math.min(100, exMatches * 50);
+
+  // Element bonus (up to +15 on overall)
+  const elemBonus = Math.round((elemFound / round.keyElements.length) * 15);
+  const rawAvg = Math.round((conciseness + context + tone + examples) / 4);
+  const overall = Math.min(100, rawAvg + elemBonus);
+
+  // Tip: point at the lowest non-zero dimension
+  const dimMap = { conciseness, context, tone, examples };
+  const lowestDim = Object.entries(dimMap).reduce((a,b) => b[1] < a[1] ? b : a)[0];
+  const tipMap = { conciseness:'level3', context:'level2', tone:'level3', examples:'level2' };
   const habitTip = round.hintSeeds[tipMap[lowestDim]] || round.hintSeeds.level3;
 
-  const found = elementsFound.filter(Boolean).length;
   return {
     scores: { conciseness, context, tone, examples },
     overall,
     elementsFound,
     habitTip,
-    strengths: found > 0 ? `Your prompt matched ${found}/${round.keyElements.length} key elements.` : 'Keep going — add more domain-specific terms to your prompt.',
+    strengths: elemFound > 0
+      ? `Good — your prompt matched ${elemFound}/${round.keyElements.length} key elements.`
+      : 'You named the right domain. Now add format and specificity.',
     improvements: round.hintSeeds.level4,
     localMode: true
   };
