@@ -495,7 +495,7 @@ const DEFAULT_STATE = {
   lastPromptProfile:null, completedRoundIds:[]
 }
 
-const GEMINI_MODEL = 'gemini-1.5-flash'
+const GEMINI_MODEL = 'gemini-2.0-flash'
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 const GEMINI_API_URL = `${GEMINI_API_BASE}/${GEMINI_MODEL}:generateContent`
 
@@ -1487,12 +1487,13 @@ document.body.addEventListener('click', async e => {
       if(thinkingMsg) thinkingMsg.classList.add('hidden')
       let msg='Couldn\'t reach Gemini. Check your API key and connection.'
       if(err.status===401||err.status===403){
-        msg='Invalid Gemini API key.'
+        msg='Invalid Gemini API key. Please update it in Settings ⚙️'
         const banner=document.getElementById('invalid-key-banner')
         if(banner) banner.style.display='flex'
-      } else if(err.status===429){ msg='Daily limit reached (1,500 free requests). Try again tomorrow.' }
+      } else if(err.status===429){ msg='Daily limit reached. Try again tomorrow or use a new key.' }
       else if(err.status>=500){ msg='Gemini is having issues. Try again in a moment.' }
       else if(!navigator.onLine){ msg='No connection. Check your internet.' }
+      else if(err.message){ msg=`Error: ${err.message}` }
       if(errorDiv) errorDiv.innerHTML=`<div class="error-banner" style="margin-top:10px">${msg} <a data-action="submit-prompt">Retry</a></div>`
     }
     return
