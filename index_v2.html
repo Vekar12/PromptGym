@@ -610,6 +610,7 @@ const Session = {
   hintLevel: 0,
   currentRound: null,
   generatedHTML: '',
+  blobUrl: '',
   // persisted in sessionStorage so page refresh doesn't re-trigger the error
   get apiUnavailable() { return sessionStorage.getItem('pg_api_dead') === '1'; },
   set apiUnavailable(v) { v ? sessionStorage.setItem('pg_api_dead','1') : sessionStorage.removeItem('pg_api_dead'); },
@@ -620,6 +621,7 @@ const Session = {
     this.results = [];
     this.currentRound = null;
     this.generatedHTML = '';
+    if (this.blobUrl) { URL.revokeObjectURL(this.blobUrl); this.blobUrl = ''; }
   },
 
   current() { return this.rounds[this.idx]; },
@@ -859,11 +861,14 @@ function renderDrillPick() {
     subtitle.textContent = 'Rounds focused on this habit';
   } else {
     title.textContent = 'Choose a Round';
-    subtitle.textContent = `${window.ROUNDS_V2.length} rounds available`;
+    subtitle.textContent = `${(window.ROUNDS_V2 || []).length} rounds available`;
   }
 
   window._filterCat = 'all';
   window._filterDiff = 'all';
+  // Reset filter button active states visually
+  document.querySelectorAll('[data-filter-cat]').forEach(b => b.classList.toggle('active', b.dataset.filterCat === 'all'));
+  document.querySelectorAll('[data-filter-diff]').forEach(b => b.classList.toggle('active', b.dataset.filterDiff === 'all'));
   renderRoundCards();
 }
 
@@ -873,7 +878,7 @@ function renderRoundCards() {
   const cat = window._filterCat || 'all';
   const diff = window._filterDiff || 'all';
 
-  let rounds = window.ROUNDS_V2;
+  let rounds = window.ROUNDS_V2 || [];
   if (habit) rounds = rounds.filter(r => r.habitFocus === habit);
   if (cat !== 'all') rounds = rounds.filter(r => r.category === cat);
   if (diff !== 'all') rounds = rounds.filter(r => r.difficulty === parseInt(diff));
@@ -959,8 +964,10 @@ function renderFeedback() {
   } else {
     if (genWrap) genWrap.style.display = '';
     if (localBanner) localBanner.style.display = 'none';
+    if (Session.blobUrl) URL.revokeObjectURL(Session.blobUrl);
     const blob = new Blob([Session.generatedHTML], { type: 'text/html' });
-    genFrame.src = URL.createObjectURL(blob);
+    Session.blobUrl = URL.createObjectURL(blob);
+    genFrame.src = Session.blobUrl;
   }
 
   // score bars
@@ -1156,6 +1163,10 @@ async function runEvaluation(userPrompt) {
     document.getElementById('eval-progress-fill').style.width = progress[n-1] + '%';
   }
 
+  // Update subtitle based on mode
+  const evalSubtitle = document.querySelector('#screen-evaluating .eval-subtitle');
+  if (evalSubtitle) evalSubtitle.textContent = hasKey ? 'Gemini is generating and comparing outputs' : 'Analysing your prompt against key elements...';
+
   // ── LOCAL MODE (no API key or quota exhausted) ───────────────
   if (!hasKey) {
     activateStep(1); await sleep(350);
@@ -1337,6 +1348,8 @@ document.body.addEventListener('click', async e => {
     document.getElementById('api-key-input').value = State.get('apiKey') || '';
     document.getElementById('key-error').style.display = 'none';
     Router.go('setup');
+    // Keep nav visible when accessed from within the app (not first-time setup)
+    document.getElementById('main-nav').style.display = 'flex';
   }
 
   if (action === 'start-session') {
@@ -1406,7 +1419,17 @@ function showToast(msg) {
 // BOOT — always go to dashboard; API key is optional
 // ═══════════════════════════════════════════════════════════════
 State.load();
-Router.go('dashboard');
+if (!window.ROUNDS_V2 || !window.ROUNDS_V2.length) {
+  document.getElementById('app').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;padding:20px;text-align:center">
+      <div style="font-size:2rem">⚠️</div>
+      <div style="font-size:1.1rem;font-weight:800;color:var(--red)">Failed to load rounds data</div>
+      <div style="color:var(--text2);font-size:0.85rem;max-width:400px">rounds_v2.js could not be loaded. If you're running locally, open via a local server (not file://).<br><br>Try: <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">npx serve .</code></div>
+      <button class="btn btn-secondary" onclick="location.reload()">Retry</button>
+    </div>`;
+} else {
+  Router.go('dashboard');
+}
 </script>
 </body>
 </html>
