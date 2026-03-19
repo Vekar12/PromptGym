@@ -230,6 +230,19 @@ textarea { resize: vertical; }
 .summary-round-score { font-family: var(--mono); font-weight: 800; font-size: 1rem; }
 .summary-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
+/* ── PROMPT SURGERY ───────────────────────────────────────────────────── */
+.surgery-card { margin-top: 16px; }
+.surgery-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.surgery-original { font-family: var(--mono); font-size: 0.78rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text3); line-height: 1.7; }
+.surgery-edited { font-family: var(--mono); font-size: 0.78rem; background: #22c55e0d; border: 1px solid #22c55e33; border-radius: 8px; padding: 10px 12px; color: var(--text); line-height: 1.7; }
+.surgery-change { display: grid; grid-template-columns: 1fr 20px 1fr 1.4fr; gap: 8px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.75rem; }
+.surgery-change:last-child { border-bottom: none; }
+.surgery-from { font-family: var(--mono); color: var(--red); text-decoration: line-through; word-break: break-word; }
+.surgery-arr { color: var(--text3); text-align: center; }
+.surgery-to { font-family: var(--mono); color: var(--green); font-weight: 600; word-break: break-word; }
+.surgery-why { color: var(--text2); font-size: 0.7rem; line-height: 1.45; }
+.surgery-shimmer-row { height: 14px; border-radius: 4px; margin-bottom: 8px; }
+
 /* ── SHIMMER ──────────────────────────────────────────────────────────── */
 .shimmer { background: linear-gradient(90deg, var(--bg3) 25%, var(--bg2) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -531,6 +544,47 @@ textarea { resize: vertical; }
       </div>
     </div>
   </div>
+
+  <!-- ── PROMPT SURGERY ─────────────────────────────────────────────── -->
+  <div class="card surgery-card" id="surgery-section" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text2)">🔬 Prompt Surgery</div>
+      <span style="font-size:0.68rem;color:var(--text3)">What a stronger version of your prompt looks like</span>
+    </div>
+    <!-- Loading shimmer -->
+    <div id="surgery-loading">
+      <div class="shimmer surgery-shimmer-row" style="width:60%"></div>
+      <div class="shimmer surgery-shimmer-row" style="width:100%;height:60px;margin-bottom:12px"></div>
+      <div class="shimmer surgery-shimmer-row" style="width:40%"></div>
+      <div class="shimmer surgery-shimmer-row" style="width:100%;height:60px;margin-bottom:12px"></div>
+      <div class="shimmer surgery-shimmer-row" style="width:80%"></div>
+      <div class="shimmer surgery-shimmer-row" style="width:90%"></div>
+      <div class="shimmer surgery-shimmer-row" style="width:70%"></div>
+    </div>
+    <!-- Surgery content (populated by JS) -->
+    <div id="surgery-content" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div>
+          <div class="surgery-label" style="color:var(--text3)">Your version</div>
+          <div class="surgery-original" id="surgery-original"></div>
+        </div>
+        <div>
+          <div class="surgery-label" style="color:var(--green)">Surgically improved</div>
+          <div class="surgery-edited" id="surgery-edited"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 20px 1fr 1.4fr;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px">
+          <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Removed / Weakened</div>
+          <div></div>
+          <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Added / Strengthened</div>
+          <div style="font-size:0.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Why it matters</div>
+        </div>
+        <div id="surgery-changes"></div>
+      </div>
+      <div id="surgery-local-note" style="display:none;margin-top:10px;font-size:0.72rem;color:var(--text3);border-top:1px solid var(--border);padding-top:10px">Local mode — add a Gemini key in ⚙ Settings for AI-generated surgery specific to your exact wording.</div>
+    </div>
+  </div>
 </div>
 
 <div id="screen-summary" class="screen hidden">
@@ -724,6 +778,30 @@ Return this JSON structure:
   "habitTip": "One sentence explaining the most important thing the user should do differently next time, specific to the ${round.habitFocus} habit.",
   "strengths": "One sentence on what they did well.",
   "improvements": "One sentence on the biggest gap."
+}`;
+    const raw = await this.call(prompt, sys);
+    const cleaned = raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    return JSON.parse(cleaned);
+  },
+
+  async getSurgery(userPrompt, idealPrompt, round) {
+    const sys = `You are a prompt editing coach. Compare the user's prompt to the ideal and produce surgical improvements.
+Return ONLY valid JSON — no markdown fences, no explanation outside the JSON.`;
+    const prompt = `Round: "${round.title}" (${round.category}, habit focus: ${round.habitFocus})
+
+User's prompt: "${userPrompt}"
+Ideal prompt: "${idealPrompt}"
+
+Produce a surgically improved version of the user's prompt. Keep the user's good parts — only fix weak or missing parts. Do NOT just copy the ideal prompt verbatim. Preserve the user's voice where it works.
+
+Also list the 3–4 most impactful specific changes you made.
+
+Return this JSON:
+{
+  "editedPrompt": "the improved prompt text",
+  "changes": [
+    { "from": "exact word or short phrase from user's prompt (or '(missing)' if it was absent)", "to": "what replaced or was added", "why": "one sentence — why this change matters for the ${round.habitFocus} habit" }
+  ]
 }`;
     const raw = await this.call(prompt, sys);
     const cleaned = raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
@@ -993,6 +1071,12 @@ function renderFeedback() {
   document.getElementById('habit-tip').textContent = result.habitTip || '—';
   document.getElementById('ideal-prompt-display').textContent = round.idealPromptContext;
   document.getElementById('your-prompt-display').textContent = result.prompt;
+
+  // Reset surgery section, then load async
+  document.getElementById('surgery-section').style.display = 'none';
+  document.getElementById('surgery-loading').style.display = 'block';
+  document.getElementById('surgery-content').style.display = 'none';
+  loadSurgery(result, round);
 }
 
 function setScoreBar(habit, score) {
@@ -1140,6 +1224,88 @@ function scoreLocally(prompt, round) {
     improvements: round.hintSeeds.level4,
     localMode: true
   };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROMPT SURGERY
+// ═══════════════════════════════════════════════════════════════
+
+function getSurgeryLocally(userPrompt, idealPrompt, round) {
+  const u = userPrompt.toLowerCase();
+  const changes = [];
+
+  // 1. Verb strength
+  const firstWord = userPrompt.trim().split(/\s+/)[0].toLowerCase();
+  const weakVerbs = ['make','write','do','give','show','produce','create','get'];
+  const strongVerbs = ['generate','build','design','construct'];
+  if (weakVerbs.includes(firstWord) && !strongVerbs.includes(firstWord)) {
+    changes.push({ from: firstWord, to: 'Generate / Build', why: 'Stronger action verb signals the expected output type more clearly.' });
+  }
+
+  // 2. Missing format/layout spec
+  const fmtWords = ['table','column','card','grid','section','badge','row','layout','format','bar','list'];
+  const hasFmt = fmtWords.some(w => u.includes(w));
+  if (!hasFmt) {
+    changes.push({ from: '(no format spec)', to: 'Name the layout — table, card grid, sections…', why: `Tone & Format habit: the output has specific layout elements your prompt doesn't describe.` });
+  }
+
+  // 3. Missing domain/audience
+  const STOP = new Set(['with','from','that','this','each','when','have','into','then','their','should','could','about','which','these','those']);
+  const idealConcepts = idealPrompt.toLowerCase().split(/\W+/).filter(w => w.length > 5 && !STOP.has(w));
+  const userWords = new Set(u.split(/\W+/));
+  const missingConcepts = [...new Set(idealConcepts)].filter(w => !userWords.has(w)).slice(0, 3);
+  if (missingConcepts.length >= 2) {
+    changes.push({ from: '(missing domain context)', to: missingConcepts.join(', ') + '…', why: 'Context habit: these domain-specific terms from the ideal prompt were absent in yours.' });
+  }
+
+  // 4. Missing concrete values / examples
+  const hasNumbers = /\d/.test(userPrompt);
+  const hasExamples = /e\.g\.|example|such as|like:|→|->|format:/i.test(userPrompt);
+  if (!hasNumbers && !hasExamples) {
+    changes.push({ from: '(vague — no data anchors)', to: 'Add real values, column names, or a format example', why: 'Examples habit: concrete anchors (column names, sample values) constrain the AI to produce a specific output.' });
+  }
+
+  return { editedPrompt: idealPrompt, changes: changes.slice(0, 4), localMode: true };
+}
+
+async function loadSurgery(result, round) {
+  const section = document.getElementById('surgery-section');
+  const loading = document.getElementById('surgery-loading');
+  const content = document.getElementById('surgery-content');
+  section.style.display = 'block';
+  loading.style.display = 'block';
+  content.style.display = 'none';
+
+  const hasKey = !!(State.get('apiKey')) && !Session.apiUnavailable;
+  let surgeryData;
+  try {
+    if (hasKey) {
+      surgeryData = await API.getSurgery(result.prompt, round.idealPromptContext, round);
+    } else {
+      surgeryData = getSurgeryLocally(result.prompt, round.idealPromptContext, round);
+    }
+  } catch(e) {
+    surgeryData = getSurgeryLocally(result.prompt, round.idealPromptContext, round);
+  }
+
+  loading.style.display = 'none';
+  content.style.display = 'block';
+
+  document.getElementById('surgery-original').textContent = result.prompt;
+  document.getElementById('surgery-edited').textContent = surgeryData.editedPrompt;
+
+  const changesEl = document.getElementById('surgery-changes');
+  changesEl.innerHTML = (surgeryData.changes || []).map(c => `
+    <div class="surgery-change">
+      <div class="surgery-from">${c.from}</div>
+      <div class="surgery-arr">→</div>
+      <div class="surgery-to">${c.to}</div>
+      <div class="surgery-why">${c.why}</div>
+    </div>
+  `).join('');
+
+  const localNote = document.getElementById('surgery-local-note');
+  if (localNote) localNote.style.display = surgeryData.localMode ? 'block' : 'none';
 }
 
 // ═══════════════════════════════════════════════════════════════
