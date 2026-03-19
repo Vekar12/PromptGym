@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disbursement Pipeline — iLens</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F8F9FA;
+      color: #1A1A2E;
+      width: 900px;
+      margin: 0 auto;
+      padding: 0 0 40px 0;
+    }
+
+    /* HEADER */
+    .header {
+      background: #1A1A2E;
+      color: #fff;
+      padding: 22px 32px 20px;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .header h1 {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    .header p {
+      font-size: 12.5px;
+      color: #A0AEC0;
+      margin-top: 4px;
+    }
+    .header-pill {
+      background: #EF4444;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.4px;
+      margin-top: 2px;
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 28px 32px;
+    }
+
+    /* SECTION HEADING */
+    .section-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4A5568;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #E2E8F0;
+    }
+
+    /* PIPELINE STAGES */
+    .pipeline-wrap {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      padding: 22px 24px;
+      margin-bottom: 20px;
+    }
+    .stage-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .stage-row:last-child {
+      margin-bottom: 0;
+    }
+    .stage-label {
+      width: 110px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1A1A2E;
+      flex-shrink: 0;
+    }
+    .stage-bar-bg {
+      flex: 1;
+      background: #EDF2F7;
+      border-radius: 6px;
+      height: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stage-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.3s ease;
+    }
+    .stage-bar-fill.green  { background: #10B981; }
+    .stage-bar-fill.amber  { background: #F59E0B; }
+    .stage-bar-fill.red    { background: #EF4444; }
+    .stage-meta {
+      width: 230px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .stage-count {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1A1A2E;
+      white-space: nowrap;
+    }
+    .tat-badge {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .tat-badge.green  { background: #D1FAE5; color: #065F46; }
+    .tat-badge.amber  { background: #FEF3C7; color: #92400E; }
+    .tat-badge.red    { background: #FEE2E2; color: #991B1B; }
+
+    /* BOTTLENECK ALERT */
+    .bottleneck-box {
+      border: 2px solid #EF4444;
+      border-radius: 10px;
+      background: #FFF5F5;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .bn-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .bn-text h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #991B1B;
+    }
+    .bn-text p {
+      font-size: 13px;
+      color: #C53030;
+      margin-top: 3px;
+    }
+
+    /* TABLE */
+    .table-wrap {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    thead th {
+      background: #1A1A2E;
+      color: #fff;
+      font-weight: 600;
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+    }
+    tbody tr {
+      border-bottom: 1px solid #EDF2F7;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #F7FAFC; }
+    tbody td {
+      padding: 11px 16px;
+      color: #2D3748;
+    }
+    .status-pill {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    .status-pill.breached { background: #FEE2E2; color: #991B1B; }
+    .status-pill.risk     { background: #FEF3C7; color: #92400E; }
+    .status-pill.track    { background: #D1FAE5; color: #065F46; }
+
+    /* SUMMARY BAR */
+    .summary-bar {
+      background: #1A1A2E;
+      color: #fff;
+      border-radius: 10px;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .summary-item {
+      text-align: center;
+    }
+    .summary-item .s-label {
+      font-size: 11px;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .summary-item .s-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .summary-item .s-value.red   { color: #F87171; }
+    .summary-item .s-value.green { color: #34D399; }
+    .summary-sep {
+      width: 1px;
+      height: 36px;
+      background: #2D3748;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <h1>Disbursement Pipeline — iLens</h1>
+        <p>Week of 10 March 2025 &nbsp;|&nbsp; Home Loan Division &nbsp;|&nbsp; Processed by Credit Ops Team</p>
+      </div>
+      <div class="header-pill">1 BOTTLENECK</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- PIPELINE STAGES -->
+    <div class="section-heading">Pipeline Stages — Current Week</div>
+    <div class="pipeline-wrap">
+
+      <div class="stage-row">
+        <div class="stage-label">IGF</div>
+        <div class="stage-bar-bg">
+          <div class="stage-bar-fill green" style="width:85%;"></div>
+        </div>
+        <div class="stage-meta">
+          <span class="stage-count">23 files</span>
+          <span class="tat-badge green">TAT 1.2d / Target 1d</span>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-label" style="color:#EF4444;font-weight:800;">Legal &#9888;</div>
+        <div class="stage-bar-bg">
+          <div class="stage-bar-fill red" style="width:100%;"></div>
+        </div>
+        <div class="stage-meta">
+          <span class="stage-count">18 files</span>
+          <span class="tat-badge red">TAT 4.8d / Target 3d</span>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-label">Technical</div>
+        <div class="stage-bar-bg">
+          <div class="stage-bar-fill amber" style="width:68%;"></div>
+        </div>
+        <div class="stage-meta">
+          <span class="stage-count">12 files</span>
+          <span class="tat-badge amber">TAT 2.1d / Target 2d</span>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-label">Credit</div>
+        <div class="stage-bar-bg">
+          <div class="stage-bar-fill green" style="width:55%;"></div>
+        </div>
+        <div class="stage-meta">
+          <span class="stage-count">8 files</span>
+          <span class="tat-badge green">TAT 1.8d / Target 2d</span>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-label">NDC</div>
+        <div class="stage-bar-bg">
+          <div class="stage-bar-fill amber" style="width:72%;"></div>
+        </div>
+        <div class="stage-meta">
+          <span class="stage-count">5 files</span>
+          <span class="tat-badge amber">TAT 3.2d / Target 3d</span>
+        </div>
+      </div>
+
+      <div class="stage-row">
+        <div class="stage-label">Disbursed</div>
+        <div class="stage-bar-bg">
+          <div class="stage-bar-fill green" style="width:100%;"></div>
+        </div>
+        <div class="stage-meta">
+          <span class="stage-count">31 files</span>
+          <span class="tat-badge green">This Week ✓</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTLENECK ALERT -->
+    <div class="bottleneck-box">
+      <div class="bn-icon">⚠️</div>
+      <div class="bn-text">
+        <h3>BOTTLENECK IDENTIFIED: Legal Stage</h3>
+        <p>4.8d average TAT vs 3d target — 8 files at risk of SLA breach. Immediate escalation required to Legal team head.</p>
+      </div>
+    </div>
+
+    <!-- FILES AT RISK TABLE -->
+    <div class="section-heading">Files at Risk — Detailed View</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>App ID</th>
+            <th>Borrower</th>
+            <th>Stage</th>
+            <th>Days in Stage</th>
+            <th>Owner</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#FFF5F5;">
+            <td><strong>ILNS-2024-4421</strong></td>
+            <td>Rahul Mehta</td>
+            <td>Legal</td>
+            <td><strong style="color:#C53030;">6d</strong></td>
+            <td>Priya Sharma</td>
+            <td><span class="status-pill breached">SLA Breached</span></td>
+          </tr>
+          <tr style="background:#FFF5F5;">
+            <td><strong>ILNS-2024-4398</strong></td>
+            <td>Sunita Patel</td>
+            <td>Legal</td>
+            <td><strong style="color:#C53030;">7d</strong></td>
+            <td>Amit Kulkarni</td>
+            <td><span class="status-pill breached">SLA Breached</span></td>
+          </tr>
+          <tr>
+            <td><strong>ILNS-2024-4445</strong></td>
+            <td>Vikram Singh</td>
+            <td>Technical</td>
+            <td>3d</td>
+            <td>Neha Joshi</td>
+            <td><span class="status-pill risk">At Risk</span></td>
+          </tr>
+          <tr>
+            <td><strong>ILNS-2024-4389</strong></td>
+            <td>Anita Desai</td>
+            <td>Credit</td>
+            <td>2d</td>
+            <td>Rohit Verma</td>
+            <td><span class="status-pill track">On Track</span></td>
+          </tr>
+          <tr>
+            <td><strong>ILNS-2024-4412</strong></td>
+            <td>Mohan Kumar</td>
+            <td>NDC</td>
+            <td>4d</td>
+            <td>Sunita Das</td>
+            <td><span class="status-pill risk">At Risk</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div class="summary-bar">
+      <div class="summary-item">
+        <div class="s-label">Total Pipeline</div>
+        <div class="s-value green">&#8377;12.4 Cr</div>
+      </div>
+      <div class="summary-sep"></div>
+      <div class="summary-item">
+        <div class="s-label">End-to-End TAT</div>
+        <div class="s-value red">18.2 days</div>
+      </div>
+      <div class="summary-sep"></div>
+      <div class="summary-item">
+        <div class="s-label">TAT Target</div>
+        <div class="s-value">14 days</div>
+      </div>
+      <div class="summary-sep"></div>
+      <div class="summary-item">
+        <div class="s-label">Disbursed This Week</div>
+        <div class="s-value green">31 files</div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Jargon to Plain English Transformation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f9fa; color: #1a1a1a; padding: 28px; max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { font-size: 0.75rem; color: #666; margin-bottom: 24px; }
+  .pair { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 16px; overflow: hidden; }
+  .pair-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #f5f5f5; border-bottom: 1px solid #eee; }
+  .tag { border-radius: 4px; padding: 2px 8px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+  .tag-before { background: #fce4ec; color: #b71c1c; }
+  .tag-after { background: #e8f5e9; color: #2e7d32; }
+  .pair-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .side { padding: 14px 16px; font-size: 0.82rem; line-height: 1.65; }
+  .side-before { border-right: 1px solid #eee; color: #555; }
+  .side-after { color: #222; font-weight: 500; }
+  .annotation { font-size: 0.72rem; color: #999; font-style: italic; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #eee; }
+  .divider { display: flex; align-items: center; justify-content: center; background: #f0f4fc; font-size: 1rem; }
+  .stats-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stat { background: white; border-radius: 8px; padding: 12px 16px; flex: 1; min-width: 100px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); text-align: center; }
+  .stat-val { font-size: 1.2rem; font-weight: 800; color: #1565c0; }
+  .stat-label { font-size: 0.65rem; color: #888; font-weight: 600; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<h1>Jargon → Plain English</h1>
+<p class="subtitle">SaaS investor update rewritten for a non-technical audience</p>
+
+<div class="stats-row">
+  <div class="stat"><div class="stat-val">4</div><div class="stat-label">Passages</div></div>
+  <div class="stat"><div class="stat-val">−38%</div><div class="stat-label">Word Count</div></div>
+  <div class="stat"><div class="stat-val">6→11</div><div class="stat-label">Flesch Grade</div></div>
+</div>
+
+<div class="pair">
+  <div class="pair-header"><span class="tag tag-before">Before</span></div>
+  <div class="pair-body">
+    <div class="side side-before">
+      "We're leveraging a multi-tenant SaaS architecture with a robust API-first approach to facilitate seamless synergies across our ecosystem of strategic partners, enabling end-to-end digital transformation at scale."
+      <div class="annotation">Jargon density: 9 buzzwords</div>
+    </div>
+    <div class="divider">→</div>
+    <div class="side side-after">
+      "Our software is built to serve many businesses at once and connects easily with tools our partners already use — making it simpler for companies to move their work online."
+      <div class="annotation">Reads at Grade 8. Concrete, action-oriented.</div>
+    </div>
+  </div>
+</div>
+
+<div class="pair">
+  <div class="pair-header"><span class="tag tag-before">Before</span></div>
+  <div class="pair-body">
+    <div class="side side-before">
+      "Q3 NRR of 118% demonstrates strong net dollar expansion, with land-and-expand motion driving upsell velocity across our installed base."
+      <div class="annotation">Finance/SaaS jargon</div>
+    </div>
+    <div class="divider">→</div>
+    <div class="side side-after">
+      "In Q3, existing customers spent 18% more than last year. That growth came from customers adding more seats and features over time — we didn't need to win new clients to grow."
+      <div class="annotation">Number retained, meaning explained.</div>
+    </div>
+  </div>
+</div>
+
+<div class="pair">
+  <div class="pair-header"><span class="tag tag-before">Before</span></div>
+  <div class="pair-body">
+    <div class="side side-before">
+      "Our GTM motion has shifted toward a PLG flywheel with bottom-up adoption supplementing the legacy top-down enterprise sales cycle."
+      <div class="annotation">Marketing strategy buzzwords</div>
+    </div>
+    <div class="divider">→</div>
+    <div class="side side-after">
+      "Individual employees now start using our product on their own, and their companies later upgrade to paid plans. This reduces our reliance on long enterprise sales deals."
+      <div class="annotation">Explains the actual mechanic, not the label.</div>
+    </div>
+  </div>
+</div>
+
+<div class="pair">
+  <div class="pair-header"><span class="tag tag-before">Before</span></div>
+  <div class="pair-body">
+    <div class="side side-before">
+      "We are operationalising a data-driven culture by instrumenting all key workflows with telemetry to surface actionable insights across the organisation."
+      <div class="annotation">Corporate-speak at its densest</div>
+    </div>
+    <div class="divider">→</div>
+    <div class="side side-after">
+      "We're tracking how employees use our tools so managers can see what's working and fix what's slowing the team down."
+      <div class="annotation">Half the words. Same meaning.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

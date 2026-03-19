@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Agent Output — Fleet Management SaaS India</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a2e; max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
+
+  /* Agent header banner */
+  .agent-banner { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: #fff; border-radius: 10px; padding: 20px 24px; margin-bottom: 28px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .agent-banner-left .agent-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #80cbc4; margin-bottom: 6px; }
+  .agent-banner-left .agent-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .agent-banner-left .agent-desc { font-size: 12px; color: #b0bec5; }
+  .agent-banner-right { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+  .meta-pill { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 3px 10px; font-size: 11px; color: #cfd8dc; white-space: nowrap; }
+
+  h2 { font-size: 14px; font-weight: 700; color: #1a237e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 1px solid #e8eaf6; }
+  section { margin-bottom: 32px; }
+
+  /* Executive Summary */
+  .exec-summary { background: #f5f6ff; border-left: 4px solid #3f51b5; border-radius: 0 8px 8px 0; padding: 16px 20px; font-size: 14px; color: #2c3e50; line-height: 1.7; }
+
+  /* Sources */
+  .sources-list { display: flex; flex-direction: column; gap: 8px; }
+  .source-item { display: flex; align-items: center; gap: 12px; border: 1px solid #e8eaf6; border-radius: 6px; padding: 10px 14px; background: #fafbff; }
+  .source-num { width: 24px; height: 24px; background: #1a237e; color: #fff; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .source-name { flex: 1; font-size: 13px; font-weight: 500; color: #333; }
+  .cred-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .cred-high { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .cred-med { background: #fff8e1; color: #e65100; border: 1px solid #ffe082; }
+  .cred-low { background: #fce4ec; color: #c62828; border: 1px solid #f48fb1; }
+  .stars { font-size: 12px; margin-left: 6px; color: #f9a825; }
+
+  /* Findings */
+  .findings-list { display: flex; flex-direction: column; gap: 14px; }
+  .finding-card { border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; }
+  .finding-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
+  .finding-header.high { background: #e8f5e9; border-bottom: 1px solid #c8e6c9; }
+  .finding-header.medium { background: #fff8e1; border-bottom: 1px solid #ffe082; }
+  .finding-header.low { background: #fff3e0; border-bottom: 1px solid #ffcc80; }
+  .conf-badge { font-size: 10px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 3px 9px; border-radius: 10px; }
+  .conf-badge.high { background: #2e7d32; color: #fff; }
+  .conf-badge.medium { background: #f57f17; color: #fff; }
+  .conf-badge.low { background: #e65100; color: #fff; }
+  .finding-num { font-size: 11px; font-weight: 700; color: #888; }
+  .finding-body { padding: 12px 16px; background: #fff; }
+  .finding-text { font-size: 13px; color: #2c3e50; line-height: 1.6; margin-bottom: 8px; }
+  .evidence-row { display: flex; align-items: flex-start; gap: 6px; font-size: 12px; color: #666; }
+  .evidence-label { font-weight: 700; color: #888; white-space: nowrap; }
+
+  /* Gaps */
+  .gaps-box { background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 16px 20px; }
+  .gap-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #5d4037; margin-bottom: 8px; line-height: 1.5; }
+  .gap-item:last-child { margin-bottom: 0; }
+  .gap-dot { color: #f57f17; font-size: 16px; line-height: 1.2; flex-shrink: 0; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  thead tr { background: #1a237e; color: #fff; }
+  thead th { padding: 10px 12px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.5px; }
+  tbody tr { border-bottom: 1px solid #e8eaf6; }
+  tbody tr:nth-child(even) { background: #f5f6ff; }
+  tbody td { padding: 9px 12px; color: #2c3e50; vertical-align: middle; }
+  .company-name { font-weight: 700; color: #1a237e; }
+  .nbfc-yes { color: #2e7d32; font-weight: 600; }
+  .nbfc-no { color: #c62828; font-weight: 600; }
+  .nbfc-partial { color: #e65100; font-weight: 600; }
+  .rating { font-weight: 700; }
+  .rating-good { color: #2e7d32; }
+  .rating-avg { color: #e65100; }
+
+  /* Next Steps */
+  .steps-list { display: flex; flex-direction: column; gap: 8px; }
+  .step-item { display: flex; align-items: flex-start; gap: 12px; background: #f5f6ff; border: 1px solid #e8eaf6; border-radius: 6px; padding: 12px 16px; }
+  .step-num { background: #1a237e; color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .step-text { font-size: 13px; color: #333; line-height: 1.5; }
+  .step-duration { font-size: 11px; color: #888; margin-top: 2px; }
+
+  /* Footer metadata */
+  .agent-footer { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px 20px; margin-top: 32px; }
+  .footer-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 10px; }
+  .footer-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+  .footer-item { font-size: 12px; color: #555; }
+  .footer-item strong { color: #333; }
+</style>
+</head>
+<body>
+
+<!-- Agent Header Banner -->
+<div class="agent-banner">
+  <div class="agent-banner-left">
+    <div class="agent-label">Research Agent Output</div>
+    <div class="agent-title">Competitor Analysis: Fleet Management SaaS in India</div>
+    <div class="agent-desc">Market landscape, competitive positioning, and strategic gaps — Indian B2B fleet tech sector</div>
+  </div>
+  <div class="agent-banner-right">
+    <div class="meta-pill">Run: 14 Mar 2025, 09:32 AM</div>
+    <div class="meta-pill">Model: gemini-1.5-flash</div>
+    <div class="meta-pill">Status: Complete</div>
+    <div class="meta-pill">Sources: 5 processed</div>
+  </div>
+</div>
+
+<!-- Executive Summary -->
+<section>
+  <h2>Executive Summary</h2>
+  <div class="exec-summary">
+    The Indian fleet management SaaS market is dominated by 4–5 established players with Fleetx holding the strongest market position at ~34% share, primarily due to deep NBFC integrations and enterprise-grade analytics. A significant whitespace exists in the SME segment (&lt;50 vehicle fleets), where no current player offers sub-&#8377;2,000/vehicle/month pricing, despite confirmed operator willingness to pay at &#8377;1,200–1,800. Driver behavior analytics is emerging as the fastest-differentiating feature category, with a 67% YoY increase in user mentions across review platforms.
+  </div>
+</section>
+
+<!-- Sources Consulted -->
+<section>
+  <h2>Sources Consulted</h2>
+  <div class="sources-list">
+    <div class="source-item">
+      <span class="source-num">1</span>
+      <span class="source-name">NASSCOM Fleet Tech Report 2024</span>
+      <span class="cred-badge cred-high">High Credibility</span>
+      <span class="stars">&#9733;&#9733;&#9733;</span>
+    </div>
+    <div class="source-item">
+      <span class="source-num">2</span>
+      <span class="source-name">LinkedIn Company Pages — Fleetx, Locus, Intellicheck</span>
+      <span class="cred-badge cred-med">Medium Credibility</span>
+      <span class="stars">&#9733;&#9733;</span>
+    </div>
+    <div class="source-item">
+      <span class="source-num">3</span>
+      <span class="source-name">G2 Reviews Data (January–March 2025)</span>
+      <span class="cred-badge cred-high">High Credibility</span>
+      <span class="stars">&#9733;&#9733;&#9733;</span>
+    </div>
+    <div class="source-item">
+      <span class="source-num">4</span>
+      <span class="source-name">Industry Interviews — 3 Ops Managers (Mumbai, Pune, Ahmedabad)</span>
+      <span class="cred-badge cred-high">High Credibility</span>
+      <span class="stars">&#9733;&#9733;&#9733;</span>
+    </div>
+    <div class="source-item">
+      <span class="source-num">5</span>
+      <span class="source-name">Product Hunt Listings</span>
+      <span class="cred-badge cred-low">Low Credibility</span>
+      <span class="stars">&#9733;</span>
+    </div>
+  </div>
+</section>
+
+<!-- Key Findings -->
+<section>
+  <h2>Key Findings</h2>
+  <div class="findings-list">
+
+    <div class="finding-card">
+      <div class="finding-header high">
+        <span class="conf-badge high">High Confidence</span>
+        <span class="finding-num">Finding 01</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-text"><strong>Fleetx leads market share at 34%</strong> with strong NBFC integrations and an established enterprise customer base across 15+ states. Their analytics dashboard is consistently rated as the most comprehensive in the segment.</div>
+        <div class="evidence-row"><span class="evidence-label">Evidence:</span> NASSCOM Fleet Tech Report 2024 (market share data) + G2 review volume analysis (highest total reviews in category: 312)</div>
+      </div>
+    </div>
+
+    <div class="finding-card">
+      <div class="finding-header high">
+        <span class="conf-badge high">High Confidence</span>
+        <span class="finding-num">Finding 02</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-text"><strong>The SME segment (&lt;50 vehicle fleets) is critically underserved.</strong> No current player offers sub-&#8377;2,000/vehicle/month pricing, yet confirmed operator willingness to pay exists at &#8377;1,200–1,800/vehicle/month — a clear demand gap.</div>
+        <div class="evidence-row"><span class="evidence-label">Evidence:</span> All 3 operator interviews confirmed pricing sensitivity at this threshold; lowest current market price is &#8377;1,800 (Intellicheck, limited features)</div>
+      </div>
+    </div>
+
+    <div class="finding-card">
+      <div class="finding-header medium">
+        <span class="conf-badge medium">Medium Confidence</span>
+        <span class="finding-num">Finding 03</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-text"><strong>Driver behavior analytics is the fastest-growing feature category</strong> with a 67% year-on-year increase in user review mentions. Features like harsh braking detection, fatigue alerts, and score-based incentive programs are driving purchase decisions.</div>
+        <div class="evidence-row"><span class="evidence-label">Evidence:</span> G2 review text analysis (Jan–Mar 2025), n=180 reviews filtered for feature mentions. Sample size moderate; trend direction confirmed but magnitude estimate carries uncertainty.</div>
+      </div>
+    </div>
+
+    <div class="finding-card">
+      <div class="finding-header" style="background:#fce4ec; border-bottom:1px solid #f48fb1;">
+        <span class="conf-badge low">Low Confidence</span>
+        <span class="finding-num">Finding 04</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-text"><strong>At least 2 competitors are exploring ONDC integration</strong> for their logistics modules — potentially a significant platform shift if ONDC logistics adoption scales in FY26.</div>
+        <div class="evidence-row"><span class="evidence-label">Evidence:</span> LinkedIn job postings only (ONDC-related engineering roles at Locus and FarEye) — unconfirmed strategy. Requires direct validation.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Gaps -->
+<section>
+  <h2>Identified Research Gaps</h2>
+  <div class="gaps-box">
+    <div class="gap-item"><span class="gap-dot">&#9642;</span> Could not verify revenue or ARR figures for private companies (Fleetx, Intellicheck, TrackoBit) — no public filings available.</div>
+    <div class="gap-item"><span class="gap-dot">&#9642;</span> No data on customer churn rates — critical metric for evaluating product stickiness and competitive moat.</div>
+    <div class="gap-item"><span class="gap-dot">&#9642;</span> Enterprise pricing tiers are undisclosed; all enterprise quotes are custom — benchmarking incomplete for high-fleet customers (&gt;500 vehicles).</div>
+  </div>
+</section>
+
+<!-- Competitor Table -->
+<section>
+  <h2>Competitor Comparison Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Company</th>
+        <th>Fleet Size Focus</th>
+        <th>Key Feature</th>
+        <th>Pricing</th>
+        <th>NBFC Integration</th>
+        <th>Mobile App Rating</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="company-name">Fleetx</td>
+        <td>50–5,000 vehicles</td>
+        <td>Real-time GPS + Analytics</td>
+        <td>&#8377;3,200/vehicle/mo</td>
+        <td class="nbfc-yes">Yes</td>
+        <td class="rating rating-good">4.1 / 5</td>
+      </tr>
+      <tr>
+        <td class="company-name">Locus</td>
+        <td>100+ vehicles</td>
+        <td>Route Optimisation</td>
+        <td>&#8377;4,500/vehicle/mo</td>
+        <td class="nbfc-no">No</td>
+        <td class="rating rating-good">4.3 / 5</td>
+      </tr>
+      <tr>
+        <td class="company-name">Intellicheck</td>
+        <td>10–200 vehicles</td>
+        <td>Compliance Focus</td>
+        <td>&#8377;1,800/vehicle/mo</td>
+        <td class="nbfc-partial">Partial</td>
+        <td class="rating rating-avg">3.8 / 5</td>
+      </tr>
+      <tr>
+        <td class="company-name">FarEye</td>
+        <td>200+ vehicles</td>
+        <td>Enterprise Logistics</td>
+        <td>Custom</td>
+        <td class="nbfc-no">No</td>
+        <td class="rating rating-good">4.0 / 5</td>
+      </tr>
+      <tr>
+        <td class="company-name">TrackoBit</td>
+        <td>20–500 vehicles</td>
+        <td>GPS + Driver Scorecard</td>
+        <td>&#8377;2,400/vehicle/mo</td>
+        <td class="nbfc-yes">Yes</td>
+        <td class="rating rating-avg">3.9 / 5</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Next Steps -->
+<section>
+  <h2>Recommended Next Steps</h2>
+  <div class="steps-list">
+    <div class="step-item">
+      <span class="step-num">1</span>
+      <div>
+        <div class="step-text"><strong>Primary research with 5 NBFC fleet managers</strong> — structured interviews to validate NBFC integration requirements and decision criteria for SaaS adoption.</div>
+        <div class="step-duration">Timeline: 2 weeks | Owner: Business Development</div>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-num">2</span>
+      <div>
+        <div class="step-text"><strong>Pricing benchmarking study with 10 SME fleet operators</strong> — conjoint analysis to identify precise willingness-to-pay thresholds for sub-50-vehicle fleets.</div>
+        <div class="step-duration">Timeline: 3 weeks | Owner: Product + Marketing</div>
+      </div>
+    </div>
+    <div class="step-item">
+      <span class="step-num">3</span>
+      <div>
+        <div class="step-text"><strong>Request Fleetx product demo</strong> — map feature-by-feature gaps, UX benchmarks, and NBFC integration architecture to inform product roadmap priorities.</div>
+        <div class="step-duration">Timeline: 1 week | Owner: Product Manager</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Agent Metadata Footer -->
+<div class="agent-footer">
+  <div class="footer-label">Agent Run Metadata</div>
+  <div class="footer-grid">
+    <div class="footer-item"><strong>Model:</strong> gemini-1.5-flash</div>
+    <div class="footer-item"><strong>Run Timestamp:</strong> 2025-03-14T09:32:41Z</div>
+    <div class="footer-item"><strong>Input Tokens:</strong> 2,847</div>
+    <div class="footer-item"><strong>Output Tokens:</strong> 1,203</div>
+    <div class="footer-item"><strong>Duration:</strong> 8.4s</div>
+    <div class="footer-item"><strong>Sources Processed:</strong> 5</div>
+  </div>
+</div>
+
+</body>
+</html>

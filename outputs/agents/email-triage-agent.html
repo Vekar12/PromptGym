@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Triage Agent — Processed Inbox</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8f9fa; color: #1a1a2e; max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* Top header */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .page-title { font-size: 18px; font-weight: 700; color: #1a237e; }
+  .page-subtitle { font-size: 12px; color: #888; margin-top: 2px; }
+  .agent-pill { background: #1a237e; color: #fff; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 12px; }
+
+  /* Summary bar */
+  .summary-bar { background: #1a237e; color: #fff; border-radius: 8px; padding: 14px 20px; margin-bottom: 22px; display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+  .summary-stat { padding: 0 20px; border-right: 1px solid rgba(255,255,255,0.2); }
+  .summary-stat:first-child { padding-left: 0; }
+  .summary-stat:last-child { border-right: none; }
+  .stat-value { font-size: 20px; font-weight: 800; }
+  .stat-label { font-size: 10px; color: #9fa8da; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-p1 { color: #ef5350; }
+  .stat-p2 { color: #ffa726; }
+  .stat-fyi { color: #42a5f5; }
+  .summary-timing { margin-left: auto; font-size: 12px; color: #c5cae9; }
+
+  /* Email cards */
+  .email-list { display: flex; flex-direction: column; gap: 10px; }
+  .email-card { background: #fff; border-radius: 8px; border: 1px solid #e0e0e0; overflow: hidden; }
+  .email-card.p1 { border-left: 4px solid #c62828; }
+  .email-card.p2 { border-left: 4px solid #e65100; }
+  .email-card.p3 { border-left: 4px solid #90a4ae; }
+
+  .email-top { padding: 12px 16px 10px; border-bottom: 1px solid #f5f5f5; }
+  .email-meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .email-subject { font-size: 13.5px; font-weight: 600; color: #1a1a2e; flex: 1; min-width: 200px; }
+  .priority-badge { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 3px; letter-spacing: 0.5px; flex-shrink: 0; }
+  .priority-badge.p1 { background: #c62828; color: #fff; }
+  .priority-badge.p2 { background: #e65100; color: #fff; }
+  .priority-badge.p3 { background: #78909c; color: #fff; }
+  .from-row { font-size: 11.5px; color: #666; }
+  .from-row span { color: #1a237e; font-weight: 500; }
+
+  .email-bottom { padding: 10px 16px 12px; display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .category-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; white-space: nowrap; flex-shrink: 0; }
+  .cat-escalation { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
+  .cat-action { background: #fff8e1; color: #e65100; border: 1px solid #ffe082; }
+  .cat-fyi { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+  .cat-spam { background: #f5f5f5; color: #546e7a; border: 1px solid #cfd8dc; }
+
+  .action-box { flex: 1; min-width: 180px; }
+  .action-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #aaa; margin-bottom: 3px; }
+  .action-text { font-size: 12.5px; color: #333; font-weight: 500; }
+
+  .confidence-box { text-align: right; flex-shrink: 0; }
+  .confidence-pct { font-size: 18px; font-weight: 800; color: #1a237e; }
+  .confidence-label { font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .reasoning-row { width: 100%; border-top: 1px dashed #eee; margin-top: 8px; padding-top: 8px; font-size: 11.5px; color: #666; line-height: 1.5; display: flex; gap: 6px; }
+  .reasoning-icon { color: #9fa8da; font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">Email Triage Agent</div>
+    <div class="page-subtitle">Processed inbox view — Mumbai Bus Operations | 14 March 2025</div>
+  </div>
+  <div class="agent-pill">AI Agent</div>
+</div>
+
+<!-- Summary Bar -->
+<div class="summary-bar">
+  <div class="summary-stat">
+    <div class="stat-value">8</div>
+    <div class="stat-label">Emails Processed</div>
+  </div>
+  <div class="summary-stat">
+    <div class="stat-value stat-p1">2</div>
+    <div class="stat-label">Priority P1</div>
+  </div>
+  <div class="summary-stat">
+    <div class="stat-value stat-p2">3</div>
+    <div class="stat-label">Priority P2</div>
+  </div>
+  <div class="summary-stat">
+    <div class="stat-value stat-fyi">3</div>
+    <div class="stat-label">FYI / Archive</div>
+  </div>
+  <div class="summary-timing">Processing time: 3.2s</div>
+</div>
+
+<!-- Email Cards -->
+<div class="email-list">
+
+  <!-- Email 1 -->
+  <div class="email-card p1">
+    <div class="email-top">
+      <div class="email-meta-row">
+        <span class="email-subject">RE: Bus MH-04-AB-1122 still not returned from workshop — Day 10</span>
+        <span class="priority-badge p1">P1</span>
+      </div>
+      <div class="from-row">From: <span>ravi.kulkarni@ops.in</span> &nbsp;&bull;&nbsp; 14 Mar 2025, 08:14 AM</div>
+    </div>
+    <div class="email-bottom">
+      <span class="category-tag cat-escalation">&#128308; Escalation</span>
+      <div class="action-box">
+        <div class="action-label">Recommended Action</div>
+        <div class="action-text">Forward to Ashish Patil (Vendor Manager)</div>
+      </div>
+      <div class="confidence-box">
+        <div class="confidence-pct">94%</div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+      <div class="reasoning-row">
+        <span class="reasoning-icon">&#8505;</span>
+        Vendor SLA breach pattern detected — bus exceeds 7-day workshop turnaround SLA by Day 10. Requires immediate vendor management escalation to prevent further route disruption.
+      </div>
+    </div>
+  </div>
+
+  <!-- Email 2 -->
+  <div class="email-card p1">
+    <div class="email-top">
+      <div class="email-meta-row">
+        <span class="email-subject">Legal file ILNS-2024-4421 — missing document list</span>
+        <span class="priority-badge p1">P1</span>
+      </div>
+      <div class="from-row">From: <span>priya.sharma@legal.in</span> &nbsp;&bull;&nbsp; 14 Mar 2025, 09:02 AM</div>
+    </div>
+    <div class="email-bottom">
+      <span class="category-tag cat-action">&#128993; Action Required</span>
+      <div class="action-box">
+        <div class="action-label">Recommended Action</div>
+        <div class="action-text">Reply with document checklist</div>
+      </div>
+      <div class="confidence-box">
+        <div class="confidence-pct">88%</div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+      <div class="reasoning-row">
+        <span class="reasoning-icon">&#8505;</span>
+        Loan file ILNS-2024-4421 is blocked pending customer document submission. Action required within SLA window (24 hrs) to avoid file aging breach.
+      </div>
+    </div>
+  </div>
+
+  <!-- Email 3 -->
+  <div class="email-card p3">
+    <div class="email-top">
+      <div class="email-meta-row">
+        <span class="email-subject">Weekly fleet report — Week 11</span>
+        <span class="priority-badge p3">P3</span>
+      </div>
+      <div class="from-row">From: <span>reports@fleetops.in</span> &nbsp;&bull;&nbsp; 14 Mar 2025, 06:00 AM</div>
+    </div>
+    <div class="email-bottom">
+      <span class="category-tag cat-fyi">&#128309; FYI</span>
+      <div class="action-box">
+        <div class="action-label">Recommended Action</div>
+        <div class="action-text">Archive</div>
+      </div>
+      <div class="confidence-box">
+        <div class="confidence-pct">97%</div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+      <div class="reasoning-row">
+        <span class="reasoning-icon">&#8505;</span>
+        Auto-generated weekly report from fleet ops system. No action required — report is for informational reference only.
+      </div>
+    </div>
+  </div>
+
+  <!-- Email 4 -->
+  <div class="email-card p2">
+    <div class="email-top">
+      <div class="email-meta-row">
+        <span class="email-subject">Training session reminder — Challan filing workshop, 22 Mar</span>
+        <span class="priority-badge p2">P2</span>
+      </div>
+      <div class="from-row">From: <span>hr@mumbaibus.in</span> &nbsp;&bull;&nbsp; 13 Mar 2025, 04:30 PM</div>
+    </div>
+    <div class="email-bottom">
+      <span class="category-tag cat-action">&#128993; Action Required</span>
+      <div class="action-box">
+        <div class="action-label">Recommended Action</div>
+        <div class="action-text">Reply to confirm attendance</div>
+      </div>
+      <div class="confidence-box">
+        <div class="confidence-pct">82%</div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+      <div class="reasoning-row">
+        <span class="reasoning-icon">&#8505;</span>
+        Training invitation for challan filing compliance workshop on 22 Mar. RSVP deadline is 18 Mar — action required within 4 days.
+      </div>
+    </div>
+  </div>
+
+  <!-- Email 5 -->
+  <div class="email-card p3">
+    <div class="email-top">
+      <div class="email-meta-row">
+        <span class="email-subject">Congratulations on Q3 performance &#127881;</span>
+        <span class="priority-badge p3">P3</span>
+      </div>
+      <div class="from-row">From: <span>md@mumbaibus.in</span> &nbsp;&bull;&nbsp; 13 Mar 2025, 11:00 AM</div>
+    </div>
+    <div class="email-bottom">
+      <span class="category-tag cat-fyi">&#128309; FYI</span>
+      <div class="action-box">
+        <div class="action-label">Recommended Action</div>
+        <div class="action-text">Archive</div>
+      </div>
+      <div class="confidence-box">
+        <div class="confidence-pct">91%</div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+      <div class="reasoning-row">
+        <span class="reasoning-icon">&#8505;</span>
+        Internal celebration email from Managing Director — no action required. Positive sentiment, no follow-up needed.
+      </div>
+    </div>
+  </div>
+
+  <!-- Email 6 -->
+  <div class="email-card p2">
+    <div class="email-top">
+      <div class="email-meta-row">
+        <span class="email-subject">iLens downtime notification — 15 Mar 02:00–04:00 AM</span>
+        <span class="priority-badge p2">P2</span>
+      </div>
+      <div class="from-row">From: <span>it@ilens.in</span> &nbsp;&bull;&nbsp; 13 Mar 2025, 05:00 PM</div>
+    </div>
+    <div class="email-bottom">
+      <span class="category-tag cat-fyi">&#128309; FYI</span>
+      <div class="action-box">
+        <div class="action-label">Recommended Action</div>
+        <div class="action-text">Forward to Hub Managers</div>
+      </div>
+      <div class="confidence-box">
+        <div class="confidence-pct">95%</div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+      <div class="reasoning-row">
+        <span class="reasoning-icon">&#8505;</span>
+        Scheduled system downtime affects iLens access. Hub managers need advance notice to avoid filing or status-update failures during the downtime window.
+      </div>
+    </div>
+  </div>
+
+  <!-- Email 7 -->
+  <div class="email-card p2">
+    <div class="email-top">
+      <div class="email-meta-row">
+        <span class="email-subject">Claim settlement for Bus MH-04-CD-3344 — ICICI Lombard</span>
+        <span class="priority-badge p2">P2</span>
+      </div>
+      <div class="from-row">From: <span>claims@icicilombard.com</span> &nbsp;&bull;&nbsp; 14 Mar 2025, 10:22 AM</div>
+    </div>
+    <div class="email-bottom">
+      <span class="category-tag cat-action">&#128993; Action Required</span>
+      <div class="action-box">
+        <div class="action-label">Recommended Action</div>
+        <div class="action-text">Forward to Insurance Coordinator</div>
+      </div>
+      <div class="confidence-box">
+        <div class="confidence-pct">89%</div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+      <div class="reasoning-row">
+        <span class="reasoning-icon">&#8505;</span>
+        Insurance claim document from ICICI Lombard requires coordinator review and document submission within the 7-day response window. External insurer — time-sensitive.
+      </div>
+    </div>
+  </div>
+
+  <!-- Email 8 -->
+  <div class="email-card p3">
+    <div class="email-top">
+      <div class="email-meta-row">
+        <span class="email-subject">Exclusive offer: Fleet insurance renewal — 20% off!!!</span>
+        <span class="priority-badge p3">P3</span>
+      </div>
+      <div class="from-row">From: <span>promo@insuranceoffer.xyz</span> &nbsp;&bull;&nbsp; 14 Mar 2025, 07:45 AM</div>
+    </div>
+    <div class="email-bottom">
+      <span class="category-tag cat-spam">&#11035; Spam</span>
+      <div class="action-box">
+        <div class="action-label">Recommended Action</div>
+        <div class="action-text">Archive</div>
+      </div>
+      <div class="confidence-box">
+        <div class="confidence-pct">99%</div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+      <div class="reasoning-row">
+        <span class="reasoning-icon">&#8505;</span>
+        Promotional email from unverified sender domain (.xyz TLD + excessive punctuation + unsolicited offer). Multiple spam indicators detected — safe to archive.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

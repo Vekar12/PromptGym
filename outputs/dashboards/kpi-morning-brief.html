@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morning KPI Brief — Ravi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F0F4F8;
+      color: #1A1A2E;
+      width: 900px;
+      margin: 0 auto;
+      padding: 0 0 40px 0;
+    }
+
+    /* HEADER */
+    .header {
+      background: #1A1A2E;
+      color: #fff;
+      padding: 28px 32px 22px;
+    }
+    .header .greeting {
+      font-size: 13px;
+      color: #718096;
+      font-weight: 500;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .header .sub {
+      font-size: 13px;
+      color: #718096;
+      margin-top: 6px;
+    }
+    .header .sub strong {
+      color: #A0AEC0;
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 28px 32px;
+    }
+
+    /* SECTION HEADING */
+    .section-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4A5568;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #E2E8F0;
+    }
+
+    /* KPI GRID */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .kpi-card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 20px 18px 18px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+    }
+    .kpi-card.green::after { background: #10B981; }
+    .kpi-card.red::after   { background: #EF4444; }
+    .kpi-card.amber::after { background: #F59E0B; }
+
+    .kpi-metric-name {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+    }
+    .kpi-number {
+      font-size: 30px;
+      font-weight: 800;
+      color: #1A1A2E;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .kpi-deltas {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .delta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .delta-label {
+      font-size: 11px;
+      color: #A0AEC0;
+      font-weight: 500;
+    }
+    .delta-value {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .delta-value.green  { background: #D1FAE5; color: #065F46; }
+    .delta-value.red    { background: #FEE2E2; color: #991B1B; }
+    .delta-value.amber  { background: #FEF3C7; color: #92400E; }
+    .delta-value.neutral { background: #EDF2F7; color: #718096; }
+
+    .kpi-bar-bg {
+      height: 4px;
+      background: #EDF2F7;
+      border-radius: 4px;
+      margin-top: 14px;
+      margin-bottom: 2px;
+    }
+    .kpi-bar-fill {
+      height: 4px;
+      border-radius: 4px;
+    }
+    .kpi-bar-fill.green { background: #10B981; }
+    .kpi-bar-fill.red   { background: #EF4444; }
+    .kpi-bar-fill.amber { background: #F59E0B; }
+
+    /* PRIORITY ITEMS */
+    .priority-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      overflow: hidden;
+    }
+    .priority-box-header {
+      background: #1A1A2E;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 14px 20px;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .priority-item {
+      padding: 18px 20px;
+      border-bottom: 1px solid #EDF2F7;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .priority-item:last-child {
+      border-bottom: none;
+    }
+    .priority-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #1A1A2E;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .priority-content h4 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1A1A2E;
+      margin-bottom: 3px;
+    }
+    .priority-content p {
+      font-size: 13px;
+      color: #4A5568;
+      line-height: 1.5;
+    }
+    .priority-tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-right: 6px;
+      vertical-align: middle;
+      letter-spacing: 0.3px;
+    }
+    .priority-tag.urgent { background: #FEE2E2; color: #991B1B; }
+    .priority-tag.review { background: #FEF3C7; color: #92400E; }
+    .priority-tag.track  { background: #DBEAFE; color: #1D4ED8; }
+
+    .owner-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #718096;
+      background: #EDF2F7;
+      padding: 2px 9px;
+      border-radius: 10px;
+      margin-top: 6px;
+    }
+
+    .timestamp {
+      text-align: center;
+      font-size: 11.5px;
+      color: #A0AEC0;
+      margin-top: 22px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="greeting">Morning Brief &mdash; 06:00 AM</div>
+    <h1>Good morning, Ravi.</h1>
+    <p class="sub">Here's your brief for <strong>Friday, 14 March 2025</strong> &nbsp;&middot;&nbsp; Mumbai Operations</p>
+  </div>
+
+  <div class="content">
+
+    <!-- KPI GRID -->
+    <div class="section-heading">Key Metrics — Today vs Yesterday vs Target</div>
+    <div class="kpi-grid">
+
+      <!-- DAU -->
+      <div class="kpi-card green">
+        <div class="kpi-metric-name">Daily Active Users</div>
+        <div class="kpi-number">48,420</div>
+        <div class="kpi-deltas">
+          <div class="delta-row">
+            <span class="delta-label">vs Yesterday</span>
+            <span class="delta-value green">&#8593; +2.1%</span>
+          </div>
+          <div class="delta-row">
+            <span class="delta-label">vs Target</span>
+            <span class="delta-value green">&#8593; +3.4%</span>
+          </div>
+        </div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill green" style="width:87%;"></div></div>
+      </div>
+
+      <!-- REVENUE -->
+      <div class="kpi-card red">
+        <div class="kpi-metric-name">Revenue</div>
+        <div class="kpi-number">&#8377;8.4L</div>
+        <div class="kpi-deltas">
+          <div class="delta-row">
+            <span class="delta-label">vs Yesterday</span>
+            <span class="delta-value red">&#8595; -1.2%</span>
+          </div>
+          <div class="delta-row">
+            <span class="delta-label">vs Target</span>
+            <span class="delta-value red">&#8595; -4.8%</span>
+          </div>
+        </div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill red" style="width:52%;"></div></div>
+      </div>
+
+      <!-- SUPPORT TICKETS -->
+      <div class="kpi-card red">
+        <div class="kpi-metric-name">Support Tickets Open</div>
+        <div class="kpi-number">247</div>
+        <div class="kpi-deltas">
+          <div class="delta-row">
+            <span class="delta-label">vs Yesterday</span>
+            <span class="delta-value red">&#8593; +18%</span>
+          </div>
+          <div class="delta-row">
+            <span class="delta-label">vs Target</span>
+            <span class="delta-value red">&#8593; +23%</span>
+          </div>
+        </div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill red" style="width:78%;"></div></div>
+      </div>
+
+      <!-- NPS SCORE -->
+      <div class="kpi-card amber">
+        <div class="kpi-metric-name">NPS Score</div>
+        <div class="kpi-number">62</div>
+        <div class="kpi-deltas">
+          <div class="delta-row">
+            <span class="delta-label">vs Yesterday</span>
+            <span class="delta-value neutral">&#8594; 0%</span>
+          </div>
+          <div class="delta-row">
+            <span class="delta-label">vs Target</span>
+            <span class="delta-value amber">&#8595; -3 pts</span>
+          </div>
+        </div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill amber" style="width:62%;"></div></div>
+      </div>
+
+      <!-- FLEET UTILISATION -->
+      <div class="kpi-card green">
+        <div class="kpi-metric-name">Fleet Utilisation</div>
+        <div class="kpi-number">83%</div>
+        <div class="kpi-deltas">
+          <div class="delta-row">
+            <span class="delta-label">vs Yesterday</span>
+            <span class="delta-value green">&#8593; +1%</span>
+          </div>
+          <div class="delta-row">
+            <span class="delta-label">vs Target</span>
+            <span class="delta-value green">&#8593; +8%</span>
+          </div>
+        </div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill green" style="width:83%;"></div></div>
+      </div>
+
+      <!-- LOAN TAT -->
+      <div class="kpi-card red">
+        <div class="kpi-metric-name">Loan TAT (days)</div>
+        <div class="kpi-number">18.4<span style="font-size:14px;color:#A0AEC0;font-weight:600;">d</span></div>
+        <div class="kpi-deltas">
+          <div class="delta-row">
+            <span class="delta-label">vs Yesterday</span>
+            <span class="delta-value green">&#8595; -0.3d</span>
+          </div>
+          <div class="delta-row">
+            <span class="delta-label">vs Target (14d)</span>
+            <span class="delta-value red">&#8593; +4.4d</span>
+          </div>
+        </div>
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill red" style="width:76%;"></div></div>
+      </div>
+
+    </div>
+
+    <!-- PRIORITY ITEMS -->
+    <div class="section-heading">Today's Focus</div>
+    <div class="priority-box">
+      <div class="priority-box-header">
+        <span>&#128204;</span>
+        <span>3 Priority Actions — Friday, 14 March 2025</span>
+      </div>
+      <div class="priority-item">
+        <div class="priority-num">1</div>
+        <div class="priority-content">
+          <h4><span class="priority-tag urgent">URGENT</span> Resolve support ticket spike</h4>
+          <p>Tickets up 18% overnight — likely related to app update pushed yesterday evening. Assign 3 agents to clear backlog. Target: bring open count below 200 by 2 PM.</p>
+          <span class="owner-badge">&#128100; Owner: Deepika M.</span>
+        </div>
+      </div>
+      <div class="priority-item">
+        <div class="priority-num">2</div>
+        <div class="priority-content">
+          <h4><span class="priority-tag review">REVIEW</span> Revenue shortfall investigation</h4>
+          <p>Revenue at &#8377;8.4L vs &#8377;8.8L target — check if March cohort activation is delayed. Pull cohort D+7 data and cross-verify with marketing team on campaign delivery status.</p>
+          <span class="owner-badge">&#128100; Owner: Arjun K.</span>
+        </div>
+      </div>
+      <div class="priority-item">
+        <div class="priority-num">3</div>
+        <div class="priority-content">
+          <h4><span class="priority-tag track">TRACK</span> Loan TAT — Legal stage SLA breach</h4>
+          <p>TAT remains at 18.4d vs 14d target. Legal stage identified as bottleneck (4.8d avg vs 3d SLA). Escalate to Legal Head and Credit Ops Manager if no resolution by 3 PM today.</p>
+          <span class="owner-badge">&#128100; Owner: Priya S.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timestamp">Brief generated at 06:00 AM &nbsp;|&nbsp; Data as of 05:55 AM &nbsp;|&nbsp; PromptGym Ops Intelligence</div>
+
+  </div>
+
+</body>
+</html>

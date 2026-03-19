@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMAIC Analysis — High Rework Rate in Legal Stage</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #ffffff;
+    color: #1A1A2E;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  .doc-header {
+    border-bottom: 3px solid #1A1A2E;
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  .doc-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #6366F1;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1A1A2E;
+    margin-bottom: 6px;
+  }
+  .meta { font-size: 13px; color: #6B7280; }
+
+  .section {
+    margin-bottom: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #E5E7EB;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 22px;
+    cursor: default;
+  }
+  .section-letter {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 900;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .section-subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 2px;
+  }
+  .section-body {
+    padding: 22px 24px;
+    background: #fff;
+  }
+
+  /* Define — Blue */
+  .define .section-header { background: #1E40AF; }
+  .define .section-letter { background: rgba(255,255,255,0.2); }
+
+  /* Measure — Amber */
+  .measure .section-header { background: #B45309; }
+  .measure .section-letter { background: rgba(255,255,255,0.2); }
+
+  /* Analyse — Red */
+  .analyse .section-header { background: #991B1B; }
+  .analyse .section-letter { background: rgba(255,255,255,0.2); }
+
+  /* Improve — Green */
+  .improve .section-header { background: #065F46; }
+  .improve .section-letter { background: rgba(255,255,255,0.2); }
+
+  /* Control — Dark */
+  .control .section-header { background: #1A1A2E; }
+  .control .section-letter { background: rgba(255,255,255,0.2); }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .info-item {
+    background: #F9FAFB;
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .info-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9CA3AF;
+    margin-bottom: 4px;
+  }
+  .info-value {
+    font-size: 13.5px;
+    color: #1A1A2E;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .metric-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .metric-box {
+    background: #F9FAFB;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid #E5E7EB;
+  }
+  .metric-number {
+    font-size: 28px;
+    font-weight: 900;
+    color: #EF4444;
+    margin-bottom: 4px;
+  }
+  .metric-label {
+    font-size: 12px;
+    color: #6B7280;
+    font-weight: 600;
+  }
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+  table.data-table th {
+    background: #F3F4F6;
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #374151;
+  }
+  table.data-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #F3F4F6;
+    color: #1A1A2E;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 12px;
+    background: #FEE2E2;
+    color: #991B1B;
+  }
+
+  /* Fishbone CSS */
+  .fishbone {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 8px;
+  }
+  .fishbone-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #92400E;
+    margin-bottom: 16px;
+  }
+  .fishbone-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .bone {
+    background: #fff;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .bone-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #92400E;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #FDE68A;
+  }
+  .bone-item {
+    font-size: 12px;
+    color: #374151;
+    padding: 3px 0;
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.4;
+  }
+  .bone-item::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #F59E0B;
+    font-size: 11px;
+  }
+  .problem-box {
+    background: #991B1B;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  /* Interventions */
+  .intervention {
+    background: #F0FDF4;
+    border: 1px solid #A7F3D0;
+    border-left: 4px solid #10B981;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+  .int-num {
+    font-size: 11px;
+    font-weight: 800;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+  }
+  .int-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #065F46;
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
+  }
+  .int-meta {
+    font-size: 12px;
+    color: #374151;
+  }
+  .int-meta-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9CA3AF;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .impact-badge {
+    display: inline-block;
+    background: #D1FAE5;
+    color: #065F46;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  /* Control KPIs */
+  .kpi-list {
+    list-style: none;
+    margin-bottom: 14px;
+  }
+  .kpi-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 13px;
+    color: #374151;
+  }
+  .kpi-list li:last-child { border-bottom: none; }
+  .kpi-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6366F1;
+    flex-shrink: 0;
+  }
+  .kpi-freq {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    background: #EEF2FF;
+    color: #4338CA;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .alert-box {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-left: 4px solid #EF4444;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #991B1B;
+    margin-top: 12px;
+  }
+  .footer {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #E5E7EB;
+    font-size: 12px;
+    color: #9CA3AF;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="doc-label">Six Sigma Framework</div>
+  <h1>DMAIC Root Cause Analysis</h1>
+  <div class="meta">High Rework Rate in Legal Stage &nbsp;|&nbsp; iLens Operations &nbsp;|&nbsp; Jan–Mar 2025</div>
+</div>
+
+<!-- DEFINE -->
+<div class="section define">
+  <div class="section-header">
+    <div class="section-letter">D</div>
+    <div>
+      <div class="section-title">Define</div>
+      <div class="section-subtitle">Problem scoping, stakeholders, business impact</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="info-grid">
+      <div class="info-item" style="grid-column:1/-1;">
+        <div class="info-label">Problem Statement</div>
+        <div class="info-value">Legal stage rework rate is <strong>23%</strong>, causing an average <strong>2.4-day delay per file</strong> and <strong>₹18L/month</strong> in additional operational cost.</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Scope</div>
+        <div class="info-value">iLens Legal stage only — Mumbai operations — Jan–Mar 2025</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Business Impact</div>
+        <div class="info-value">₹18L/month extra cost &nbsp;|&nbsp; 4.8d avg TAT vs 3d target</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Stakeholders</div>
+        <div class="info-value">Legal Team Lead, Ops Head, Credit Manager, IT</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Project Status</div>
+        <div class="info-value">Active — Improvement phase in progress</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEASURE -->
+<div class="section measure">
+  <div class="section-header">
+    <div class="section-letter">M</div>
+    <div>
+      <div class="section-title">Measure</div>
+      <div class="section-subtitle">Current state data and failure type analysis</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="metric-row">
+      <div class="metric-box">
+        <div class="metric-number">23%</div>
+        <div class="metric-label">Rework Rate</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-number">2.4d</div>
+        <div class="metric-label">Avg Delay per File</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-number">₹18L</div>
+        <div class="metric-label">Monthly Ops Cost</div>
+      </div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Failure Type</th>
+          <th>Frequency</th>
+          <th>% of Rework Cases</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Missing NOC from relevant authority</td><td>High</td><td><span class="tag">41%</span></td></tr>
+        <tr><td>Outdated property paper / title deed</td><td>Medium</td><td><span class="tag">33%</span></td></tr>
+        <tr><td>Stamp duty discrepancy</td><td>Medium</td><td><span class="tag">26%</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ANALYSE -->
+<div class="section analyse">
+  <div class="section-header">
+    <div class="section-letter">A</div>
+    <div>
+      <div class="section-title">Analyse</div>
+      <div class="section-subtitle">Fishbone diagram — root cause identification</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="problem-box">Root Cause Target: 23% Legal Stage Rework Rate</div>
+    <div class="fishbone">
+      <div class="fishbone-title">Cause-and-Effect (Fishbone) Diagram</div>
+      <div class="fishbone-grid">
+        <div class="bone">
+          <div class="bone-title">People</div>
+          <div class="bone-item">Inadequate training — 3 new joiners with &lt;6 months experience</div>
+          <div class="bone-item">High workload — 18 files per person simultaneously</div>
+          <div class="bone-item">Unclear accountability for rework resolution</div>
+        </div>
+        <div class="bone">
+          <div class="bone-title">Process</div>
+          <div class="bone-item">No pre-submission checklist for Legal documents</div>
+          <div class="bone-item">SLA not defined per sub-stage within Legal review</div>
+          <div class="bone-item">Rework instances not logged — no trend visibility</div>
+        </div>
+        <div class="bone">
+          <div class="bone-title">Technology</div>
+          <div class="bone-item">iLens does not flag missing documents at upload stage</div>
+          <div class="bone-item">No automated reminder system for pending items</div>
+          <div class="bone-item">File status updates require manual refresh</div>
+        </div>
+        <div class="bone">
+          <div class="bone-title">Environment</div>
+          <div class="bone-item">Borrower document quality varies significantly by geography</div>
+          <div class="bone-item">External CA coordination adds 1.2d avg delay</div>
+          <div class="bone-item">Festival periods cause document authority closures</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPROVE -->
+<div class="section improve">
+  <div class="section-header">
+    <div class="section-letter">I</div>
+    <div>
+      <div class="section-title">Improve</div>
+      <div class="section-subtitle">Interventions, owners, timelines, expected impact</div>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="intervention">
+      <div style="grid-column:1/-1;">
+        <div class="int-num">Intervention 1</div>
+        <div class="int-name">Pre-submission Document Checklist</div>
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Owner</div>
+        Priya Sharma (Legal Team Lead)
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Deadline</div>
+        15 April 2025
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Expected Impact</div>
+        <span class="impact-badge">−40% rework</span>
+      </div>
+    </div>
+
+    <div class="intervention">
+      <div style="grid-column:1/-1;">
+        <div class="int-num">Intervention 2</div>
+        <div class="int-name">iLens Auto-Flag System for Missing Documents</div>
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Owner</div>
+        IT Team (Dev Lead)
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Deadline</div>
+        30 April 2025
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Expected Impact</div>
+        <span class="impact-badge">−30% rework</span>
+      </div>
+    </div>
+
+    <div class="intervention">
+      <div style="grid-column:1/-1;">
+        <div class="int-num">Intervention 3</div>
+        <div class="int-name">Legal Team Training — 2-Day Workshop</div>
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Owner</div>
+        HR (L&D Team)
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Deadline</div>
+        22 March 2025
+      </div>
+      <div class="int-meta">
+        <div class="int-meta-label">Expected Impact</div>
+        <span class="impact-badge">−15% rework</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONTROL -->
+<div class="section control">
+  <div class="section-header">
+    <div class="section-letter">C</div>
+    <div>
+      <div class="section-title">Control</div>
+      <div class="section-subtitle">Monitoring KPIs, review cadence, escalation triggers</div>
+    </div>
+  </div>
+  <div class="section-body">
+    <ul class="kpi-list">
+      <li><div class="kpi-dot"></div> Rework rate (% of files requiring revision) <span class="kpi-freq">Weekly</span></li>
+      <li><div class="kpi-dot"></div> TAT per file (Legal stage days) <span class="kpi-freq">Daily</span></li>
+      <li><div class="kpi-dot"></div> Checklist completion percentage <span class="kpi-freq">Daily</span></li>
+    </ul>
+    <div class="info-grid" style="margin-bottom:0;">
+      <div class="info-item">
+        <div class="info-label">Review Cadence</div>
+        <div class="info-value">Weekly Ops Review — every Monday 10 AM</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Report Owner</div>
+        <div class="info-value">Legal Team Lead — distributes to Ops Head</div>
+      </div>
+    </div>
+    <div class="alert-box">
+      <strong>Escalation Trigger:</strong> If rework rate exceeds 20% in any given week, immediate escalation to Ops Head with root cause note required within 24 hours.
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Confidential — Internal Use Only</span>
+  <span>Framework: DMAIC &nbsp;|&nbsp; iLens Operations &nbsp;|&nbsp; Mar 2025</span>
+</div>
+
+</body>
+</html>

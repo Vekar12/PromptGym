@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>retry_module.py — Code Viewer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #13131f; color: #cdd6f4; max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* Editor chrome */
+  .editor-window { border-radius: 10px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+
+  /* Title bar */
+  .title-bar { background: #181825; display: flex; align-items: center; padding: 10px 16px; gap: 10px; border-bottom: 1px solid #313244; }
+  .traffic-lights { display: flex; gap: 6px; }
+  .tl { width: 12px; height: 12px; border-radius: 50%; }
+  .tl-red { background: #f38ba8; }
+  .tl-yellow { background: #f9e2af; }
+  .tl-green { background: #a6e3a1; }
+  .file-tab { background: #1e1e2e; border-radius: 6px 6px 0 0; padding: 5px 14px; font-size: 12px; color: #cdd6f4; font-family: 'Courier New', monospace; border-top: 2px solid #89b4fa; margin-left: 8px; display: flex; align-items: center; gap: 8px; }
+  .lang-badge { background: #313244; color: #89b4fa; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 3px; letter-spacing: 0.5px; }
+
+  /* Breadcrumb */
+  .breadcrumb { background: #181825; padding: 6px 16px; font-size: 11px; color: #6c7086; border-bottom: 1px solid #313244; font-family: 'Courier New', monospace; }
+  .breadcrumb span { color: #89b4fa; }
+
+  /* Code area */
+  .code-area { background: #1e1e2e; display: flex; overflow-x: auto; }
+
+  /* Line numbers */
+  .line-numbers { background: #181825; color: #45475a; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6; padding: 16px 12px 16px 16px; text-align: right; user-select: none; border-right: 1px solid #313244; min-width: 48px; }
+  .line-numbers div { height: 20.8px; }
+
+  /* Code */
+  .code-content { font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6; padding: 16px 20px; white-space: pre; flex: 1; min-width: 0; overflow-x: auto; }
+
+  /* Syntax colours — Catppuccin Mocha palette */
+  .kw   { color: #cba6f7; }   /* keywords: purple */
+  .kw2  { color: #89b4fa; }   /* import/from/return/class: blue */
+  .fn   { color: #89dceb; }   /* function names: teal/cyan */
+  .str  { color: #a6e3a1; }   /* strings: green */
+  .fstr { color: #fab387; }   /* f-strings: orange */
+  .num  { color: #fab387; }   /* numbers: orange */
+  .cmt  { color: #6c7086; font-style: italic; }  /* comments: grey */
+  .dec  { color: #f38ba8; }   /* decorators: red/pink */
+  .typ  { color: #94e2d5; }   /* types (int, float, str, etc): teal */
+  .cls  { color: #f9e2af; }   /* class names: yellow */
+  .dstr { color: #fab387; font-style: italic; }  /* docstrings: amber italic */
+  .sep  { color: #6c7086; }   /* separator lines */
+  .pfn  { color: #89b4fa; }   /* function params: blue */
+  .op   { color: #89b4fa; }   /* operators: blue */
+  .const{ color: #fab387; font-weight: bold; }  /* constants: bold orange */
+
+  /* Status bar */
+  .status-bar { background: #181825; border-top: 1px solid #313244; padding: 5px 16px; display: flex; gap: 20px; font-size: 11px; color: #6c7086; }
+  .status-bar span strong { color: #89b4fa; }
+  .status-bar .ok { color: #a6e3a1; }
+
+  /* Footer card */
+  .footer-card { background: #181825; border: 1px solid #313244; border-radius: 8px; padding: 14px 18px; margin-top: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .footer-meta { font-size: 12px; color: #6c7086; }
+  .footer-meta strong { color: #a6adc8; }
+  .copy-btn { background: #313244; color: #cdd6f4; border: 1px solid #45475a; border-radius: 6px; padding: 6px 16px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Segoe UI', sans-serif; }
+  .copy-btn:hover { background: #45475a; }
+</style>
+</head>
+<body>
+
+<div class="editor-window">
+
+  <!-- Title bar -->
+  <div class="title-bar">
+    <div class="traffic-lights">
+      <span class="tl tl-red"></span>
+      <span class="tl tl-yellow"></span>
+      <span class="tl tl-green"></span>
+    </div>
+    <div class="file-tab">
+      retry_module.py
+      <span class="lang-badge">Python</span>
+    </div>
+  </div>
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">promptgym / <span>outputs</span> / <span>code</span> / <span>retry_module.py</span></div>
+
+  <!-- Code -->
+  <div class="code-area">
+
+    <!-- Line numbers -->
+    <div class="line-numbers">
+      <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div>
+      <div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div>
+      <div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div>
+      <div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div>
+      <div>25</div><div>26</div><div>27</div><div>28</div><div>29</div><div>30</div>
+      <div>31</div><div>32</div><div>33</div><div>34</div><div>35</div><div>36</div>
+      <div>37</div><div>38</div><div>39</div><div>40</div><div>41</div><div>42</div>
+      <div>43</div><div>44</div><div>45</div><div>46</div><div>47</div><div>48</div>
+      <div>49</div><div>50</div><div>51</div><div>52</div><div>53</div><div>54</div>
+      <div>55</div><div>56</div><div>57</div><div>58</div><div>59</div><div>60</div>
+      <div>61</div><div>62</div><div>63</div><div>64</div><div>65</div><div>66</div>
+      <div>67</div><div>68</div><div>69</div><div>70</div><div>71</div><div>72</div>
+      <div>73</div><div>74</div><div>75</div><div>76</div><div>77</div><div>78</div>
+      <div>79</div><div>80</div><div>81</div><div>82</div><div>83</div><div>84</div>
+      <div>85</div><div>86</div><div>87</div><div>88</div><div>89</div><div>90</div>
+      <div>91</div><div>92</div><div>93</div><div>94</div><div>95</div><div>96</div>
+      <div>97</div><div>98</div><div>99</div><div>100</div><div>101</div><div>102</div>
+    </div>
+
+    <!-- Code content -->
+    <div class="code-content"><span class="dstr">"""
+retry_module.py
+API retry utility with exponential backoff and jitter.
+
+Usage:
+    from retry_module import retry_with_backoff, with_retry
+
+    result = retry_with_backoff(api_client.get_data, file_id="123")
+
+    @with_retry(max_retries=5)
+    def fetch_document(doc_id: str) -> dict:
+        return api_client.get(doc_id)
+"""</span>
+
+<span class="kw2">import</span> <span class="fn">time</span>
+<span class="kw2">import</span> <span class="fn">random</span>
+<span class="kw2">import</span> <span class="fn">logging</span>
+<span class="kw2">from</span> <span class="fn">typing</span> <span class="kw2">import</span> <span class="typ">Callable</span>, <span class="typ">Any</span>, <span class="typ">Optional</span>
+<span class="kw2">from</span> <span class="fn">functools</span> <span class="kw2">import</span> <span class="fn">wraps</span>
+
+<span class="sep"># ── Constants ─────────────────────────────────────────────────────────────────</span>
+<span class="const">MAX_RETRIES</span>: <span class="typ">int</span> = <span class="num">3</span>
+<span class="const">BASE_DELAY</span>: <span class="typ">float</span> = <span class="num">1.0</span>   <span class="cmt"># seconds before first retry</span>
+<span class="const">MAX_DELAY</span>: <span class="typ">float</span> = <span class="num">30.0</span>   <span class="cmt"># cap to prevent infinite wait</span>
+<span class="const">JITTER_FACTOR</span>: <span class="typ">float</span> = <span class="num">0.3</span>  <span class="cmt"># randomness fraction to prevent thundering herd</span>
+
+<span class="fn">logger</span> = <span class="fn">logging</span>.<span class="fn">getLogger</span>(<span class="str">__name__</span>)
+
+<span class="sep"># ── Exceptions ────────────────────────────────────────────────────────────────</span>
+<span class="kw">class</span> <span class="cls">APIRetryExhausted</span>(<span class="cls">Exception</span>):
+    <span class="dstr">"""Raised when all retry attempts have been exhausted."""</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, <span class="pfn">attempts</span>: <span class="typ">int</span>, <span class="pfn">last_error</span>: <span class="cls">Exception</span>):
+        <span class="kw">self</span>.<span class="fn">attempts</span> = <span class="fn">attempts</span>
+        <span class="kw">self</span>.<span class="fn">last_error</span> = <span class="fn">last_error</span>
+        <span class="kw">super</span>().<span class="fn">__init__</span>(<span class="fstr">f"API call failed after {attempts} attempts: {last_error}"</span>)
+
+<span class="sep"># ── Core Function ─────────────────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">retry_with_backoff</span>(
+    <span class="pfn">fn</span>: <span class="typ">Callable</span>,
+    <span class="op">*</span><span class="pfn">args</span>: <span class="typ">Any</span>,
+    <span class="pfn">max_retries</span>: <span class="typ">int</span> = <span class="const">MAX_RETRIES</span>,
+    <span class="pfn">base_delay</span>: <span class="typ">float</span> = <span class="const">BASE_DELAY</span>,
+    <span class="pfn">retryable_exceptions</span>: <span class="typ">tuple</span> = (<span class="cls">ConnectionError</span>, <span class="cls">TimeoutError</span>),
+    <span class="op">**</span><span class="pfn">kwargs</span>: <span class="typ">Any</span>
+) -> <span class="typ">Any</span>:
+    <span class="dstr">"""
+    Execute fn with exponential backoff retry on failure.
+
+    Args:
+        fn: Callable to execute
+        max_retries: Maximum number of retry attempts
+        base_delay: Initial delay in seconds (doubles each attempt)
+        retryable_exceptions: Only retry on these exception types
+    """</span>
+    <span class="pfn">last_error</span>: <span class="typ">Optional</span>[<span class="cls">Exception</span>] = <span class="kw">None</span>
+
+    <span class="kw">for</span> <span class="pfn">attempt</span> <span class="kw">in</span> <span class="fn">range</span>(<span class="pfn">max_retries</span> + <span class="num">1</span>):
+        <span class="kw">try</span>:
+            <span class="kw2">return</span> <span class="pfn">fn</span>(<span class="op">*</span><span class="pfn">args</span>, <span class="op">**</span><span class="pfn">kwargs</span>)  <span class="cmt"># Attempt the call</span>
+        <span class="kw">except</span> <span class="pfn">retryable_exceptions</span> <span class="kw">as</span> <span class="pfn">e</span>:
+            <span class="pfn">last_error</span> = <span class="pfn">e</span>
+            <span class="kw">if</span> <span class="pfn">attempt</span> == <span class="pfn">max_retries</span>:
+                <span class="kw">break</span>  <span class="cmt"># No more retries — raise below</span>
+
+            <span class="cmt"># Exponential backoff: 1s, 2s, 4s, 8s...</span>
+            <span class="pfn">delay</span> = <span class="fn">min</span>(<span class="pfn">base_delay</span> <span class="op">*</span> (<span class="num">2</span> <span class="op">**</span> <span class="pfn">attempt</span>), <span class="const">MAX_DELAY</span>)
+
+            <span class="cmt"># Add jitter to prevent all clients retrying simultaneously</span>
+            <span class="pfn">jitter</span> = <span class="fn">random</span>.<span class="fn">uniform</span>(<span class="op">-</span><span class="const">JITTER_FACTOR</span> <span class="op">*</span> <span class="pfn">delay</span>, <span class="const">JITTER_FACTOR</span> <span class="op">*</span> <span class="pfn">delay</span>)
+            <span class="pfn">sleep_time</span> = <span class="fn">max</span>(<span class="num">0</span>, <span class="pfn">delay</span> + <span class="pfn">jitter</span>)
+
+            <span class="fn">logger</span>.<span class="fn">warning</span>(<span class="fstr">f"Attempt {attempt + 1} failed: {e}. Retrying in {sleep_time:.2f}s..."</span>)
+            <span class="fn">time</span>.<span class="fn">sleep</span>(<span class="pfn">sleep_time</span>)
+
+    <span class="kw2">raise</span> <span class="cls">APIRetryExhausted</span>(<span class="pfn">attempts</span>=<span class="pfn">max_retries</span> + <span class="num">1</span>, <span class="pfn">last_error</span>=<span class="pfn">last_error</span>)
+
+<span class="sep"># ── Decorator Version ──────────────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">with_retry</span>(<span class="pfn">max_retries</span>: <span class="typ">int</span> = <span class="const">MAX_RETRIES</span>, <span class="pfn">base_delay</span>: <span class="typ">float</span> = <span class="const">BASE_DELAY</span>):
+    <span class="dstr">"""Decorator to add retry logic to any function."""</span>
+    <span class="kw">def</span> <span class="fn">decorator</span>(<span class="pfn">fn</span>: <span class="typ">Callable</span>) -> <span class="typ">Callable</span>:
+        <span class="dec">@wraps</span>(<span class="pfn">fn</span>)  <span class="cmt"># Preserve original function metadata</span>
+        <span class="kw">def</span> <span class="fn">wrapper</span>(<span class="op">*</span><span class="pfn">args</span>: <span class="typ">Any</span>, <span class="op">**</span><span class="pfn">kwargs</span>: <span class="typ">Any</span>) -> <span class="typ">Any</span>:
+            <span class="kw2">return</span> <span class="fn">retry_with_backoff</span>(<span class="pfn">fn</span>, <span class="op">*</span><span class="pfn">args</span>, <span class="pfn">max_retries</span>=<span class="pfn">max_retries</span>,
+                                          <span class="pfn">base_delay</span>=<span class="pfn">base_delay</span>, <span class="op">**</span><span class="pfn">kwargs</span>)
+        <span class="kw2">return</span> <span class="pfn">wrapper</span>
+    <span class="kw2">return</span> <span class="pfn">decorator</span>
+
+<span class="sep"># ── Usage Example ─────────────────────────────────────────────────────────────</span>
+<span class="kw">if</span> <span class="str">__name__</span> == <span class="str">"__main__"</span>:
+    <span class="cmt"># Direct usage</span>
+    <span class="kw">def</span> <span class="fn">unstable_api_call</span>(<span class="pfn">file_id</span>: <span class="typ">str</span>) -> <span class="typ">dict</span>:
+        <span class="kw2">return</span> {<span class="str">"status"</span>: <span class="str">"ok"</span>, <span class="str">"file_id"</span>: <span class="pfn">file_id</span>}
+
+    <span class="pfn">result</span> = <span class="fn">retry_with_backoff</span>(<span class="fn">unstable_api_call</span>, <span class="pfn">file_id</span>=<span class="str">"ILNS-2024-4421"</span>)
+
+    <span class="cmt"># Decorator usage</span>
+    <span class="dec">@with_retry</span>(<span class="pfn">max_retries</span>=<span class="num">5</span>)
+    <span class="kw">def</span> <span class="fn">fetch_challan_data</span>(<span class="pfn">bus_id</span>: <span class="typ">str</span>) -> <span class="typ">dict</span>:
+        <span class="kw2">return</span> <span class="fn">api_client</span>.<span class="fn">get</span>(<span class="fstr">f"/challans/{bus_id}"</span>)</div>
+
+  </div>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="ok">&#9679; Python 3.11</span>
+    <span><strong>Ln 102</strong></span>
+    <span><strong>UTF-8</strong></span>
+    <span><strong>LF</strong></span>
+    <span>Spaces: 4</span>
+    <span>retry_module.py</span>
+  </div>
+
+</div>
+
+<!-- Footer card -->
+<div class="footer-card">
+  <div class="footer-meta">
+    <strong>Last modified:</strong> 12 March 2025 &nbsp;&bull;&nbsp;
+    <strong>Lines:</strong> 102 &nbsp;&bull;&nbsp;
+    <strong>Size:</strong> 3.1 KB &nbsp;&bull;&nbsp;
+    <strong>Author:</strong> Ops Engineering Team
+  </div>
+  <button class="copy-btn">Copy Code</button>
+</div>
+
+</body>
+</html>

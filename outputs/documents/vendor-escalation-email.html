@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor Escalation Email — Bus Repair SLA Breach</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #F3F4F6;
+    color: #1A1A2E;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* Email client chrome */
+  .email-client {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    overflow: hidden;
+    border: 1px solid #E5E7EB;
+  }
+
+  /* Client top bar */
+  .client-bar {
+    background: #1A1A2E;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .bar-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .bar-title {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    margin-left: 8px;
+    font-weight: 500;
+  }
+
+  /* Email header fields */
+  .email-header {
+    background: #FAFAFA;
+    border-bottom: 1px solid #E5E7EB;
+    padding: 0;
+  }
+  .field-row {
+    display: flex;
+    align-items: baseline;
+    padding: 10px 24px;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 13.5px;
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-label {
+    width: 80px;
+    flex-shrink: 0;
+    font-weight: 700;
+    color: #9CA3AF;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field-value {
+    color: #374151;
+    flex: 1;
+  }
+  .field-value a {
+    color: #4338CA;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .cc-addr {
+    color: #6B7280;
+    font-size: 13px;
+  }
+  .subject-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-bottom: 1px solid #E5E7EB;
+    background: #fff;
+  }
+  .subject-text {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1A1A2E;
+  }
+  .escalation-badge {
+    background: #EF4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+
+  /* Email body */
+  .email-body {
+    padding: 28px 32px;
+    line-height: 1.8;
+    font-size: 14px;
+    color: #374151;
+  }
+  .salutation {
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 16px;
+  }
+  .para { margin-bottom: 16px; }
+
+  /* In-email table */
+  table.vehicle-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 18px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #E5E7EB;
+  }
+  table.vehicle-table thead tr {
+    background: #1A1A2E;
+    color: #fff;
+  }
+  table.vehicle-table thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  table.vehicle-table tbody tr {
+    border-bottom: 1px solid #F3F4F6;
+  }
+  table.vehicle-table tbody tr:hover { background: #FFFBEB; }
+  table.vehicle-table td {
+    padding: 10px 12px;
+    vertical-align: top;
+    color: #374151;
+  }
+  .bus-id {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: #1A1A2E;
+    font-size: 12px;
+  }
+  .days-badge {
+    font-weight: 700;
+    color: #EF4444;
+  }
+  .status-text {
+    font-size: 12px;
+    color: #6B7280;
+    font-style: italic;
+  }
+
+  .impact-box {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-left: 4px solid #EF4444;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 13.5px;
+    color: #991B1B;
+    line-height: 1.6;
+  }
+
+  .requirements-list {
+    list-style: none;
+    margin: 14px 0;
+  }
+  .requirements-list li {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 14px;
+    color: #374151;
+  }
+  .req-num-badge {
+    background: #1A1A2E;
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .deadline-box {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #92400E;
+    margin: 14px 0;
+  }
+  .deadline-box strong { color: #7C2D12; }
+
+  /* Signature */
+  .signature {
+    border-top: 2px solid #E5E7EB;
+    margin-top: 28px;
+    padding-top: 18px;
+  }
+  .sig-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1A1A2E;
+    margin-bottom: 4px;
+  }
+  .sig-title {
+    font-size: 13px;
+    color: #6B7280;
+    margin-bottom: 4px;
+  }
+  .sig-phone {
+    font-size: 13px;
+    color: #6366F1;
+    font-weight: 600;
+  }
+
+  .page-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #9CA3AF;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-label">Email Client View</div>
+
+<div class="email-client">
+
+  <!-- Client chrome bar -->
+  <div class="client-bar">
+    <div class="bar-dot" style="background:#EF4444;"></div>
+    <div class="bar-dot" style="background:#F59E0B;"></div>
+    <div class="bar-dot" style="background:#10B981;"></div>
+    <div class="bar-title">Mumbai Bus Division — Mail</div>
+  </div>
+
+  <!-- Email Header Fields -->
+  <div class="email-header">
+    <div class="field-row">
+      <div class="field-label">From</div>
+      <div class="field-value"><strong>Ravi Kulkarni</strong> &lt;fleet.ops@mumbaibus.in&gt;</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">To</div>
+      <div class="field-value"><a href="#">repairs@omegafleetservices.com</a></div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">CC</div>
+      <div class="field-value cc-addr">ops.head@mumbaibus.in &nbsp;&bull;&nbsp; legal@mumbaibus.in</div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">Date</div>
+      <div class="field-value">14 March 2025, 11:32 AM IST</div>
+    </div>
+  </div>
+
+  <!-- Subject line -->
+  <div class="subject-row">
+    <span class="escalation-badge">ESCALATION</span>
+    <span class="subject-text">Bus Repair SLA Breach — 6 Vehicles Pending &gt;7 Days</span>
+  </div>
+
+  <!-- Email Body -->
+  <div class="email-body">
+
+    <div class="salutation">Dear Mr. Ashish Patil,</div>
+
+    <div class="para">
+      This is a formal escalation regarding <strong>6 vehicles</strong> that have exceeded your committed <strong>7-day repair SLA</strong>. This breach is directly impacting our daily fleet availability and route operations across the Mumbai Division.
+    </div>
+
+    <div class="para">Please find the details of all affected vehicles below:</div>
+
+    <table class="vehicle-table">
+      <thead>
+        <tr>
+          <th>Bus ID</th>
+          <th>Issue Reported</th>
+          <th>Date Admitted</th>
+          <th>Days Pending</th>
+          <th>Current Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="bus-id">MH-04-AB-1122</td>
+          <td>Engine overhaul</td>
+          <td>05 Mar 2025</td>
+          <td class="days-badge">9 days</td>
+          <td class="status-text">"Awaiting parts" — no update since 08 Mar</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-CD-3344</td>
+          <td>Brake failure</td>
+          <td>04 Mar 2025</td>
+          <td class="days-badge">10 days</td>
+          <td class="status-text">Workshop confirmed — no ETA given</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-GH-7788</td>
+          <td>Suspension repair</td>
+          <td>06 Mar 2025</td>
+          <td class="days-badge">8 days</td>
+          <td class="status-text">Parts ordered — delivery pending</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-KL-1234</td>
+          <td>Gearbox issue</td>
+          <td>07 Mar 2025</td>
+          <td class="days-badge">7 days</td>
+          <td class="status-text">Diagnosis complete — repair not started</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-MN-5678</td>
+          <td>Electrical fault</td>
+          <td>06 Mar 2025</td>
+          <td class="days-badge">8 days</td>
+          <td class="status-text">Awaiting senior technician availability</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-OP-9012</td>
+          <td>Tyre + alignment</td>
+          <td>07 Mar 2025</td>
+          <td class="days-badge">7 days</td>
+          <td class="status-text">Parts in stock — repair not yet scheduled</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="impact-box">
+      <strong>Operational Impact:</strong> With 6 of 42 buses offline (14.3% fleet unavailability), we are unable to serve Routes 3, 7, 12, and 19 at full frequency. This has resulted in <strong>₹4.2L in lost daily revenue</strong> and <strong>3 formal passenger complaints</strong> to MSRTC.
+    </div>
+
+    <div class="para">We require the following commitments by <strong>COB 17 March 2025:</strong></div>
+
+    <ul class="requirements-list">
+      <li><span class="req-num-badge">1</span> Confirmed repair completion dates for all 6 vehicles listed above.</li>
+      <li><span class="req-num-badge">2</span> Daily status update (via WhatsApp) until all vehicles are returned to service.</li>
+    </ul>
+
+    <div class="para">
+      Should we not receive a commitment by the stated deadline, we will be compelled to invoke the <strong>penalty clauses under Clause 8.3</strong> of our service agreement and engage an alternate vendor for the pending repairs without further notice.
+    </div>
+
+    <div class="para">
+      We trust this matter will receive your immediate attention.
+    </div>
+
+    <div class="signature">
+      <div class="sig-name">Ravi Kulkarni</div>
+      <div class="sig-title">Fleet Operations Manager | Mumbai Division</div>
+      <div class="sig-phone">+91 98765 43210</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raw Data to Executive Report Transformation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f8; color: #1a1a2e; max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* Page header */
+  .page-header { margin-bottom: 24px; }
+  .page-badge { display: inline-block; background: #37474f; color: #eceff1; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; padding: 3px 10px; border-radius: 3px; margin-bottom: 8px; }
+  .page-title { font-size: 20px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
+  .page-subtitle { font-size: 13px; color: #666; }
+
+  /* Section label */
+  .section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .section-badge { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 3px; }
+  .badge-input { background: #37474f; color: #eceff1; }
+  .badge-output { background: #1a237e; color: #e8eaf6; }
+  .section-desc { font-size: 12px; color: #888; }
+
+  /* Raw input */
+  .raw-input-block { background: #1e2228; border-radius: 8px; padding: 20px 22px; margin-bottom: 28px; overflow-x: auto; }
+  .raw-input-block pre { font-family: 'Courier New', monospace; font-size: 12.5px; color: #abb2bf; line-height: 1.7; }
+  .csv-header { color: #61dafb; font-weight: 700; }
+  .csv-row-odd { color: #98c379; }
+  .csv-row-even { color: #d19a66; }
+  .csv-row-crit { color: #e06c75; }
+
+  /* Transform arrow */
+  .transform-arrow { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px; }
+  .transform-arrow .line { flex: 1; height: 2px; background: linear-gradient(to right, #e8eaf6, #1a237e); }
+  .transform-arrow .label { background: #1a237e; color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 14px; white-space: nowrap; letter-spacing: 0.5px; }
+
+  /* Generated report */
+  .report-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 0; }
+  .report-header { background: linear-gradient(135deg, #1a237e, #283593); color: #fff; padding: 18px 24px; }
+  .report-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .report-meta { font-size: 12px; color: #9fa8da; }
+  .report-body { padding: 20px 24px; }
+
+  /* KPI row */
+  .kpi-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .kpi-card { flex: 1; min-width: 130px; border-radius: 8px; padding: 14px 16px; border: 1px solid; }
+  .kpi-card.critical { background: #fff5f5; border-color: #ef9a9a; }
+  .kpi-card.warning { background: #fff8e1; border-color: #ffe082; }
+  .kpi-card.good { background: #f1f8e9; border-color: #a5d6a7; }
+  .kpi-value { font-size: 24px; font-weight: 800; }
+  .kpi-card.critical .kpi-value { color: #c62828; }
+  .kpi-card.warning .kpi-value { color: #e65100; }
+  .kpi-card.good .kpi-value { color: #2e7d32; }
+  .kpi-label { font-size: 11px; color: #666; margin-top: 2px; }
+  .kpi-vs { font-size: 10px; color: #999; margin-top: 2px; }
+
+  /* Summary para */
+  .summary-para { background: #f5f6ff; border-left: 4px solid #3f51b5; border-radius: 0 6px 6px 0; padding: 14px 16px; font-size: 13.5px; color: #2c3e50; line-height: 1.7; margin-bottom: 20px; }
+
+  /* Key findings */
+  h3 { font-size: 13px; font-weight: 700; color: #1a237e; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+  .finding-list { margin-bottom: 20px; }
+  .finding-item { display: flex; gap: 8px; font-size: 13px; color: #333; line-height: 1.6; margin-bottom: 8px; }
+  .bullet { color: #1a237e; font-size: 16px; flex-shrink: 0; line-height: 1.4; }
+
+  /* Data table */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 20px; }
+  thead tr { background: #1a237e; }
+  thead th { padding: 9px 12px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.5px; color: #fff; }
+  tbody tr { border-bottom: 1px solid #f0f0f0; }
+  tbody tr:hover { background: #fafbff; }
+  tbody td { padding: 9px 12px; color: #2c3e50; vertical-align: middle; }
+  .bus-id { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 700; }
+  .delay-critical { color: #c62828; font-weight: 800; }
+  .delay-warning { color: #e65100; font-weight: 700; }
+  .delay-minor { color: #f57f17; font-weight: 600; }
+  .delay-ok { color: #2e7d32; font-weight: 700; }
+  .action-red { color: #c62828; font-weight: 600; }
+  .action-amber { color: #e65100; font-weight: 600; }
+  .action-green { color: #2e7d32; font-weight: 600; }
+
+  /* Recommendation */
+  .recommendation { background: #fff8e1; border: 1.5px solid #ffa726; border-radius: 8px; padding: 16px 20px; font-size: 13px; color: #4a3000; line-height: 1.7; }
+  .recommendation strong { color: #e65100; }
+
+  /* Report footer */
+  .report-footer { display: flex; gap: 16px; padding: 12px 24px; background: #f5f5f5; border-top: 1px solid #e0e0e0; font-size: 11px; color: #888; flex-wrap: wrap; }
+  .report-footer span strong { color: #555; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-badge">Transformation Example</div>
+  <div class="page-title">Raw Data to Executive Report</div>
+  <div class="page-subtitle">Prompt: Transform fleet delay CSV into a structured operations brief with actionable recommendations</div>
+</div>
+
+<!-- Raw Input -->
+<div class="section-label">
+  <span class="section-badge badge-input">Raw Input</span>
+  <span class="section-desc">Source: fleet-ops-db delay_logs export — 15 March 2025</span>
+</div>
+<div class="raw-input-block">
+  <pre><span class="csv-header">date,bus_id,route,delay_mins,reason,driver_id</span>
+<span class="csv-row-even">2025-03-15,MH-04-AB-1122,Route7,12,Traffic,DRV-0234</span>
+<span class="csv-row-odd">2025-03-15,MH-04-CD-3344,Route12,0,,DRV-0847</span>
+<span class="csv-row-crit">2025-03-15,MH-04-EF-5566,Route3,28,Engine fault,DRV-0156</span>
+<span class="csv-row-even">2025-03-15,MH-04-GH-7788,Route19,18,Road block,DRV-0391</span>
+<span class="csv-row-odd">2025-03-15,MH-04-IJ-9900,Route5,0,,DRV-0623</span>
+<span class="csv-row-even">2025-03-15,MH-04-KL-1234,Route7,8,Driver late,DRV-0478</span>
+<span class="csv-row-crit">2025-03-15,MH-04-MN-5678,Route12,35,Breakdown,DRV-0812</span>
+<span class="csv-row-odd">2025-03-15,MH-04-OP-9012,Route3,4,Minor delay,DRV-0267</span></pre>
+</div>
+
+<!-- Transform Arrow -->
+<div class="transform-arrow">
+  <div class="line"></div>
+  <div class="label">&#129302; AI-Generated Report</div>
+  <div class="line" style="background: linear-gradient(to right, #1a237e, #e8eaf6);"></div>
+</div>
+
+<!-- Generated Report -->
+<div class="section-label">
+  <span class="section-badge badge-output">Generated Report</span>
+  <span class="section-desc">Fleet Operations Brief — 15 March 2025</span>
+</div>
+
+<div class="report-card">
+  <div class="report-header">
+    <div class="report-title">Daily Fleet Health Brief — 15 March 2025</div>
+    <div class="report-meta">Mumbai Bus Operations &nbsp;|&nbsp; Generated: 06:04 AM IST &nbsp;|&nbsp; Distribution: Ops Head, Hub Managers</div>
+  </div>
+  <div class="report-body">
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card critical">
+        <div class="kpi-value">25%</div>
+        <div class="kpi-label">On-Time Rate</div>
+        <div class="kpi-vs">vs 84% weekly avg</div>
+      </div>
+      <div class="kpi-card warning">
+        <div class="kpi-value">13.1</div>
+        <div class="kpi-label">Avg Delay (mins)</div>
+        <div class="kpi-vs">vs 4.2 weekly avg</div>
+      </div>
+      <div class="kpi-card critical">
+        <div class="kpi-value">6 / 8</div>
+        <div class="kpi-label">Buses Delayed</div>
+        <div class="kpi-vs">2 on time today</div>
+      </div>
+      <div class="kpi-card warning">
+        <div class="kpi-value">105</div>
+        <div class="kpi-label">Total Delay Mins</div>
+        <div class="kpi-vs">2 critical incidents</div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-para">
+      On 15 March 2025, 6 of 8 monitored buses experienced delays, with a fleet on-time rate of 25% — significantly below the 84% weekly average. Two critical incidents occurred: Bus MH-04-MN-5678 (Route 12) was delayed 35 minutes due to breakdown, and Bus MH-04-EF-5566 (Route 3) was delayed 28 minutes due to engine fault. Immediate mechanical intervention is recommended for both vehicles before the next operating cycle.
+    </div>
+
+    <!-- Key Findings -->
+    <h3>Key Findings</h3>
+    <div class="finding-list">
+      <div class="finding-item"><span class="bullet">&#9642;</span><span><strong>75% of buses delayed on 15 Mar</strong> — compared to a 16% delay rate across the remainder of Week 11. This is a significant negative outlier and warrants investigation into common cause factors.</span></div>
+      <div class="finding-item"><span class="bullet">&#9642;</span><span><strong>Route 12 and Route 3 account for 63 of 105 total delay minutes (60%)</strong> — both routes share the same maintenance contractor, suggesting a possible systemic maintenance quality issue.</span></div>
+      <div class="finding-item"><span class="bullet">&#9642;</span><span><strong>Engine and mechanical faults caused 60% of delay minutes</strong> — 63 minutes attributable to breakdown and engine fault reasons, indicating a likely maintenance backlog or inspection gap.</span></div>
+    </div>
+
+    <!-- Table -->
+    <h3>Bus-wise Delay Breakdown (sorted by delay)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Bus ID</th>
+          <th>Route</th>
+          <th>Delay (mins)</th>
+          <th>Reason</th>
+          <th>Recommended Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="bus-id">MH-04-MN-5678</td>
+          <td>Route 12</td>
+          <td class="delay-critical">35</td>
+          <td>Breakdown</td>
+          <td class="action-red">&#128308; Workshop inspection</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-EF-5566</td>
+          <td>Route 3</td>
+          <td class="delay-critical">28</td>
+          <td>Engine fault</td>
+          <td class="action-red">&#128308; Immediate service</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-GH-7788</td>
+          <td>Route 19</td>
+          <td class="delay-warning">18</td>
+          <td>Road block</td>
+          <td class="action-amber">&#127993; Monitor route</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-AB-1122</td>
+          <td>Route 7</td>
+          <td class="delay-minor">12</td>
+          <td>Traffic</td>
+          <td class="action-amber">&#127993; Standard ops</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-KL-1234</td>
+          <td>Route 7</td>
+          <td class="delay-minor">8</td>
+          <td>Driver late</td>
+          <td class="action-amber">&#127993; HR note — DRV-0478</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-OP-9012</td>
+          <td>Route 3</td>
+          <td style="color:#555;">4</td>
+          <td>Minor delay</td>
+          <td class="action-green">&#128994; No action required</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-CD-3344</td>
+          <td>Route 12</td>
+          <td class="delay-ok">0</td>
+          <td>—</td>
+          <td class="action-green">&#128994; On time</td>
+        </tr>
+        <tr>
+          <td class="bus-id">MH-04-IJ-9900</td>
+          <td>Route 5</td>
+          <td class="delay-ok">0</td>
+          <td>—</td>
+          <td class="action-green">&#128994; On time</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Recommendation -->
+    <h3>Recommendation</h3>
+    <div class="recommendation">
+      Schedule immediate mechanical inspection for <strong>MH-04-MN-5678</strong> and <strong>MH-04-EF-5566</strong> before 06:00 AM on 16 March 2025. Route 12 requires an alternate vehicle for morning service if inspection extends beyond overnight. Workshop supervisor to confirm vehicle availability status by 10:00 PM today.
+    </div>
+
+  </div>
+  <div class="report-footer">
+    <span><strong>Generated by:</strong> Fleet AI Daily Brief Agent</span>
+    <span><strong>Data source:</strong> fleet-ops-db delay_logs</span>
+    <span><strong>Report date:</strong> 15 March 2025</span>
+    <span><strong>Rows processed:</strong> 8</span>
+    <span><strong>Generation time:</strong> 2.1s</span>
+  </div>
+</div>
+
+</body>
+</html>

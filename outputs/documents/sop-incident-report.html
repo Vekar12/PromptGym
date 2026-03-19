@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOP-OPS-014 — Bus Incident Reporting Procedure</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #ffffff;
+    color: #1A1A2E;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  /* Document Header */
+  .doc-banner {
+    background: #1A1A2E;
+    color: #fff;
+    border-radius: 10px;
+    padding: 22px 28px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .doc-banner-left .sop-code {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #A5B4FC;
+    margin-bottom: 4px;
+  }
+  .doc-banner-left h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .doc-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 20px;
+    font-size: 12px;
+  }
+  .doc-meta-item { color: rgba(255,255,255,0.75); }
+  .doc-meta-item strong { color: #fff; }
+  .version-badge {
+    background: #6366F1;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    align-self: flex-start;
+  }
+
+  h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1A1A2E;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #E5E7EB;
+  }
+  section { margin-bottom: 28px; }
+
+  /* TOC */
+  .toc {
+    background: #F8F9FF;
+    border: 1px solid #E0E7FF;
+    border-radius: 10px;
+    padding: 18px 22px;
+  }
+  .toc-list {
+    list-style: none;
+    counter-reset: toc;
+  }
+  .toc-list li {
+    counter-increment: toc;
+    padding: 6px 0;
+    font-size: 13.5px;
+    color: #374151;
+    border-bottom: 1px dashed #E5E7EB;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toc-list li:last-child { border-bottom: none; }
+  .toc-list li::before {
+    content: counter(toc, decimal) ".";
+    font-weight: 700;
+    color: #6366F1;
+    font-size: 13px;
+    width: 22px;
+    flex-shrink: 0;
+  }
+  .toc-section { font-weight: 600; }
+
+  /* Scope box */
+  .scope-box {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-left: 4px solid #3B82F6;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    color: #1E40AF;
+    line-height: 1.6;
+  }
+
+  /* Steps table */
+  table.steps-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.steps-table thead tr {
+    background: #1A1A2E;
+    color: #fff;
+  }
+  table.steps-table thead th {
+    padding: 11px 13px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+  table.steps-table tbody tr {
+    border-bottom: 1px solid #F3F4F6;
+  }
+  table.steps-table tbody tr:hover { background: #FAFAFA; }
+  table.steps-table td {
+    padding: 12px 13px;
+    vertical-align: top;
+    color: #374151;
+  }
+  .step-num {
+    background: #6366F1;
+    color: #fff;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-action {
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 3px;
+  }
+  .step-detail {
+    font-size: 12px;
+    color: #6B7280;
+  }
+  td.party { font-weight: 500; }
+  td.timeline { font-weight: 600; color: #EF4444; white-space: nowrap; }
+  td.tool {
+    font-size: 12px;
+    background: #F3F4F6;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #374151;
+  }
+  .tool-name {
+    display: inline-block;
+    background: #EEF2FF;
+    color: #4338CA;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* Escalation matrix */
+  table.esc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.esc-table th {
+    background: #374151;
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  table.esc-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: top;
+  }
+  .tier-minor { background: #D1FAE5; color: #065F46; font-weight: 700; border-radius: 6px; padding: 4px 10px; font-size: 12px; display: inline-block; }
+  .tier-major { background: #FEF3C7; color: #92400E; font-weight: 700; border-radius: 6px; padding: 4px 10px; font-size: 12px; display: inline-block; }
+  .tier-critical { background: #FEE2E2; color: #991B1B; font-weight: 700; border-radius: 6px; padding: 4px 10px; font-size: 12px; display: inline-block; }
+
+  /* Appendix */
+  .appendix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+  .appendix-card {
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 12.5px;
+  }
+  .appendix-card.minor { background: #D1FAE5; border: 1px solid #6EE7B7; }
+  .appendix-card.major { background: #FEF3C7; border: 1px solid #FCD34D; }
+  .appendix-card.critical { background: #FEE2E2; border: 1px solid #FCA5A5; }
+  .appendix-card .card-title { font-weight: 800; font-size: 13px; margin-bottom: 8px; }
+  .appendix-card.minor .card-title { color: #065F46; }
+  .appendix-card.major .card-title { color: #92400E; }
+  .appendix-card.critical .card-title { color: #991B1B; }
+  .appendix-card ul { list-style: none; }
+  .appendix-card ul li { padding: 3px 0; color: #374151; }
+  .appendix-card ul li::before { content: '• '; font-weight: 700; }
+
+  .footer {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #E5E7EB;
+    font-size: 12px;
+    color: #9CA3AF;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-banner">
+  <div class="doc-banner-left">
+    <div class="sop-code">SOP-OPS-014</div>
+    <h1>Bus Incident Reporting Procedure</h1>
+  </div>
+  <div class="doc-meta-grid">
+    <div class="doc-meta-item"><strong>Version:</strong> 2.1</div>
+    <div class="doc-meta-item"><strong>Last Updated:</strong> 01 Mar 2025</div>
+    <div class="doc-meta-item"><strong>Owner:</strong> Ops Head</div>
+    <div class="doc-meta-item"><strong>Status:</strong> Active</div>
+  </div>
+  <div class="version-badge">v2.1</div>
+</div>
+
+<!-- TOC -->
+<section>
+  <h2>Table of Contents</h2>
+  <div class="toc">
+    <ul class="toc-list">
+      <li><span class="toc-section">Scope & Applicability</span></li>
+      <li><span class="toc-section">Incident Reporting Steps</span></li>
+      <li><span class="toc-section">Escalation Matrix</span></li>
+      <li><span class="toc-section">Appendix A — Incident Classification Table</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Scope -->
+<section>
+  <h2>1. Scope &amp; Applicability</h2>
+  <div class="scope-box">
+    This SOP applies to <strong>all hub managers, drivers, and fleet supervisors</strong> across the <strong>Mumbai Division</strong>. It covers all incidents involving fleet vehicles during operational hours, including accidents, breakdowns, and passenger-related incidents. All personnel must be familiar with this SOP before commencing field operations.
+  </div>
+</section>
+
+<!-- Steps -->
+<section>
+  <h2>2. Incident Reporting Steps</h2>
+  <table class="steps-table">
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th>Action</th>
+        <th>Responsible Party</th>
+        <th>Timeline</th>
+        <th>Tool / Form</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="step-num">1</span></td>
+        <td>
+          <div class="step-action">Incident occurs — report immediately</div>
+          <div class="step-detail">Contact Hub Manager via WhatsApp or phone call</div>
+        </td>
+        <td class="party">Driver</td>
+        <td class="timeline">Within 5 min</td>
+        <td><span class="tool-name">WhatsApp to Hub Manager</span></td>
+      </tr>
+      <tr>
+        <td><span class="step-num">2</span></td>
+        <td>
+          <div class="step-action">Assess severity — classify incident</div>
+          <div class="step-detail">Classify as Minor / Major / Critical per Appendix A</div>
+        </td>
+        <td class="party">Hub Manager</td>
+        <td class="timeline">Within 10 min</td>
+        <td><span class="tool-name">Incident Classification Chart (Appendix A)</span></td>
+      </tr>
+      <tr>
+        <td><span class="step-num">3</span></td>
+        <td>
+          <div class="step-action">Secure scene — ensure passenger safety</div>
+          <div class="step-detail">Call police (100) if Critical; cordon off area; do not move vehicle</div>
+        </td>
+        <td class="party">Driver + Hub Manager</td>
+        <td class="timeline">Immediate</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="step-num">4</span></td>
+        <td>
+          <div class="step-action">Document the incident</div>
+          <div class="step-detail">Fill Incident Report Form OPS-IR-01 with full details</div>
+        </td>
+        <td class="party">Hub Manager</td>
+        <td class="timeline">Within 30 min</td>
+        <td><span class="tool-name">Form OPS-IR-01 (iLens)</span></td>
+      </tr>
+      <tr>
+        <td><span class="step-num">5</span></td>
+        <td>
+          <div class="step-action">Notify stakeholders</div>
+          <div class="step-detail">Inform Ops Head — mandatory for Major and Critical incidents</div>
+        </td>
+        <td class="party">Hub Manager</td>
+        <td class="timeline">Within 1 hour</td>
+        <td><span class="tool-name">Phone + WhatsApp</span></td>
+      </tr>
+      <tr>
+        <td><span class="step-num">6</span></td>
+        <td>
+          <div class="step-action">Submit to system — upload form</div>
+          <div class="step-detail">Upload completed form OPS-IR-01 to iLens portal</div>
+        </td>
+        <td class="party">Hub Manager</td>
+        <td class="timeline">Within 2 hours</td>
+        <td><span class="tool-name">iLens Portal</span></td>
+      </tr>
+      <tr>
+        <td><span class="step-num">7</span></td>
+        <td>
+          <div class="step-action">File insurance claim — if vehicle damage</div>
+          <div class="step-detail">Initiate claim via ICICI Lombard portal; attach Form OPS-IR-01</div>
+        </td>
+        <td class="party">Insurance Coordinator</td>
+        <td class="timeline">Within 24 hours</td>
+        <td><span class="tool-name">ICICI Lombard Portal</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Escalation Matrix -->
+<section>
+  <h2>3. Escalation Matrix</h2>
+  <table class="esc-table">
+    <thead>
+      <tr>
+        <th>Tier</th>
+        <th>Trigger Condition</th>
+        <th>Escalate To</th>
+        <th>Response Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tier-minor">Minor</span></td>
+        <td>No injury; vehicle damage &lt;₹5,000</td>
+        <td>Hub Manager handles independently</td>
+        <td>Same day</td>
+      </tr>
+      <tr>
+        <td><span class="tier-major">Major</span></td>
+        <td>Passenger/driver injury; damage &gt;₹5,000</td>
+        <td>Hub Manager → Ops Head</td>
+        <td>Within 1 hour</td>
+      </tr>
+      <tr>
+        <td><span class="tier-critical">Critical</span></td>
+        <td>Fatality; damage &gt;₹50,000; media attention</td>
+        <td>Ops Head → MD + Legal</td>
+        <td>Within 30 minutes</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Appendix -->
+<section>
+  <h2>Appendix A — Incident Classification Table</h2>
+  <div class="appendix-grid">
+    <div class="appendix-card minor">
+      <div class="card-title">Minor</div>
+      <ul>
+        <li>Tyre puncture (no delay &gt;30 min)</li>
+        <li>Minor fender contact</li>
+        <li>Passenger complaint — non-injury</li>
+        <li>Dashboard warning light</li>
+      </ul>
+    </div>
+    <div class="appendix-card major">
+      <div class="card-title">Major</div>
+      <ul>
+        <li>Passenger injury (non-critical)</li>
+        <li>Significant vehicle damage (&gt;₹5,000)</li>
+        <li>Collision with another vehicle</li>
+        <li>Route delay &gt;60 min due to breakdown</li>
+      </ul>
+    </div>
+    <div class="appendix-card critical">
+      <div class="card-title">Critical</div>
+      <ul>
+        <li>Fatality — passenger or third party</li>
+        <li>Major fire or explosion</li>
+        <li>Damage &gt;₹50,000</li>
+        <li>Media or MSRTC escalation</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <span>SOP-OPS-014 v2.1 — Confidential — Mumbai Division</span>
+  <span>Owner: Ops Head &nbsp;|&nbsp; Last Updated: 01 Mar 2025</span>
+</div>
+
+</body>
+</html>

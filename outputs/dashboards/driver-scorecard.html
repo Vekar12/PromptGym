@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Driver Scorecard — Rajesh Kumar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F0F4F8;
+      color: #1A1A2E;
+      width: 900px;
+      margin: 0 auto;
+      padding: 0 0 40px 0;
+    }
+
+    /* HEADER */
+    .header {
+      background: #1A1A2E;
+      color: #fff;
+      padding: 22px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 19px;
+      font-weight: 800;
+    }
+    .header p {
+      font-size: 12.5px;
+      color: #A0AEC0;
+      margin-top: 4px;
+    }
+    .header-pill {
+      background: #F59E0B;
+      color: #1A1A2E;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 28px 32px;
+    }
+
+    /* SECTION HEADING */
+    .section-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4A5568;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #E2E8F0;
+    }
+
+    /* PROFILE CARD */
+    .profile-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .profile-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #1A1A2E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+      letter-spacing: 1px;
+    }
+    .profile-info h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1A1A2E;
+    }
+    .profile-info .driver-id {
+      font-size: 13px;
+      color: #718096;
+      font-weight: 600;
+      margin-top: 3px;
+      margin-bottom: 12px;
+    }
+    .profile-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .profile-meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .profile-meta-item .meta-label {
+      font-size: 10.5px;
+      color: #A0AEC0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .profile-meta-item .meta-value {
+      font-size: 13.5px;
+      color: #1A1A2E;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .profile-right {
+      margin-left: auto;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .overall-score {
+      font-size: 48px;
+      font-weight: 800;
+      color: #F59E0B;
+      line-height: 1;
+    }
+    .overall-score span {
+      font-size: 20px;
+      color: #A0AEC0;
+      font-weight: 600;
+    }
+    .overall-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #F59E0B;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 6px;
+      background: #FEF3C7;
+      padding: 3px 12px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    /* SCORE BARS */
+    .score-panel {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 22px 24px;
+      margin-bottom: 24px;
+    }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .score-row:last-child {
+      margin-bottom: 0;
+    }
+    .score-name {
+      width: 170px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2D3748;
+      flex-shrink: 0;
+    }
+    .score-bar-bg {
+      flex: 1;
+      background: #EDF2F7;
+      border-radius: 6px;
+      height: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      position: relative;
+    }
+    .score-bar-fill.green { background: linear-gradient(90deg, #10B981, #34D399); }
+    .score-bar-fill.amber { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .score-bar-fill.red   { background: linear-gradient(90deg, #EF4444, #F87171); }
+    .score-label-inside {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+    }
+    .score-value {
+      width: 60px;
+      text-align: right;
+      flex-shrink: 0;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .score-value.green { color: #10B981; }
+    .score-value.amber { color: #F59E0B; }
+    .score-value.red   { color: #EF4444; }
+
+    /* TABLE */
+    .table-wrap {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    thead th {
+      background: #1A1A2E;
+      color: #fff;
+      font-weight: 600;
+      padding: 11px 16px;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+    }
+    thead th:first-child {
+      text-align: left;
+    }
+    tbody tr {
+      border-bottom: 1px solid #EDF2F7;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #F7FAFC; }
+    tbody tr.latest-row {
+      background: #FFFBEB;
+    }
+    tbody td {
+      padding: 12px 16px;
+      color: #2D3748;
+      text-align: center;
+    }
+    tbody td:first-child {
+      text-align: left;
+      font-weight: 700;
+      color: #1A1A2E;
+    }
+    .cell-score {
+      font-weight: 700;
+    }
+    .cell-score.green { color: #059669; }
+    .cell-score.amber { color: #D97706; }
+    .cell-score.red   { color: #DC2626; }
+    .trend-arrow {
+      font-size: 12px;
+    }
+    .trend-arrow.up   { color: #10B981; }
+    .trend-arrow.flat { color: #A0AEC0; }
+
+    /* MANAGER NOTE */
+    .manager-note {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .manager-note-header {
+      background: #1A1A2E;
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+    }
+    .manager-note-body {
+      padding: 20px;
+      border-left: 4px solid #F59E0B;
+    }
+    .manager-note-body p {
+      font-size: 13.5px;
+      color: #2D3748;
+      line-height: 1.65;
+    }
+    .manager-sig {
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .manager-sig .sig-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1A1A2E;
+    }
+    .manager-sig .sig-role {
+      font-size: 12px;
+      color: #718096;
+      margin-top: 2px;
+    }
+    .next-review-badge {
+      font-size: 11.5px;
+      font-weight: 700;
+      background: #FEF3C7;
+      color: #92400E;
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <h1>Driver Performance Scorecard</h1>
+      <p>March 2025 &nbsp;|&nbsp; Mumbai Division &nbsp;|&nbsp; Kurla Depot</p>
+    </div>
+    <div class="header-pill">Needs Improvement</div>
+  </div>
+
+  <div class="content">
+
+    <!-- PROFILE CARD -->
+    <div class="section-heading">Driver Profile</div>
+    <div class="profile-card">
+      <div class="profile-avatar">RK</div>
+      <div class="profile-info">
+        <h2>Rajesh Kumar</h2>
+        <div class="driver-id">DRV-0847</div>
+        <div class="profile-meta">
+          <div class="profile-meta-item">
+            <span class="meta-label">Hub</span>
+            <span class="meta-value">Kurla Depot</span>
+          </div>
+          <div class="profile-meta-item">
+            <span class="meta-label">Assigned Route</span>
+            <span class="meta-value">Route 12</span>
+          </div>
+          <div class="profile-meta-item">
+            <span class="meta-label">Tenure</span>
+            <span class="meta-value">4 yrs 3 months</span>
+          </div>
+          <div class="profile-meta-item">
+            <span class="meta-label">Shift</span>
+            <span class="meta-value">Morning (5:30 AM)</span>
+          </div>
+        </div>
+      </div>
+      <div class="profile-right">
+        <div class="overall-score">76<span>/100</span></div>
+        <div class="overall-label">Needs Improvement</div>
+      </div>
+    </div>
+
+    <!-- SCORE BARS -->
+    <div class="section-heading">Performance Scores — March 2025</div>
+    <div class="score-panel">
+
+      <div class="score-row">
+        <div class="score-name">Punctuality</div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill amber" style="width:71%;">
+            <span class="score-label-inside">71 / 100</span>
+          </div>
+        </div>
+        <div class="score-value amber">71</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-name">Safety Score</div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill green" style="width:88%;">
+            <span class="score-label-inside">88 / 100</span>
+          </div>
+        </div>
+        <div class="score-value green">88</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-name">Passenger Rating</div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill green" style="width:79%;">
+            <span class="score-label-inside">79 / 100</span>
+          </div>
+        </div>
+        <div class="score-value green">79</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-name">Fuel Efficiency</div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill amber" style="width:64%;">
+            <span class="score-label-inside">64 / 100</span>
+          </div>
+        </div>
+        <div class="score-value amber">64</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score-name">Challan Compliance</div>
+        <div class="score-bar-bg">
+          <div class="score-bar-fill red" style="width:58%;">
+            <span class="score-label-inside">58 / 100</span>
+          </div>
+        </div>
+        <div class="score-value red">58</div>
+      </div>
+
+    </div>
+
+    <!-- MONTHLY TREND TABLE -->
+    <div class="section-heading">Monthly Performance Trend</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Punctuality</th>
+            <th>Safety</th>
+            <th>Passenger Rtg</th>
+            <th>Fuel Eff.</th>
+            <th>Challan</th>
+            <th>Overall</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Jan 2025</td>
+            <td class="cell-score amber">68 <span class="trend-arrow flat">&#8594;</span></td>
+            <td class="cell-score green">86 <span class="trend-arrow flat">&#8594;</span></td>
+            <td class="cell-score green">77 <span class="trend-arrow flat">&#8594;</span></td>
+            <td class="cell-score amber">62 <span class="trend-arrow flat">&#8594;</span></td>
+            <td class="cell-score red">55 <span class="trend-arrow flat">&#8594;</span></td>
+            <td class="cell-score amber">70</td>
+          </tr>
+          <tr>
+            <td>Feb 2025</td>
+            <td class="cell-score amber">70 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score green">87 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score green">78 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score amber">63 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score red">57 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score amber">73</td>
+          </tr>
+          <tr class="latest-row">
+            <td>Mar 2025 <span style="font-size:10.5px;color:#D97706;font-weight:700;margin-left:4px;">&#9733; Current</span></td>
+            <td class="cell-score amber">71 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score green">88 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score green">79 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score amber">64 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score red">58 <span class="trend-arrow up">&#8593;</span></td>
+            <td class="cell-score amber"><strong>76</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MANAGER NOTE -->
+    <div class="section-heading">Manager Assessment</div>
+    <div class="manager-note">
+      <div class="manager-note-header">
+        <span>&#128221;</span>
+        <span>Hub Manager Note — March 2025</span>
+      </div>
+      <div class="manager-note-body">
+        <p>
+          Rajesh shows <strong>consistent improvement</strong> in Safety Score and Passenger Rating over the last three months, which is commendable. Punctuality has marginally improved but remains below the 80-point threshold.
+          <br /><br />
+          <strong>Challan compliance remains the primary concern</strong> — 3 unresolved challans filed in Feb–Mar 2025. This affects depot compliance standing and requires immediate attention.
+          <br /><br />
+          <strong>Recommended actions:</strong> Mandatory challan filing workshop (schedule before 31 Mar 2025) + 30-day structured performance review with fortnightly check-ins. Fuel efficiency coaching also recommended.
+        </p>
+        <div class="manager-sig">
+          <div>
+            <div class="sig-name">Suresh Nair</div>
+            <div class="sig-role">Hub Manager — Kurla Depot &nbsp;|&nbsp; Mumbai Division</div>
+          </div>
+          <div class="next-review-badge">Next Review: 15 Apr 2025</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

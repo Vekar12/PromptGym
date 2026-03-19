@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disbursement SLA Reference Table — iLens Operations</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #ffffff;
+    color: #1A1A2E;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* Document Header */
+  .doc-header {
+    background: #1A1A2E;
+    border-radius: 12px;
+    padding: 22px 28px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .doc-header-left .doc-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #A5B4FC;
+    margin-bottom: 5px;
+  }
+  .doc-header-left h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .doc-meta-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-end;
+  }
+  .meta-pill {
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+  }
+  .meta-pill strong { color: #fff; }
+  .ver-badge {
+    background: #6366F1;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  section { margin-bottom: 28px; }
+  h2 {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1A1A2E;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #E5E7EB;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    background: #6366F1;
+    border-radius: 2px;
+  }
+
+  /* Main SLA Table */
+  table.sla-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.sla-table thead tr {
+    background: #1A1A2E;
+    color: #fff;
+  }
+  table.sla-table thead th {
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  table.sla-table tbody tr {
+    border-bottom: 1px solid #F3F4F6;
+  }
+  table.sla-table tbody tr:hover { background: #FAFAFA; }
+  table.sla-table tbody tr:nth-child(even) { background: #FAFAFA; }
+  table.sla-table tbody tr:nth-child(even):hover { background: #F3F4F6; }
+  table.sla-table td {
+    padding: 13px 14px;
+    vertical-align: top;
+    color: #374151;
+    line-height: 1.5;
+  }
+  .stage-name {
+    font-weight: 700;
+    color: #1A1A2E;
+  }
+  .stage-code {
+    font-size: 11px;
+    color: #9CA3AF;
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .sla-days {
+    text-align: center;
+  }
+  .sla-badge {
+    display: inline-block;
+    background: #EEF2FF;
+    color: #4338CA;
+    font-weight: 800;
+    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+  .breach-badge {
+    display: inline-block;
+    background: #FEE2E2;
+    color: #991B1B;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 3px 9px;
+    border-radius: 6px;
+  }
+  .owner-badge {
+    display: inline-block;
+    background: #F3F4F6;
+    color: #374151;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 6px;
+  }
+  .consequence-text { font-size: 12.5px; color: #6B7280; }
+  .escalation-path { font-size: 12px; color: #374151; }
+  .arrow { color: #9CA3AF; }
+
+  /* Total SLA footer row */
+  .total-row {
+    background: #1A1A2E !important;
+  }
+  .total-row td {
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 14px 14px !important;
+  }
+  .total-label { color: #A5B4FC !important; font-size: 11px !important; font-weight: 700 !important; letter-spacing: 1px !important; text-transform: uppercase !important; }
+
+  /* SLA Pause box */
+  .pause-box {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .pause-box p {
+    font-size: 13.5px;
+    color: #78350F;
+    margin-bottom: 14px;
+    line-height: 1.6;
+    font-style: italic;
+  }
+  .pause-list { list-style: none; }
+  .pause-item {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #FDE68A;
+    font-size: 13.5px;
+    color: #374151;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .pause-item:last-child { border-bottom: none; }
+  .pause-num {
+    background: #F59E0B;
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Footnote */
+  .footnote {
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 12.5px;
+    color: #6B7280;
+    line-height: 1.6;
+  }
+  .footnote strong { color: #374151; }
+
+  .footer {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #E5E7EB;
+    font-size: 12px;
+    color: #9CA3AF;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="doc-header-left">
+    <div class="doc-label">SLA Reference Document</div>
+    <h1>Disbursement SLA Reference</h1>
+  </div>
+  <div class="doc-meta-pills">
+    <div class="meta-pill"><strong>System:</strong> iLens Operations</div>
+    <div class="meta-pill"><strong>Effective:</strong> 01 January 2025</div>
+    <span class="ver-badge">Version 1.3</span>
+  </div>
+</div>
+
+<!-- Main SLA Table -->
+<section>
+  <h2>Stage-wise SLA Commitments</h2>
+  <table class="sla-table">
+    <thead>
+      <tr>
+        <th>Stage</th>
+        <th style="text-align:center;">SLA<br>(Working Days)</th>
+        <th style="text-align:center;">Breach Threshold</th>
+        <th>Owner Team</th>
+        <th>Breach Consequence</th>
+        <th>Escalation Path</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="stage-name">IGF — Initial File</div>
+          <div class="stage-code">Stage 01</div>
+        </td>
+        <td class="sla-days"><span class="sla-badge">1 day</span></td>
+        <td style="text-align:center;"><span class="breach-badge">&gt;2 days</span></td>
+        <td><span class="owner-badge">Sales Team</span></td>
+        <td class="consequence-text">File flagged in iLens dashboard with status alert</td>
+        <td class="escalation-path">File Manager <span class="arrow">→</span> Branch Head</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="stage-name">Legal Verification</div>
+          <div class="stage-code">Stage 02</div>
+        </td>
+        <td class="sla-days"><span class="sla-badge">3 days</span></td>
+        <td style="text-align:center;"><span class="breach-badge">&gt;4 days</span></td>
+        <td><span class="owner-badge">Legal Team</span></td>
+        <td class="consequence-text">Auto-alert generated to Legal Head with file details</td>
+        <td class="escalation-path">Legal Head <span class="arrow">→</span> Ops Head</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="stage-name">Technical Valuation</div>
+          <div class="stage-code">Stage 03</div>
+        </td>
+        <td class="sla-days"><span class="sla-badge">2 days</span></td>
+        <td style="text-align:center;"><span class="breach-badge">&gt;3 days</span></td>
+        <td><span class="owner-badge">Tech Panel</span></td>
+        <td class="consequence-text">File reassigned to next available valuer automatically</td>
+        <td class="escalation-path">Tech Lead <span class="arrow">→</span> Credit Head</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="stage-name">Credit Assessment</div>
+          <div class="stage-code">Stage 04</div>
+        </td>
+        <td class="sla-days"><span class="sla-badge">2 days</span></td>
+        <td style="text-align:center;"><span class="breach-badge">&gt;3 days</span></td>
+        <td><span class="owner-badge">Credit Team</span></td>
+        <td class="consequence-text">File escalated to senior credit officer for priority review</td>
+        <td class="escalation-path">Credit Head <span class="arrow">→</span> Risk Head</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="stage-name">NDC Procurement</div>
+          <div class="stage-code">Stage 05</div>
+        </td>
+        <td class="sla-days"><span class="sla-badge">3 days</span></td>
+        <td style="text-align:center;"><span class="breach-badge">&gt;5 days</span></td>
+        <td><span class="owner-badge">Operations</span></td>
+        <td class="consequence-text">External SLA invoked; vendor escalation initiated</td>
+        <td class="escalation-path">Ops Head <span class="arrow">→</span> MD</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="stage-name">Final Disbursement</div>
+          <div class="stage-code">Stage 06</div>
+        </td>
+        <td class="sla-days"><span class="sla-badge">1 day</span></td>
+        <td style="text-align:center;"><span class="breach-badge">&gt;2 days</span></td>
+        <td><span class="owner-badge">Disbursement Cell</span></td>
+        <td class="consequence-text">Financial penalty applicable per service agreement</td>
+        <td class="escalation-path">Disbursement Head <span class="arrow">→</span> MD</td>
+      </tr>
+      <tr class="total-row">
+        <td colspan="2">
+          <span class="total-label">Total End-to-End SLA Commitment</span>
+          <div style="font-size:22px;font-weight:900;margin-top:4px;">14 Working Days</div>
+        </td>
+        <td colspan="4" style="color:rgba(255,255,255,0.6)!important;font-size:12.5px!important;font-weight:400!important;vertical-align:middle;">
+          Breach of end-to-end SLA requires written explanation from respective stage owner within 24 hours. Cumulative TAT tracked in iLens per file.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SLA Pause Conditions -->
+<section>
+  <h2>SLA Pause Conditions</h2>
+  <div class="pause-box">
+    <p>The SLA clock is <strong>paused</strong> (and restarted upon resolution) in the following scenarios. Pause must be logged in iLens with a reason code at the time of occurrence.</p>
+    <ul class="pause-list">
+      <li class="pause-item">
+        <span class="pause-num">1</span>
+        Customer document submission pending — pause logged in iLens with reason code DOC-PEND
+      </li>
+      <li class="pause-item">
+        <span class="pause-num">2</span>
+        VAHAN API or external government registry unavailability exceeding 4 continuous hours
+      </li>
+      <li class="pause-item">
+        <span class="pause-num">3</span>
+        Legal holiday declared in the jurisdiction applicable to the property being assessed
+      </li>
+      <li class="pause-item">
+        <span class="pause-num">4</span>
+        Customer-requested hold — written request (email or physical) required before pause is logged
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Footnote -->
+<section style="margin-bottom:0;">
+  <div class="footnote">
+    <strong>Breach Reporting:</strong> Breach reporting is automated via iLens dashboards and refreshed every 4 hours during business hours. All breaches exceeding 2 days beyond the defined SLA threshold require a written explanation note to be submitted within 24 hours by the stage owner. Repeated breaches (&gt;3 in a month) trigger a formal corrective action review.
+  </div>
+</section>
+
+<div class="footer">
+  <span>Disbursement SLA Reference v1.3 — iLens Operations — Confidential</span>
+  <span>Effective: 01 Jan 2025 &nbsp;|&nbsp; Next Review: 01 Jul 2025</span>
+</div>
+
+</body>
+</html>

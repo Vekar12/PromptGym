@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Formal to Casual Rewrite</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f9fa; color: #1a1a1a; padding: 28px; max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { font-size: 0.75rem; color: #666; margin-bottom: 24px; }
+  .card { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden; }
+  .card-label { padding: 10px 16px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #eee; }
+  .label-formal { background: #ede7f6; color: #4527a0; }
+  .label-casual { background: #e8f5e9; color: #1b5e20; }
+  .card-body { padding: 16px; font-size: 0.83rem; line-height: 1.75; }
+  .formal-text { color: #555; }
+  .casual-text { color: #222; }
+  .annotation { display: inline-block; background: #fff3cd; border-radius: 4px; padding: 1px 5px; font-size: 0.7rem; color: #856404; margin: 0 2px; cursor: default; }
+  .change-row { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.78rem; }
+  .change-row:last-child { border-bottom: none; }
+  .change-from { color: #b71c1c; text-decoration: line-through; flex: 1; }
+  .change-arr { color: #888; }
+  .change-to { color: #2e7d32; flex: 1; font-weight: 500; }
+  .change-why { color: #888; font-size: 0.7rem; flex: 1.2; }
+  .changes-section { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .changes-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #666; margin-bottom: 12px; }
+  .col-headers { display: flex; gap: 12px; font-size: 0.65rem; font-weight: 700; color: #aaa; text-transform: uppercase; padding-bottom: 6px; border-bottom: 1px solid #eee; margin-bottom: 4px; }
+  .col-headers span { flex: 1; }
+  .col-headers span:last-child { flex: 1.2; }
+</style>
+</head>
+<body>
+<h1>Formal → Casual Register Rewrite</h1>
+<p class="subtitle">Internal policy email rewritten for a startup Slack message</p>
+
+<div class="card">
+  <div class="card-label label-formal">Formal — Original Email</div>
+  <div class="card-body formal-text">
+    Dear Team,<br><br>
+    I am writing to inform you that, effective the commencement of the forthcoming quarter, the organisation shall be implementing a revised remote work policy. Employees are hereby required to be physically present at the office premises for a minimum of three days per calendar week. Exceptions may be granted at the sole discretion of the relevant department head, subject to submission of a formal request no fewer than five business days in advance. Failure to comply with the aforementioned stipulations may result in disciplinary proceedings being initiated in accordance with the Employee Conduct Framework.
+    <br><br>
+    Kindly acknowledge receipt of this communication.<br><br>
+    Regards,<br>
+    HR Department
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-label label-casual">Casual — Slack Rewrite</div>
+  <div class="card-body casual-text">
+    Hey everyone 👋<br><br>
+    Quick update on our return-to-office policy starting next quarter:<br><br>
+    <strong>In-office days: 3 days/week minimum.</strong><br><br>
+    Need flexibility? Just check with your manager at least 5 business days ahead — they can make exceptions when needed.<br><br>
+    If you're not sure how this applies to your team, drop a message in <strong>#people-ops</strong> and we'll sort it out.<br><br>
+    Thanks for being awesome 🙏<br>
+    — People Ops
+  </div>
+</div>
+
+<div class="changes-section">
+  <div class="changes-title">Key Changes Made</div>
+  <div class="col-headers"><span>Formal phrase</span><span></span><span>Casual version</span><span>Why it works</span></div>
+  <div class="change-row">
+    <span class="change-from">"effective the commencement of the forthcoming quarter"</span>
+    <span class="change-arr">→</span>
+    <span class="change-to">"starting next quarter"</span>
+    <span class="change-why">6 words → 3. No meaning lost.</span>
+  </div>
+  <div class="change-row">
+    <span class="change-from">"Failure to comply may result in disciplinary proceedings"</span>
+    <span class="change-arr">→</span>
+    <span class="change-to">Removed entirely</span>
+    <span class="change-why">Threat language kills psychological safety. Manager conversation handles edge cases.</span>
+  </div>
+  <div class="change-row">
+    <span class="change-from">"Kindly acknowledge receipt of this communication"</span>
+    <span class="change-arr">→</span>
+    <span class="change-to">Removed (Slack's read receipts handle this)</span>
+    <span class="change-why">Channel-appropriate; don't replicate email formalities in chat.</span>
+  </div>
+  <div class="change-row">
+    <span class="change-from">"HR Department"</span>
+    <span class="change-arr">→</span>
+    <span class="change-to">"People Ops" + emoji</span>
+    <span class="change-why">Team name matches company culture. Emoji adds warmth without being unprofessional.</span>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRD — Automated Challan Filing System</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #ffffff;
+    color: #1A1A2E;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  /* Header Banner */
+  .prd-banner {
+    background: linear-gradient(135deg, #1A1A2E 0%, #2D2D5E 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+  }
+  .prd-banner .doc-type {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #A5B4FC;
+    margin-bottom: 6px;
+  }
+  .prd-banner h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .prd-meta-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .prd-meta-item {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.75);
+  }
+  .prd-meta-item strong { color: #fff; }
+  .status-badge {
+    display: inline-block;
+    background: #F59E0B;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  section { margin-bottom: 26px; }
+  h2 {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1A1A2E;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 18px;
+    background: #6366F1;
+    border-radius: 2px;
+  }
+
+  /* Problem Statement */
+  .problem-box {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-left: 4px solid #EF4444;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #7F1D1D;
+    line-height: 1.6;
+  }
+
+  /* User Story */
+  .user-story-box {
+    background: #F0F4FF;
+    border: 1px solid #C7D2FE;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #1E40AF;
+    line-height: 1.7;
+    font-style: italic;
+  }
+
+  /* Metrics Table */
+  table.metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  table.metrics-table thead tr { background: #1A1A2E; color: #fff; }
+  table.metrics-table thead th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  table.metrics-table tbody tr { border-bottom: 1px solid #F3F4F6; }
+  table.metrics-table tbody tr:hover { background: #FAFAFA; }
+  table.metrics-table td { padding: 11px 14px; color: #374151; }
+  .current-val { color: #EF4444; font-weight: 600; }
+  .target-val { color: #10B981; font-weight: 700; }
+
+  /* Functional Reqs */
+  .req-list { list-style: none; }
+  .req-item {
+    display: flex;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 13.5px;
+    color: #374151;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .req-item:last-child { border-bottom: none; }
+  .req-num {
+    background: #6366F1;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* NFRs */
+  .nfr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .nfr-card {
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .nfr-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9CA3AF;
+    margin-bottom: 6px;
+  }
+  .nfr-value {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1A1A2E;
+  }
+
+  /* Out of Scope */
+  .oos-list { list-style: none; }
+  .oos-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13.5px;
+    color: #374151;
+    border-bottom: 1px dashed #E5E7EB;
+  }
+  .oos-item:last-child { border-bottom: none; }
+  .oos-icon {
+    color: #EF4444;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Dependencies */
+  .dep-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .dep-card {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .dep-name { font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 4px; }
+  .dep-desc { font-size: 12.5px; color: #78350F; }
+
+  /* Timeline */
+  .timeline-list { list-style: none; }
+  .timeline-item {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+  }
+  .timeline-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 16px;
+    width: 20px;
+    flex-shrink: 0;
+  }
+  .t-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #6366F1;
+    border: 3px solid #C7D2FE;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .t-line {
+    width: 2px;
+    flex: 1;
+    background: #E0E7FF;
+    min-height: 30px;
+  }
+  .timeline-item:last-child .t-line { display: none; }
+  .timeline-content {
+    padding-bottom: 18px;
+  }
+  .t-date { font-size: 12px; font-weight: 700; color: #6366F1; margin-bottom: 3px; }
+  .t-milestone { font-size: 13.5px; font-weight: 600; color: #1A1A2E; }
+
+  /* Open Questions */
+  .oq-list { list-style: none; }
+  .oq-item {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-left: 4px solid #F59E0B;
+    border-radius: 7px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    font-size: 13.5px;
+    color: #92400E;
+    line-height: 1.5;
+  }
+  .oq-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #D97706;
+    margin-bottom: 4px;
+  }
+
+  .footer {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #E5E7EB;
+    font-size: 12px;
+    color: #9CA3AF;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<div class="prd-banner">
+  <div class="doc-type">Product Requirements Document</div>
+  <h1>Automated Challan Filing System</h1>
+  <div class="prd-meta-row">
+    <div class="prd-meta-item"><strong>Version:</strong> v1.0</div>
+    <div class="prd-meta-item"><strong>Date:</strong> 12 March 2025</div>
+    <div class="prd-meta-item"><strong>Status:</strong> <span class="status-badge">Draft</span></div>
+    <div class="prd-meta-item"><strong>Author:</strong> Product Team</div>
+  </div>
+</div>
+
+<!-- Problem Statement -->
+<section>
+  <h2>Problem Statement</h2>
+  <div class="problem-box">
+    Hub managers spend <strong>45+ minutes daily</strong> manually filing traffic challans across 42 buses, leading to <strong>missed filings</strong>, <strong>duplicate payments</strong>, and significant <strong>compliance risks</strong>. Current process is entirely manual with no system-level tracking or alerts.
+  </div>
+</section>
+
+<!-- User Story -->
+<section>
+  <h2>User Story</h2>
+  <div class="user-story-box">
+    "As a <strong>Hub Manager</strong>, I want challans to be automatically detected and filed from the GPS system, so that I can eliminate manual tracking errors and reduce filing time to near-zero."
+  </div>
+</section>
+
+<!-- Success Metrics -->
+<section>
+  <h2>Success Metrics</h2>
+  <table class="metrics-table">
+    <thead>
+      <tr>
+        <th>Metric</th>
+        <th>Current State</th>
+        <th>Target</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Challan filing time per hub</td>
+        <td class="current-val">45 min/day</td>
+        <td class="target-val">&lt;5 min/day</td>
+      </tr>
+      <tr>
+        <td>Missed challan rate</td>
+        <td class="current-val">18%</td>
+        <td class="target-val">&lt;2%</td>
+      </tr>
+      <tr>
+        <td>Duplicate filing incidents</td>
+        <td class="current-val">4 / month</td>
+        <td class="target-val">0 / month</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Functional Requirements -->
+<section>
+  <h2>Functional Requirements</h2>
+  <ul class="req-list">
+    <li class="req-item"><span class="req-num">1</span> System must auto-detect challan from VAHAN API when bus number plate is queried.</li>
+    <li class="req-item"><span class="req-num">2</span> System must auto-populate challan details (amount, date, violation type) in iLens.</li>
+    <li class="req-item"><span class="req-num">3</span> Hub Manager must receive WhatsApp notification for each detected challan within 15 minutes of detection.</li>
+    <li class="req-item"><span class="req-num">4</span> One-click filing and payment confirmation must be available directly from the WhatsApp notification.</li>
+    <li class="req-item"><span class="req-num">5</span> Monthly challan summary report must be auto-generated and emailed to Ops Head on the 1st of each month.</li>
+  </ul>
+</section>
+
+<!-- NFRs -->
+<section>
+  <h2>Non-Functional Requirements</h2>
+  <div class="nfr-grid">
+    <div class="nfr-card">
+      <div class="nfr-label">Performance</div>
+      <div class="nfr-value">&lt;3s</div>
+      <div style="font-size:12px;color:#6B7280;margin-top:4px;">API response time</div>
+    </div>
+    <div class="nfr-card">
+      <div class="nfr-label">Security</div>
+      <div class="nfr-value">SOC2</div>
+      <div style="font-size:12px;color:#6B7280;margin-top:4px;">Compliance standard</div>
+    </div>
+    <div class="nfr-card">
+      <div class="nfr-label">Availability</div>
+      <div class="nfr-value">99.5%</div>
+      <div style="font-size:12px;color:#6B7280;margin-top:4px;">System uptime SLA</div>
+    </div>
+  </div>
+</section>
+
+<!-- Out of Scope -->
+<section>
+  <h2>Out of Scope</h2>
+  <ul class="oos-list">
+    <li class="oos-item"><span class="oos-icon">✕</span> Court challan disputes — handled by legal team separately, outside this system.</li>
+    <li class="oos-item"><span class="oos-icon">✕</span> Challans for non-fleet vehicles (personal vehicles, vendor vehicles).</li>
+    <li class="oos-item"><span class="oos-icon">✕</span> Integration with state-specific portals other than VAHAN (MoRTH).</li>
+  </ul>
+</section>
+
+<!-- Dependencies -->
+<section>
+  <h2>Dependencies</h2>
+  <div class="dep-grid">
+    <div class="dep-card">
+      <div class="dep-name">GPS Module</div>
+      <div class="dep-desc">Source of bus number plate data — required for VAHAN plate lookup queries</div>
+    </div>
+    <div class="dep-card">
+      <div class="dep-name">VAHAN API (MoRTH)</div>
+      <div class="dep-desc">Government API for challan lookup by number plate — external dependency</div>
+    </div>
+  </div>
+</section>
+
+<!-- Timeline -->
+<section>
+  <h2>Timeline</h2>
+  <ul class="timeline-list">
+    <li class="timeline-item">
+      <div class="timeline-left"><div class="t-dot"></div><div class="t-line"></div></div>
+      <div class="timeline-content">
+        <div class="t-date">31 March 2025</div>
+        <div class="t-milestone">Milestone 1 — VAHAN API integration complete</div>
+      </div>
+    </li>
+    <li class="timeline-item">
+      <div class="timeline-left"><div class="t-dot"></div><div class="t-line"></div></div>
+      <div class="timeline-content">
+        <div class="t-date">15 April 2025</div>
+        <div class="t-milestone">Milestone 2 — Beta launch with 2 pilot hubs</div>
+      </div>
+    </li>
+    <li class="timeline-item">
+      <div class="timeline-left"><div class="t-dot"></div><div class="t-line"></div></div>
+      <div class="timeline-content">
+        <div class="t-date">30 April 2025</div>
+        <div class="t-milestone">Milestone 3 — Full rollout across all hubs</div>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- Open Questions -->
+<section>
+  <h2>Open Questions</h2>
+  <div class="oq-item">
+    <div class="oq-label">Open Question 1</div>
+    Should drivers be notified of their challans directly, or only Hub Managers? Impact on accountability model TBD.
+  </div>
+  <div class="oq-item">
+    <div class="oq-label">Open Question 2</div>
+    Who approves payment — Hub Manager or Ops Head? Payment threshold for approval-gating to be defined.
+  </div>
+</section>
+
+<div class="footer">
+  <span>Product Requirements Document — Confidential — Draft</span>
+  <span>v1.0 &nbsp;|&nbsp; 12 March 2025</span>
+</div>
+
+</body>
+</html>

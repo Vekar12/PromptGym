@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RAG Pipeline Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 28px; font-size: 0.83rem; }
+  h1 { font-size: 1.1rem; font-weight: 800; color: #3fb950; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; font-size: 0.75rem; margin-bottom: 24px; }
+  .pipeline { display: flex; flex-direction: column; gap: 16px; }
+  .phase { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 16px; }
+  .phase-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .phase-badge { border-radius: 6px; padding: 3px 10px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+  .badge-ingest { background: #1f6feb33; color: #58a6ff; }
+  .badge-retrieve { background: #3fb95033; color: #3fb950; }
+  .badge-generate { background: #bc8cff33; color: #bc8cff; }
+  .phase-title { font-weight: 700; font-size: 0.9rem; }
+  .steps { display: flex; gap: 0; align-items: stretch; flex-wrap: nowrap; overflow-x: auto; }
+  .step-box { background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 10px 12px; min-width: 140px; flex: 1; }
+  .step-name { font-weight: 700; font-size: 0.78rem; margin-bottom: 4px; }
+  .step-detail { font-size: 0.7rem; color: #8b949e; line-height: 1.4; }
+  .arrow { display: flex; align-items: center; padding: 0 4px; color: #30363d; font-size: 1.1rem; flex-shrink: 0; }
+  .config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .config-card { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 12px; }
+  .config-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #8b949e; margin-bottom: 8px; }
+  .config-val { font-family: monospace; font-size: 0.78rem; color: #79c0ff; }
+  .eval-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #21262d; }
+  .eval-name { flex: 1; font-size: 0.78rem; color: #e6edf3; }
+  .eval-score { font-family: monospace; font-size: 0.85rem; font-weight: 700; }
+  .score-good { color: #3fb950; }
+  .score-warn { color: #d2a650; }
+  .score-bad { color: #f85149; }
+  .section-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #8b949e; margin: 20px 0 10px; border-top: 1px solid #21262d; padding-top: 16px; }
+</style>
+</head>
+<body>
+<h1>RAG Pipeline Architecture</h1>
+<p class="subtitle">Production-grade retrieval-augmented generation for internal knowledge base Q&amp;A</p>
+
+<div class="pipeline">
+  <div class="phase">
+    <div class="phase-header"><span class="phase-badge badge-ingest">Phase 1</span><span class="phase-title">Ingestion</span></div>
+    <div class="steps">
+      <div class="step-box"><div class="step-name">Document Loader</div><div class="step-detail">PDF, DOCX, Confluence, Notion via connectors. Incremental sync every 6h.</div></div>
+      <div class="arrow">→</div>
+      <div class="step-box"><div class="step-name">Chunker</div><div class="step-detail">Recursive character split. Chunk: 512 tokens, overlap: 64. Preserve section headers.</div></div>
+      <div class="arrow">→</div>
+      <div class="step-box"><div class="step-name">Embedder</div><div class="step-detail">text-embedding-3-large. 3072 dims. Batch 100 docs/call.</div></div>
+      <div class="arrow">→</div>
+      <div class="step-box"><div class="step-name">Vector Store</div><div class="step-detail">Pinecone (prod) / Chroma (dev). HNSW index. Metadata: source, dept, date.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header"><span class="phase-badge badge-retrieve">Phase 2</span><span class="phase-title">Retrieval</span></div>
+    <div class="steps">
+      <div class="step-box"><div class="step-name">Query Rewriter</div><div class="step-detail">GPT-4o rewrites ambiguous queries. HyDE for sparse queries. Returns 3 variants.</div></div>
+      <div class="arrow">→</div>
+      <div class="step-box"><div class="step-name">Hybrid Search</div><div class="step-detail">Dense (cosine) + BM25 sparse. RRF fusion. Top-k: 20.</div></div>
+      <div class="arrow">→</div>
+      <div class="step-box"><div class="step-name">Reranker</div><div class="step-detail">Cohere rerank-v3. Cross-encoder scoring. Returns top 5 chunks.</div></div>
+      <div class="arrow">→</div>
+      <div class="step-box"><div class="step-name">Context Builder</div><div class="step-detail">Assemble context window. Inject source metadata. Max 4096 tokens.</div></div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header"><span class="phase-badge badge-generate">Phase 3</span><span class="phase-title">Generation</span></div>
+    <div class="steps">
+      <div class="step-box"><div class="step-name">Prompt Assembly</div><div class="step-detail">System + context + user query. Role: internal assistant. Cite sources inline.</div></div>
+      <div class="arrow">→</div>
+      <div class="step-box"><div class="step-name">LLM Call</div><div class="step-detail">claude-3-5-sonnet. Temp: 0.2. Max tokens: 1024. Stream to UI.</div></div>
+      <div class="arrow">→</div>
+      <div class="step-box"><div class="step-name">Citation Validator</div><div class="step-detail">Verify each [Source X] exists in retrieved docs. Strip hallucinated cites.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">Configuration</div>
+<div class="config-grid">
+  <div class="config-card"><div class="config-label">Embedding Model</div><div class="config-val">text-embedding-3-large</div></div>
+  <div class="config-card"><div class="config-label">Chunk Size</div><div class="config-val">512 tokens / 64 overlap</div></div>
+  <div class="config-card"><div class="config-label">Retrieval Top-K</div><div class="config-val">20 → rerank → 5</div></div>
+</div>
+
+<div class="section-label">Eval Scores (RAGAS — last run)</div>
+<div class="eval-row"><span class="eval-name">Faithfulness</span><span class="eval-score score-good">0.91</span></div>
+<div class="eval-row"><span class="eval-name">Answer Relevancy</span><span class="eval-score score-good">0.88</span></div>
+<div class="eval-row"><span class="eval-name">Context Recall</span><span class="eval-score score-warn">0.74</span></div>
+<div class="eval-row"><span class="eval-name">Context Precision</span><span class="eval-score score-good">0.82</span></div>
+</body>
+</html>

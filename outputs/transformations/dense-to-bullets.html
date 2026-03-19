@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dense Text to Bullet Points</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8f9fa; color: #1a1a1a; padding: 28px; max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { font-size: 0.75rem; color: #666; margin-bottom: 24px; }
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .col-head { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; padding: 5px 10px; border-radius: 4px; }
+  .ch-before { background: #fce4ec; color: #b71c1c; }
+  .ch-after { background: #e8f5e9; color: #2e7d32; }
+  .before-box { background: white; border-radius: 8px; padding: 16px; font-size: 0.82rem; line-height: 1.75; color: #555; border: 2px solid #fce4ec; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .after-box { background: white; border-radius: 8px; padding: 16px; font-size: 0.82rem; border: 2px solid #e8f5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .section-head { font-size: 0.75rem; font-weight: 800; color: #1565c0; text-transform: uppercase; letter-spacing: 0.06em; margin: 12px 0 6px; }
+  .section-head:first-child { margin-top: 0; }
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 5px 0; padding-left: 18px; position: relative; font-size: 0.8rem; color: #222; line-height: 1.5; }
+  ul li::before { content: '•'; position: absolute; left: 4px; color: #1565c0; font-weight: 900; }
+  ul li strong { color: #1a1a1a; }
+  .arrow-col { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #ccc; }
+  .metrics-row { display: flex; gap: 12px; background: white; border-radius: 8px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .metric { flex: 1; text-align: center; }
+  .metric-val { font-size: 1.1rem; font-weight: 800; color: #1565c0; }
+  .metric-label { font-size: 0.65rem; color: #888; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+</style>
+</head>
+<body>
+<h1>Dense Text → Structured Bullets</h1>
+<p class="subtitle">Quarterly business review narrative converted to exec-ready bullet format</p>
+
+<div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:12px;margin-bottom:20px;align-items:start;">
+  <div>
+    <div class="col-head ch-before">Original — Dense Paragraph</div>
+    <div class="before-box">
+      The company achieved revenue of ₹48 crore in Q3, representing a 22% year-on-year increase, driven primarily by growth in our enterprise segment which contributed 64% of total revenue. However, EBITDA margins contracted by 3.2 percentage points to 14.8% due to elevated customer acquisition costs following the launch of two new sales regions in Tier-2 cities. Churn improved to 1.8% monthly from 2.4% in the prior quarter, though the SMB cohort continues to show attrition above 3%. Headcount increased to 340 from 298 as we made targeted hires in engineering and sales. Key risks for Q4 include the delayed onboarding of a large enterprise client worth ₹4.2 crore ARR and uncertainty around a proposed regulatory change affecting our data processing operations in two states.
+    </div>
+  </div>
+  <div class="arrow-col">→</div>
+  <div>
+    <div class="col-head ch-after">Transformed — Structured Bullets</div>
+    <div class="after-box">
+      <div class="section-head">Revenue</div>
+      <ul>
+        <li><strong>₹48 Cr Q3 revenue</strong> — +22% YoY</li>
+        <li>Enterprise = <strong>64% of revenue</strong> (primary driver)</li>
+      </ul>
+      <div class="section-head">Margins</div>
+      <ul>
+        <li>EBITDA: <strong>14.8%</strong> (−3.2pp QoQ)</li>
+        <li>Cause: Higher CAC from Tier-2 city expansion (2 new regions)</li>
+      </ul>
+      <div class="section-head">Retention</div>
+      <ul>
+        <li>Overall churn: <strong>1.8%/mo</strong> (was 2.4% — improving)</li>
+        <li>SMB churn still elevated: <strong>&gt;3%</strong> — watch closely</li>
+      </ul>
+      <div class="section-head">Team</div>
+      <ul>
+        <li>Headcount: <strong>340</strong> (↑42 from 298) — Eng + Sales hires</li>
+      </ul>
+      <div class="section-head">Q4 Risks</div>
+      <ul>
+        <li>Enterprise onboarding delayed: <strong>₹4.2 Cr ARR at risk</strong></li>
+        <li>Regulatory uncertainty: data processing in 2 states</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="metrics-row">
+  <div class="metric"><div class="metric-val">312→186</div><div class="metric-label">Words</div></div>
+  <div class="metric"><div class="metric-val">40%</div><div class="metric-label">Shorter</div></div>
+  <div class="metric"><div class="metric-val">5</div><div class="metric-label">Clear Sections</div></div>
+  <div class="metric"><div class="metric-val">~8s</div><div class="metric-label">Scan Time</div></div>
+</div>
+</body>
+</html>

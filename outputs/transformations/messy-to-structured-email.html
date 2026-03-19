@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Transformation — Before &amp; After</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; color: #1a1a2e; max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* Page header */
+  .page-header { margin-bottom: 22px; }
+  .page-badge { display: inline-block; background: #37474f; color: #eceff1; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; padding: 3px 10px; border-radius: 3px; margin-bottom: 8px; }
+  .page-title { font-size: 20px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
+  .page-subtitle { font-size: 13px; color: #666; }
+
+  /* Side by side panels */
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  /* Before panel */
+  .before-panel { background: #FFF5F5; border: 1.5px solid #ffcdd2; border-radius: 10px; overflow: hidden; }
+  .after-panel { background: #F0FFF4; border: 1.5px solid #c8e6c9; border-radius: 10px; overflow: hidden; }
+
+  .panel-label-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; }
+  .before-panel .panel-label-bar { background: #c62828; }
+  .after-panel .panel-label-bar { background: #2e7d32; }
+  .panel-label-text { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
+  .panel-label-desc { font-size: 10px; color: rgba(255,255,255,0.75); margin-left: auto; }
+
+  /* Email chrome */
+  .email-chrome { background: #fff; margin: 14px; border-radius: 6px; border: 1px solid #e0e0e0; overflow: hidden; }
+  .email-chrome-bar { background: #f5f5f5; border-bottom: 1px solid #e0e0e0; padding: 8px 12px; display: flex; gap: 5px; }
+  .chrome-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #ef5350; }
+  .dot-yellow { background: #ffa726; }
+  .dot-green { background: #66bb6a; }
+  .email-header-area { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+  .email-row { display: flex; gap: 8px; font-size: 12px; margin-bottom: 5px; }
+  .email-row:last-child { margin-bottom: 0; }
+  .email-row-label { color: #888; font-weight: 600; min-width: 48px; }
+  .email-row-val { color: #333; }
+  .email-subject-text { font-weight: 700; color: #1a1a2e !important; }
+  .email-body-area { padding: 14px 16px; font-size: 13px; color: #333; line-height: 1.7; }
+
+  /* Callouts */
+  .callouts { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .callout { display: flex; align-items: flex-start; gap: 10px; border-radius: 6px; padding: 10px 12px; font-size: 12px; line-height: 1.5; }
+  .before-panel .callout { background: #fff; border: 1.5px solid #ef5350; color: #5d0000; }
+  .after-panel .callout { background: #fff; border: 1.5px solid #43a047; color: #003300; }
+  .callout-num { width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .before-panel .callout-num { background: #c62828; color: #fff; }
+  .after-panel .callout-num { background: #2e7d32; color: #fff; }
+
+  /* Structured email specific styles */
+  .struct-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #2e7d32; margin-bottom: 3px; margin-top: 10px; }
+  .struct-label:first-child { margin-top: 0; }
+  .struct-content { font-size: 13px; color: #333; line-height: 1.6; margin-bottom: 2px; }
+  .action-item { background: #e8f5e9; border-left: 3px solid #2e7d32; padding: 6px 10px; border-radius: 0 4px 4px 0; font-size: 12.5px; color: #1b5e20; margin-bottom: 4px; }
+  .sig-line { margin-top: 12px; font-size: 12px; color: #555; border-top: 1px solid #e0e0e0; padding-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-badge">Transformation Example</div>
+  <div class="page-title">Email Restructuring — Before &amp; After</div>
+  <div class="page-subtitle">Prompt: Transform unstructured field email into a professional, action-oriented message</div>
+</div>
+
+<div class="comparison">
+
+  <!-- BEFORE Panel -->
+  <div class="before-panel">
+    <div class="panel-label-bar">
+      <span class="panel-label-text">Before — Original Email</span>
+      <span class="panel-label-desc">Unstructured</span>
+    </div>
+
+    <div class="email-chrome">
+      <div class="email-chrome-bar">
+        <span class="chrome-dot dot-red"></span>
+        <span class="chrome-dot dot-yellow"></span>
+        <span class="chrome-dot dot-green"></span>
+      </div>
+      <div class="email-header-area">
+        <div class="email-row">
+          <span class="email-row-label">From:</span>
+          <span class="email-row-val">ravi.kulkarni@ops.in</span>
+        </div>
+        <div class="email-row">
+          <span class="email-row-label">To:</span>
+          <span class="email-row-val">ops-team@mumbaibus.in</span>
+        </div>
+        <div class="email-row">
+          <span class="email-row-label">Subject:</span>
+          <span class="email-row-val email-subject-text">Bus issue yesterday - need help</span>
+        </div>
+      </div>
+      <div class="email-body-area">
+        Hi, so yesterday our bus was having some problems you see and the driver told me there was engine noise and also the passengers were complaining and then we had to stop midway on route 12 near Bandra station so the passengers had to get off and also there was some delay because we couldn't reach the workshop and we tried calling but nobody picked up and also the route was affected for like 2 hours I think maybe more and I wanted to flag this to you guys and also we need to do something about the workshop response time they are really slow lately hope you can help thanks
+      </div>
+    </div>
+
+    <!-- Callouts -->
+    <div class="callouts">
+      <div class="callout">
+        <span class="callout-num">1</span>
+        <span><strong>No subject clarity</strong> — "Bus issue" gives no actionable info; reader cannot prioritise without opening the email.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-num">2</span>
+        <span><strong>Key data buried</strong> — bus ID, route number, exact time, passenger count are all absent or implied.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-num">3</span>
+        <span><strong>No clear ask</strong> — reader cannot determine what action is required or who should take it.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-num">4</span>
+        <span><strong>Mixed tone</strong> — informal, stream-of-consciousness writing is inappropriate for an incident report in a professional ops context.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AFTER Panel -->
+  <div class="after-panel">
+    <div class="panel-label-bar">
+      <span class="panel-label-text">After — Structured Email</span>
+      <span class="panel-label-desc">Action-oriented</span>
+    </div>
+
+    <div class="email-chrome">
+      <div class="email-chrome-bar">
+        <span class="chrome-dot dot-red"></span>
+        <span class="chrome-dot dot-yellow"></span>
+        <span class="chrome-dot dot-green"></span>
+      </div>
+      <div class="email-header-area">
+        <div class="email-row">
+          <span class="email-row-label">From:</span>
+          <span class="email-row-val">ravi.kulkarni@ops.in</span>
+        </div>
+        <div class="email-row">
+          <span class="email-row-label">To:</span>
+          <span class="email-row-val">ops-team@mumbaibus.in</span>
+        </div>
+        <div class="email-row">
+          <span class="email-row-label">Subject:</span>
+          <span class="email-row-val email-subject-text">[ACTION REQUIRED] Engine Failure — Bus MH-04-CD-3344, Route 12, 13 Mar 2025</span>
+        </div>
+      </div>
+      <div class="email-body-area">
+        <div class="struct-label">Situation</div>
+        <div class="struct-content">Bus MH-04-CD-3344 experienced engine failure at 14:35 on 13 March 2025, near Bandra Station on Route 12. The vehicle was stopped safely and all passengers were evacuated. No injuries reported.</div>
+
+        <div class="struct-label">Impact</div>
+        <div class="struct-content">Route 12 was non-operational for 2 hours 15 minutes (14:35–16:50). Estimated passenger impact: ~120 commuters. Workshop was unreachable during initial 45-minute window.</div>
+
+        <div class="struct-label">Action Required</div>
+        <div class="action-item">Workshop team to inspect vehicle and confirm repair timeline by EOD today (13 Mar).</div>
+        <div class="action-item">Ops Head to confirm if alternate vehicle can be deployed for evening Route 12 service.</div>
+
+        <div class="struct-label">Timeline</div>
+        <div class="struct-content">Vehicle must be operational by 06:00 AM on 15 March 2025 to avoid further route disruption.</div>
+
+        <div class="sig-line">Ravi Kulkarni &nbsp;|&nbsp; Hub Manager, Bandra Depot &nbsp;|&nbsp; +91 98200 33412</div>
+      </div>
+    </div>
+
+    <!-- Callouts -->
+    <div class="callouts">
+      <div class="callout">
+        <span class="callout-num">1</span>
+        <span><strong>Clear subject line</strong> — bus ID + route + date makes the email immediately actionable without opening it.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-num">2</span>
+        <span><strong>Situation / Impact / Action / Timeline</strong> — scannable structure allows ops manager to triage in seconds.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-num">3</span>
+        <span><strong>Specific data</strong> — times, passenger count, vehicle ID, and duration of impact are all explicitly stated.</span>
+      </div>
+      <div class="callout">
+        <span class="callout-num">4</span>
+        <span><strong>Named CTAs with deadlines</strong> — each action item has a clear owner and a specific deadline.</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

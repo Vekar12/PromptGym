@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWOT Analysis — Hyperlocal Grocery Delivery Startup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #ffffff;
+    color: #1A1A2E;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  .doc-header {
+    border-bottom: 3px solid #1A1A2E;
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  .doc-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #6366F1;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1A1A2E;
+    margin-bottom: 6px;
+  }
+  .meta {
+    font-size: 13px;
+    color: #6B7280;
+  }
+  .swot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px;
+  }
+  .quadrant {
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 280px;
+  }
+  .quadrant-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+  .quadrant-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid currentColor;
+    opacity: 0.9;
+  }
+  .point {
+    margin-bottom: 14px;
+  }
+  .point-header {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .point-desc {
+    font-size: 12.5px;
+    line-height: 1.5;
+    opacity: 0.85;
+  }
+  /* Strengths */
+  .strengths {
+    background: #D1FAE5;
+    color: #065F46;
+  }
+  .strengths .quadrant-title { border-color: #065F46; }
+  /* Weaknesses */
+  .weaknesses {
+    background: #FEE2E2;
+    color: #991B1B;
+  }
+  .weaknesses .quadrant-title { border-color: #991B1B; }
+  /* Opportunities */
+  .opportunities {
+    background: #DBEAFE;
+    color: #1E40AF;
+  }
+  .opportunities .quadrant-title { border-color: #1E40AF; }
+  /* Threats */
+  .threats {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+  .threats .quadrant-title { border-color: #92400E; }
+
+  .center-label {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  .axis-labels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .axis-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #9CA3AF;
+    padding: 6px;
+  }
+  .footer {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #E5E7EB;
+    font-size: 12px;
+    color: #9CA3AF;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="doc-label">Strategic Framework</div>
+  <h1>SWOT Analysis</h1>
+  <div class="meta">Hyperlocal Grocery Delivery Startup &nbsp;|&nbsp; Mumbai Operations &nbsp;|&nbsp; March 2025</div>
+</div>
+
+<div class="axis-labels">
+  <div class="axis-label">Internal Factors</div>
+  <div class="axis-label">Internal Factors</div>
+</div>
+
+<div class="swot-grid">
+
+  <!-- STRENGTHS -->
+  <div class="quadrant strengths">
+    <div class="quadrant-label">S</div>
+    <div class="quadrant-title">Strengths</div>
+    <div class="point">
+      <div class="point-header">Strong kirana relationships</div>
+      <div class="point-desc">200+ onboarded kiranas across 5 Mumbai zones</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Low CAC via WhatsApp</div>
+      <div class="point-desc">₹12 avg acquisition cost vs ₹180 industry avg</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Fast onboarding</div>
+      <div class="point-desc">Kirana live within 4 hours of signup</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Hyperlocal inventory</div>
+      <div class="point-desc">Real-time stock from nearby stores under 2km</div>
+    </div>
+  </div>
+
+  <!-- WEAKNESSES -->
+  <div class="quadrant weaknesses">
+    <div class="quadrant-label">W</div>
+    <div class="quadrant-title">Weaknesses</div>
+    <div class="point">
+      <div class="point-header">No cold storage</div>
+      <div class="point-desc">Cannot offer dairy/meat/frozen currently</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Cash dependency</div>
+      <div class="point-desc">67% orders still cash-on-delivery</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Manual reconciliation</div>
+      <div class="point-desc">End-of-day settlement done via WhatsApp voice notes</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Single city</div>
+      <div class="point-desc">Mumbai only — high concentration risk</div>
+    </div>
+  </div>
+
+  <!-- OPPORTUNITIES -->
+  <div class="quadrant opportunities">
+    <div class="quadrant-label">O</div>
+    <div class="quadrant-title">Opportunities</div>
+    <div class="point">
+      <div class="point-header">Tier 2 expansion</div>
+      <div class="point-desc">Pune, Nashik have 0 hyperlocal players</div>
+    </div>
+    <div class="point">
+      <div class="point-header">ONDC integration</div>
+      <div class="point-desc">Can list on ONDC with 3-week tech effort</div>
+    </div>
+    <div class="point">
+      <div class="point-header">B2B kirana credit</div>
+      <div class="point-desc">₹50–200L TAM in kirana working capital</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Festive surge</div>
+      <div class="point-desc">Q4 Diwali demand 4x normal — no competitor has inventory depth</div>
+    </div>
+  </div>
+
+  <!-- THREATS -->
+  <div class="quadrant threats">
+    <div class="quadrant-label">T</div>
+    <div class="quadrant-title">Threats</div>
+    <div class="point">
+      <div class="point-header">Blinkit expansion</div>
+      <div class="point-desc">Entered 3 Mumbai zones in Q4, aggressive pricing</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Margin compression</div>
+      <div class="point-desc">Supplier price hikes eroding already thin 8% margin</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Kirana trust</div>
+      <div class="point-desc">23% churn rate — kiranas return to traditional wholesale</div>
+    </div>
+    <div class="point">
+      <div class="point-header">Regulatory</div>
+      <div class="point-desc">FSSAI compliance requirements increasing for digital food platforms</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>Confidential — Internal Use Only</span>
+  <span>Framework: SWOT Analysis &nbsp;|&nbsp; March 2025</span>
+</div>
+
+</body>
+</html>

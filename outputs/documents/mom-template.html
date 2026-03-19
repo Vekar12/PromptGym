@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Minutes of Meeting</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #1a1a1a; padding: 32px 40px; max-width: 760px; margin: 0 auto; }
+  .header { border-bottom: 3px solid #1565c0; padding-bottom: 16px; margin-bottom: 24px; }
+  .doc-title { font-size: 1.3rem; font-weight: 800; color: #1565c0; letter-spacing: -0.02em; }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; font-size: 0.8rem; }
+  .meta-row { display: flex; gap: 8px; }
+  .meta-label { color: #666; min-width: 80px; font-weight: 600; }
+  .meta-val { color: #111; }
+  .section { margin-bottom: 24px; }
+  .section-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #1565c0; border-bottom: 1px solid #e3eaf5; padding-bottom: 6px; margin-bottom: 12px; }
+  .attendee-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .attendee { background: #e8eef8; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 500; color: #1a3a6b; }
+  .attendee.absent { background: #f5f5f5; color: #999; text-decoration: line-through; }
+  .agenda-item { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+  .agenda-num { background: #1565c0; color: white; border-radius: 50%; width: 22px; height: 22px; min-width: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
+  .agenda-text { font-size: 0.82rem; line-height: 1.5; }
+  .decision { background: #e8f5e9; border-left: 4px solid #2e7d32; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.82rem; }
+  .action-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .action-table th { background: #f0f4fc; text-align: left; padding: 8px 10px; font-weight: 700; color: #444; border-bottom: 2px solid #c5d3ee; }
+  .action-table td { padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .action-table tr:hover td { background: #fafcff; }
+  .badge { display: inline-block; border-radius: 4px; padding: 2px 7px; font-size: 0.68rem; font-weight: 700; }
+  .badge-open { background: #fff3e0; color: #e65100; }
+  .badge-done { background: #e8f5e9; color: #2e7d32; }
+  .badge-inprog { background: #e3f2fd; color: #1565c0; }
+  .next-date { font-size: 0.82rem; background: #f5f7ff; border: 1px solid #d0daef; border-radius: 6px; padding: 10px 14px; color: #333; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="doc-title">Minutes of Meeting</div>
+  <div class="meta-grid">
+    <div class="meta-row"><span class="meta-label">Meeting</span><span class="meta-val">Q3 Product Roadmap Review</span></div>
+    <div class="meta-row"><span class="meta-label">Date</span><span class="meta-val">19 March 2026, 11:00–12:30 IST</span></div>
+    <div class="meta-row"><span class="meta-label">Venue</span><span class="meta-val">Conf. Room B2 / Zoom hybrid</span></div>
+    <div class="meta-row"><span class="meta-label">Noted by</span><span class="meta-val">Priya S. (PM)</span></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Attendees</div>
+  <div class="attendee-list">
+    <span class="attendee">Arjun K. (CPO)</span>
+    <span class="attendee">Priya S. (PM)</span>
+    <span class="attendee">Rohan V. (Eng Lead)</span>
+    <span class="attendee">Sneha M. (Design)</span>
+    <span class="attendee">Dev T. (Data)</span>
+    <span class="attendee absent">Karan R. (Marketing)</span>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Agenda Items Discussed</div>
+  <div class="agenda-item"><div class="agenda-num">1</div><div class="agenda-text"><strong>Q2 retro summary</strong> — Sprint velocity down 12% vs target; root cause: dependency on external auth API. Resolved in w3.</div></div>
+  <div class="agenda-item"><div class="agenda-num">2</div><div class="agenda-text"><strong>Q3 theme alignment</strong> — Agreed focus: retention features over acquisition. NRR improvement is H1 OKR.</div></div>
+  <div class="agenda-item"><div class="agenda-num">3</div><div class="agenda-text"><strong>Feature prioritisation</strong> — Reviewed 9 backlog items against RICE scores. Top 3 shortlisted for next sprint.</div></div>
+  <div class="agenda-item"><div class="agenda-num">4</div><div class="agenda-text"><strong>Infra capacity</strong> — Rohan flagged DB migration needed before >10k DAU. Timeline: end of April.</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Key Decisions</div>
+  <div class="decision">✅ Onboarding checklist feature will ship in Sprint 14 (April 7 go-live).</div>
+  <div class="decision">✅ "Smart nudge" push notification feature deprioritised to Q4 — insufficient data to validate.</div>
+  <div class="decision">✅ Design to deliver mobile-responsive mocks by March 28 before dev handoff.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Action Items</div>
+  <table class="action-table">
+    <thead>
+      <tr><th>Action</th><th>Owner</th><th>Due</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Share RICE scoring spreadsheet with full team</td><td>Priya S.</td><td>Mar 21</td><td><span class="badge badge-open">Open</span></td></tr>
+      <tr><td>Draft DB migration plan with rollback strategy</td><td>Rohan V.</td><td>Mar 26</td><td><span class="badge badge-inprog">In Progress</span></td></tr>
+      <tr><td>Mobile mockups for onboarding flow (3 screens)</td><td>Sneha M.</td><td>Mar 28</td><td><span class="badge badge-open">Open</span></td></tr>
+      <tr><td>Pull churn cohort data for retention analysis</td><td>Dev T.</td><td>Mar 24</td><td><span class="badge badge-done">Done</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title">Next Meeting</div>
+  <div class="next-date">📅 Sprint 13 Planning — Thursday, March 26 · 10:00 IST · Zoom (link on calendar)</div>
+</div>
+</body>
+</html>

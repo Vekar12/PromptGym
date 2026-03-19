@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Agent Orchestration Blueprint</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 28px; font-size: 0.83rem; }
+  h1 { font-size: 1.1rem; font-weight: 800; color: #58a6ff; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; font-size: 0.75rem; margin-bottom: 24px; }
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 0; }
+  .step-left { display: flex; flex-direction: column; align-items: center; width: 36px; min-width: 36px; }
+  .node { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; }
+  .connector { width: 2px; flex: 1; background: #30363d; min-height: 20px; }
+  .step-body { padding: 0 0 20px 14px; flex: 1; }
+  .step-title { font-weight: 700; color: #e6edf3; margin-bottom: 4px; font-size: 0.85rem; }
+  .step-desc { color: #8b949e; font-size: 0.78rem; line-height: 1.55; }
+  .n-orchestrator { background: #58a6ff22; border: 2px solid #58a6ff; color: #58a6ff; }
+  .n-planner { background: #3fb95022; border: 2px solid #3fb950; color: #3fb950; }
+  .n-executor { background: #d2a65022; border: 2px solid #d2a650; color: #d2a650; }
+  .n-critic { background: #f7853422; border: 2px solid #f78534; color: #f78534; }
+  .n-memory { background: #bc8cff22; border: 2px solid #bc8cff; color: #bc8cff; }
+  .agents-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+  .agent-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px; }
+  .agent-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .agent-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+  .agent-name { font-weight: 700; font-size: 0.82rem; color: #e6edf3; }
+  .agent-role { font-size: 0.7rem; color: #8b949e; margin-bottom: 8px; }
+  .tool-list { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tool-tag { background: #21262d; border: 1px solid #30363d; border-radius: 4px; padding: 2px 6px; font-size: 0.65rem; color: #8b949e; font-family: monospace; }
+  .section-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #8b949e; margin: 20px 0 10px; border-top: 1px solid #21262d; padding-top: 16px; }
+  .guardrail { background: #161b22; border-left: 3px solid #f78534; border-radius: 0 6px 6px 0; padding: 8px 12px; margin-bottom: 8px; font-size: 0.78rem; color: #8b949e; }
+</style>
+</head>
+<body>
+<h1>Multi-Agent Orchestration Blueprint</h1>
+<p class="subtitle">Pattern: Hierarchical · Task: Automated Competitive Research Report</p>
+
+<div class="section-label">Execution Flow</div>
+<div class="flow">
+  <div class="step">
+    <div class="step-left"><div class="node n-orchestrator">O</div><div class="connector"></div></div>
+    <div class="step-body"><div class="step-title">Orchestrator Agent</div><div class="step-desc">Receives user query, decomposes into subtasks, assigns agents, collects results, synthesises final output. Never executes tools directly.</div></div>
+  </div>
+  <div class="step">
+    <div class="step-left"><div class="node n-planner">P</div><div class="connector"></div></div>
+    <div class="step-body"><div class="step-title">Planner Agent</div><div class="step-desc">Builds execution DAG from subtask list. Identifies parallelisable steps. Returns structured task graph with dependencies.</div></div>
+  </div>
+  <div class="step">
+    <div class="step-left"><div class="node n-executor">E</div><div class="connector"></div></div>
+    <div class="step-body"><div class="step-title">Executor Agents (×3 parallel)</div><div class="step-desc">Web search, competitor pricing scraper, LinkedIn signal tracker. Each runs independently, returns structured JSON to orchestrator.</div></div>
+  </div>
+  <div class="step">
+    <div class="step-left"><div class="node n-critic">C</div><div class="connector"></div></div>
+    <div class="step-body"><div class="step-title">Critic Agent</div><div class="step-desc">Validates executor outputs: checks for recency (≥2026), source credibility score ≥0.7, contradictions flagged for human review.</div></div>
+  </div>
+  <div class="step">
+    <div class="step-left"><div class="node n-memory">M</div></div>
+    <div class="step-body"><div class="step-title">Memory Agent</div><div class="step-desc">Stores validated findings to vector DB. Retrieves prior reports for delta comparison. Prevents redundant searches within 24h window.</div></div>
+  </div>
+</div>
+
+<div class="section-label">Agent Tool Manifests</div>
+<div class="agents-grid">
+  <div class="agent-card">
+    <div class="agent-header"><div class="agent-icon" style="background:#58a6ff22">🎯</div><div class="agent-name">Orchestrator</div></div>
+    <div class="agent-role">Coordinator — no direct tool access</div>
+    <div class="tool-list"><span class="tool-tag">spawn_agent</span><span class="tool-tag">wait_for</span><span class="tool-tag">synthesise</span></div>
+  </div>
+  <div class="agent-card">
+    <div class="agent-header"><div class="agent-icon" style="background:#3fb95022">🔍</div><div class="agent-name">Web Executor</div></div>
+    <div class="agent-role">Search &amp; extract competitor signals</div>
+    <div class="tool-list"><span class="tool-tag">web_search</span><span class="tool-tag">fetch_url</span><span class="tool-tag">extract_json</span></div>
+  </div>
+  <div class="agent-card">
+    <div class="agent-header"><div class="agent-icon" style="background:#f7853422">🧠</div><div class="agent-name">Critic</div></div>
+    <div class="agent-role">Validate outputs, flag low-confidence</div>
+    <div class="tool-list"><span class="tool-tag">score_source</span><span class="tool-tag">diff_reports</span><span class="tool-tag">flag_human</span></div>
+  </div>
+  <div class="agent-card">
+    <div class="agent-header"><div class="agent-icon" style="background:#bc8cff22">💾</div><div class="agent-name">Memory</div></div>
+    <div class="agent-role">Persist &amp; retrieve research context</div>
+    <div class="tool-list"><span class="tool-tag">upsert_doc</span><span class="tool-tag">similarity_search</span><span class="tool-tag">expire_ttl</span></div>
+  </div>
+</div>
+
+<div class="section-label">Guardrails</div>
+<div class="guardrail">🚦 Executor agents cannot write to memory directly — all writes route through Critic validation first.</div>
+<div class="guardrail">🚦 Max orchestration depth: 2 levels. Sub-agents cannot spawn further sub-agents.</div>
+<div class="guardrail">🚦 Human-in-the-loop trigger: any finding with confidence &lt;0.6 pauses the pipeline and surfaces for review.</div>
+</body>
+</html>

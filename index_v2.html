@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptGym v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="data/rounds_v2.js"></script>
+<style>
+/* ── RESET & BASE ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f1117;
+  --bg2: #171b25;
+  --bg3: #1e2333;
+  --border: #2a2f45;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --accent: #6366f1;
+  --accent-glow: #6366f133;
+  --green: #22c55e;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --purple: #a855f7;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+html, body { height: 100%; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; overflow-x: hidden; }
+a { color: var(--accent); text-decoration: none; }
+button { font-family: var(--sans); cursor: pointer; border: none; }
+input, textarea { font-family: var(--sans); }
+textarea { resize: vertical; }
+
+/* ── UTILITY ──────────────────────────────────────────────────────────── */
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* ── LAYOUT ───────────────────────────────────────────────────────────── */
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+.screen { flex: 1; display: flex; flex-direction: column; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── TOP NAV ──────────────────────────────────────────────────────────── */
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+.nav-brand { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--accent); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--text2); font-weight: 400; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.nav-stat { font-size: 0.75rem; color: var(--text2); }
+.nav-stat strong { color: var(--text); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; font-weight: 500; transition: all 0.15s; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── BUTTONS ──────────────────────────────────────────────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 10px; padding: 11px 22px; font-size: 0.9rem; font-weight: 700; transition: all 0.15s; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #4f52d9; box-shadow: 0 0 20px var(--accent-glow); }
+.btn-secondary { background: var(--bg3); border: 1px solid var(--border); color: var(--text); }
+.btn-secondary:hover { border-color: var(--accent); }
+.btn-sm { padding: 7px 14px; font-size: 0.8rem; border-radius: 8px; }
+.btn-danger { background: #ef444422; border: 1px solid #ef444444; color: var(--red); }
+.btn-danger:hover { background: #ef444433; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── CARDS ────────────────────────────────────────────────────────────── */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.card-sm { border-radius: 10px; padding: 14px 16px; }
+
+/* ── FORM ELEMENTS ────────────────────────────────────────────────────── */
+.input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; color: var(--text); font-size: 0.9rem; transition: border-color 0.15s; }
+.input:focus { outline: none; border-color: var(--accent); }
+.input::placeholder { color: var(--text3); }
+.label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+
+/* ── BADGE / PILL ─────────────────────────────────────────────────────── */
+.badge { display: inline-flex; align-items: center; border-radius: 6px; padding: 3px 9px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.badge-conciseness { background: #6366f122; color: #818cf8; }
+.badge-context { background: #3b82f622; color: #60a5fa; }
+.badge-tone { background: #a855f722; color: #c084fc; }
+.badge-examples { background: #22c55e22; color: #4ade80; }
+.badge-diff-1 { background: #22c55e18; color: var(--green); }
+.badge-diff-2 { background: #f59e0b18; color: var(--yellow); }
+.badge-diff-3 { background: #ef444418; color: var(--red); }
+.cat-badge { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: 20px; padding: 4px 12px; font-size: 0.72rem; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.cat-badge:hover, .cat-badge.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* ── SCREEN: SETUP ────────────────────────────────────────────────────── */
+#screen-setup { align-items: center; justify-content: center; padding: 40px 20px; }
+.setup-box { width: 100%; max-width: 500px; }
+.setup-logo { font-family: var(--mono); font-size: 2rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.setup-logo span { color: var(--text2); font-weight: 400; }
+.setup-tagline { color: var(--text2); font-size: 0.9rem; margin-bottom: 32px; }
+.setup-section { margin-bottom: 20px; }
+.habits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.habit-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.habit-icon { font-size: 1.2rem; margin-bottom: 4px; }
+.habit-name { font-size: 0.75rem; font-weight: 800; color: var(--text); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+.habit-desc { font-size: 0.72rem; color: var(--text2); line-height: 1.4; }
+
+/* ── SCREEN: DASHBOARD ────────────────────────────────────────────────── */
+#screen-dashboard { padding: 24px; max-width: 1100px; margin: 0 auto; width: 100%; }
+.dashboard-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
+.dashboard-title { font-size: 1.3rem; font-weight: 800; }
+.dashboard-subtitle { color: var(--text2); font-size: 0.85rem; margin-top: 2px; }
+.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.radar-wrap { position: relative; }
+.radar-wrap canvas { max-width: 100%; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.stat-val { font-size: 1.6rem; font-weight: 800; font-family: var(--mono); }
+.stat-label { font-size: 0.72rem; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+.stat-val.green { color: var(--green); }
+.stat-val.yellow { color: var(--yellow); }
+.stat-val.accent { color: var(--accent); }
+.habit-breakdown { margin-top: 20px; }
+.habit-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.habit-row-label { font-size: 0.8rem; font-weight: 600; width: 120px; min-width: 120px; }
+.habit-bar-bg { flex: 1; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+.habit-bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+.habit-bar-fill.conciseness { background: #6366f1; }
+.habit-bar-fill.context { background: #3b82f6; }
+.habit-bar-fill.tone { background: #a855f7; }
+.habit-bar-fill.examples { background: #22c55e; }
+.habit-score { font-family: var(--mono); font-size: 0.8rem; color: var(--text2); width: 36px; text-align: right; }
+
+/* ── SCREEN: DRILL-PICK ───────────────────────────────────────────────── */
+#screen-drill-pick { padding: 24px; max-width: 1000px; margin: 0 auto; width: 100%; }
+.filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.filter-section { margin-bottom: 8px; }
+.filter-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-right: 8px; }
+.rounds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.round-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; gap: 8px; }
+.round-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.15); }
+.round-card-title { font-weight: 700; font-size: 0.9rem; }
+.round-card-desc { font-size: 0.75rem; color: var(--text2); line-height: 1.5; flex: 1; }
+.round-card-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.no-rounds { text-align: center; padding: 60px 20px; color: var(--text2); }
+.no-rounds-icon { font-size: 2rem; margin-bottom: 8px; }
+
+/* ── SCREEN: ROUND ────────────────────────────────────────────────────── */
+#screen-round { display: grid; grid-template-columns: 1fr 380px; height: calc(100vh - 57px); overflow: hidden; }
+.round-preview { background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.round-preview-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg2); display: flex; align-items: center; justify-content: space-between; }
+.round-preview-title { font-weight: 700; font-size: 0.9rem; }
+.round-preview-badges { display: flex; gap: 6px; align-items: center; }
+.output-frame { flex: 1; width: 100%; border: none; background: white; }
+.round-sidebar { display: flex; flex-direction: column; overflow: hidden; background: var(--bg2); }
+.round-sidebar-inner { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.prompt-area { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px; min-height: 120px; color: var(--text); font-size: 0.85rem; font-family: var(--mono); width: 100%; line-height: 1.6; transition: border-color 0.15s; }
+.prompt-area:focus { outline: none; border-color: var(--accent); }
+.prompt-area::placeholder { color: var(--text3); font-family: var(--sans); }
+.word-count { font-size: 0.72rem; color: var(--text3); text-align: right; font-family: var(--mono); }
+.hint-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 0.8rem; color: var(--text2); line-height: 1.55; }
+.hint-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--yellow); margin-bottom: 6px; }
+.hint-content { color: var(--text); }
+.hint-loading { display: flex; gap: 4px; align-items: center; }
+.dot-anim { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: dotBounce 1.2s infinite; }
+.dot-anim:nth-child(2) { animation-delay: 0.2s; }
+.dot-anim:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce { 0%,80%,100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1.2); opacity: 1; } }
+.round-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+.round-footer .btn { flex: 1; justify-content: center; }
+
+/* ── SCREEN: EVALUATING ───────────────────────────────────────────────── */
+#screen-evaluating { align-items: center; justify-content: center; padding: 40px 20px; min-height: calc(100vh - 57px); }
+.eval-box { width: 100%; max-width: 480px; text-align: center; }
+.eval-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; }
+.eval-subtitle { color: var(--text2); font-size: 0.85rem; margin-bottom: 36px; }
+.eval-steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 36px; text-align: left; }
+.eval-step { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; }
+.eval-step-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; border: 2px solid var(--border); color: var(--text3); background: var(--bg2); transition: all 0.3s; }
+.eval-step.active .eval-step-icon { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+.eval-step.done .eval-step-icon { border-color: var(--green); background: #22c55e22; color: var(--green); }
+.eval-step-text { flex: 1; padding-top: 6px; }
+.eval-step-name { font-weight: 700; font-size: 0.85rem; }
+.eval-step-detail { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+.eval-progress { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.eval-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--purple)); border-radius: 2px; transition: width 0.5s ease; }
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SCREEN: FEEDBACK ─────────────────────────────────────────────────── */
+#screen-feedback { padding: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+.feedback-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.feedback-title { font-size: 1.15rem; font-weight: 800; }
+.score-badge { font-family: var(--mono); font-size: 1.6rem; font-weight: 800; color: var(--green); }
+.score-badge.mid { color: var(--yellow); }
+.score-badge.low { color: var(--red); }
+.iframe-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.iframe-wrap { display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+.iframe-label { padding: 8px 14px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 6px; }
+.iframe-label.original { background: #3b82f622; color: #60a5fa; }
+.iframe-label.generated { background: #6366f122; color: #818cf8; }
+.iframe-label .dot { width: 8px; height: 8px; border-radius: 50%; }
+.iframe-label.original .dot { background: #60a5fa; }
+.iframe-label.generated .dot { background: #818cf8; }
+.compare-frame { width: 100%; height: 380px; border: none; background: white; }
+.feedback-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.score-breakdown { }
+.score-rows { display: flex; flex-direction: column; gap: 10px; }
+.score-row { display: flex; align-items: center; gap: 10px; }
+.score-row-label { font-size: 0.78rem; font-weight: 600; width: 110px; min-width: 110px; }
+.score-bar-bg { flex: 1; height: 10px; background: var(--bg3); border-radius: 5px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 5px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+.score-val { font-family: var(--mono); font-size: 0.8rem; font-weight: 700; width: 36px; text-align: right; }
+.feedback-tip-section { }
+.tip-header { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); margin-bottom: 10px; }
+.tip-box { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 14px; font-size: 0.82rem; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+.ideal-prompt-box { background: var(--accent-glow); border: 1px solid var(--accent); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+.ideal-prompt-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 6px; }
+.ideal-prompt-text { font-family: var(--mono); font-size: 0.82rem; color: var(--text); line-height: 1.5; }
+.key-elements { }
+.key-elements-list { display: flex; flex-direction: column; gap: 6px; }
+.ke-item { display: flex; gap: 8px; align-items: flex-start; font-size: 0.78rem; }
+.ke-icon { font-size: 0.75rem; margin-top: 1px; flex-shrink: 0; }
+
+/* ── SCREEN: SUMMARY ──────────────────────────────────────────────────── */
+#screen-summary { padding: 24px; max-width: 800px; margin: 0 auto; width: 100%; }
+.summary-header { text-align: center; margin-bottom: 32px; }
+.summary-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+.summary-subtitle { color: var(--text2); }
+.summary-radar { max-width: 360px; margin: 0 auto 28px; }
+.summary-rounds { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.summary-round-row { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 14px; }
+.summary-round-title { font-weight: 600; font-size: 0.85rem; flex: 1; }
+.summary-round-score { font-family: var(--mono); font-weight: 800; font-size: 1rem; }
+.summary-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ── SHIMMER ──────────────────────────────────────────────────────────── */
+.shimmer { background: linear-gradient(90deg, var(--bg3) 25%, var(--bg2) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* ── ERROR TOAST ──────────────────────────────────────────────────────── */
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg2); border: 1px solid var(--red); color: var(--red); border-radius: 10px; padding: 12px 20px; font-size: 0.85rem; max-width: 480px; text-align: center; z-index: 1000; transition: transform 0.3s ease; pointer-events: none; }
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── RESPONSIVE ───────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  #screen-round { grid-template-columns: 1fr; grid-template-rows: 50vh 1fr; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .iframe-compare { grid-template-columns: 1fr; }
+  .feedback-bottom { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- ── NAV ───────────────────────────────────────────────────────────── -->
+<nav class="nav" id="main-nav" style="display:none">
+  <div class="nav-brand">Prompt<span>Gym</span> <span style="font-size:0.7rem;color:var(--accent);opacity:0.6">v2</span></div>
+  <div class="nav-right">
+    <span class="nav-stat" id="nav-rounds-done">Rounds: <strong>0</strong></span>
+    <button class="btn-ghost btn-sm" data-action="go-dashboard">Dashboard</button>
+    <button class="btn-ghost btn-sm" data-action="go-settings">⚙ Settings</button>
+  </div>
+</nav>
+
+<!-- ── SCREENS ────────────────────────────────────────────────────────── -->
+<div id="screen-setup" class="screen">
+  <div class="setup-box">
+    <div class="setup-logo">Prompt<span>Gym</span></div>
+    <div class="setup-tagline">See the output. Write the prompt. Build the habit.</div>
+    <div class="setup-section">
+      <label class="label" for="api-key-input">Gemini API Key</label>
+      <input id="api-key-input" class="input" type="password" placeholder="AIza..." autocomplete="off">
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:6px">Free at aistudio.google.com — no credit card needed. Stored locally, never sent anywhere else.</div>
+    </div>
+    <div class="setup-section" style="margin-bottom:28px">
+      <div class="habits-grid">
+        <div class="habit-card">
+          <div class="habit-icon">✂️</div>
+          <div class="habit-name">Conciseness</div>
+          <div class="habit-desc">Every word earns its place</div>
+        </div>
+        <div class="habit-card">
+          <div class="habit-icon">🎯</div>
+          <div class="habit-name">Context</div>
+          <div class="habit-desc">Right background for the task</div>
+        </div>
+        <div class="habit-card">
+          <div class="habit-icon">🎨</div>
+          <div class="habit-name">Tone & Format</div>
+          <div class="habit-desc">Voice, style, structure specified</div>
+        </div>
+        <div class="habit-card">
+          <div class="habit-icon">💡</div>
+          <div class="habit-name">Examples</div>
+          <div class="habit-desc">Anchor with patterns and samples</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" data-action="save-key">Start Training →</button>
+    <div id="key-error" style="font-size:0.78rem;color:var(--red);margin-top:8px;display:none"></div>
+  </div>
+</div>
+
+<div id="screen-dashboard" class="screen hidden">
+  <div class="dashboard-header">
+    <div>
+      <div class="dashboard-title">Training Dashboard</div>
+      <div class="dashboard-subtitle">Track your prompting habit scores over time</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary btn-sm" data-action="drill-by-habit">Drill by Habit</button>
+      <button class="btn btn-primary" data-action="start-session">Train All →</button>
+    </div>
+  </div>
+  <div class="dashboard-grid">
+    <div class="card">
+      <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:14px">Skill Radar</div>
+      <div class="radar-wrap"><canvas id="radar-chart" height="300"></canvas></div>
+    </div>
+    <div>
+      <div class="stats-grid" style="margin-bottom:16px">
+        <div class="stat-box"><div class="stat-val accent" id="stat-total">0</div><div class="stat-label">Total Rounds</div></div>
+        <div class="stat-box"><div class="stat-val green" id="stat-avg">—</div><div class="stat-label">Avg Score</div></div>
+        <div class="stat-box"><div class="stat-val yellow" id="stat-sessions">0</div><div class="stat-label">Sessions</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-streak">0🔥</div><div class="stat-label">Day Streak</div></div>
+      </div>
+      <div class="card">
+        <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:14px">Habit Breakdown</div>
+        <div class="habit-breakdown">
+          <div class="habit-row">
+            <div class="habit-row-label"><span class="badge badge-conciseness">✂️ Conciseness</span></div>
+            <div class="habit-bar-bg"><div class="habit-bar-fill conciseness" id="bar-conciseness" style="width:0%"></div></div>
+            <div class="habit-score" id="score-conciseness">—</div>
+          </div>
+          <div class="habit-row">
+            <div class="habit-row-label"><span class="badge badge-context">🎯 Context</span></div>
+            <div class="habit-bar-bg"><div class="habit-bar-fill context" id="bar-context" style="width:0%"></div></div>
+            <div class="habit-score" id="score-context">—</div>
+          </div>
+          <div class="habit-row">
+            <div class="habit-row-label"><span class="badge badge-tone">🎨 Tone</span></div>
+            <div class="habit-bar-bg"><div class="habit-bar-fill tone" id="bar-tone" style="width:0%"></div></div>
+            <div class="habit-score" id="score-tone">—</div>
+          </div>
+          <div class="habit-row">
+            <div class="habit-row-label"><span class="badge badge-examples">💡 Examples</span></div>
+            <div class="habit-bar-bg"><div class="habit-bar-fill examples" id="bar-examples" style="width:0%"></div></div>
+            <div class="habit-score" id="score-examples">—</div>
+          </div>
+        </div>
+        <div style="margin-top:20px">
+          <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:10px">Quick Drill</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="quick-drill-btns">
+            <button class="btn btn-secondary btn-sm" data-action="drill" data-habit="CONCISENESS">✂️ Conciseness</button>
+            <button class="btn btn-secondary btn-sm" data-action="drill" data-habit="CONTEXT">🎯 Context</button>
+            <button class="btn btn-secondary btn-sm" data-action="drill" data-habit="TONE_FORMAT">🎨 Tone & Format</button>
+            <button class="btn btn-secondary btn-sm" data-action="drill" data-habit="EXAMPLES">💡 Examples</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-drill-pick" class="screen hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <div style="font-size:1.1rem;font-weight:800" id="drill-pick-title">Choose a Round</div>
+      <div style="color:var(--text2);font-size:0.82rem;margin-top:2px" id="drill-pick-subtitle"></div>
+    </div>
+    <button class="btn btn-secondary btn-sm" data-action="go-dashboard">← Back</button>
+  </div>
+  <div class="filter-bar" id="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <button class="cat-badge active" data-filter-cat="all">All</button>
+    <button class="cat-badge" data-filter-cat="Dashboards">Dashboards</button>
+    <button class="cat-badge" data-filter-cat="Frameworks">Frameworks</button>
+    <button class="cat-badge" data-filter-cat="Documents">Documents</button>
+    <button class="cat-badge" data-filter-cat="Agents">Agents</button>
+    <button class="cat-badge" data-filter-cat="Code">Code</button>
+    <button class="cat-badge" data-filter-cat="Transformations">Transformations</button>
+    <span style="margin-left:8px" class="filter-label">Difficulty:</span>
+    <button class="cat-badge active" data-filter-diff="all">All</button>
+    <button class="cat-badge badge-diff-1" data-filter-diff="1">Beginner</button>
+    <button class="cat-badge badge-diff-2" data-filter-diff="2">Intermediate</button>
+    <button class="cat-badge badge-diff-3" data-filter-diff="3">Sharp</button>
+  </div>
+  <div class="rounds-grid" id="rounds-grid"></div>
+</div>
+
+<div id="screen-round" class="screen hidden">
+  <div class="round-preview">
+    <div class="round-preview-header">
+      <div class="round-preview-title" id="round-title"></div>
+      <div class="round-preview-badges" id="round-badges"></div>
+    </div>
+    <iframe id="output-frame" class="output-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+  <div class="round-sidebar">
+    <div class="round-sidebar-inner">
+      <div>
+        <div class="label" style="margin-bottom:6px">Round Description</div>
+        <div style="font-size:0.78rem;color:var(--text2);line-height:1.55" id="round-description"></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div class="label">Your Prompt</div>
+          <div class="word-count" id="word-count">0 words</div>
+        </div>
+        <textarea class="prompt-area" id="prompt-input" placeholder="Write the prompt you think produced this output..." rows="6"></textarea>
+      </div>
+      <div id="hint-container" style="display:none">
+        <div class="hint-box">
+          <div class="hint-label">💡 Hint <span id="hint-level"></span></div>
+          <div id="hint-content" class="hint-content"></div>
+        </div>
+      </div>
+    </div>
+    <div class="round-footer">
+      <button class="btn btn-secondary" id="hint-btn" data-action="get-hint" style="flex:0 0 auto">Hint</button>
+      <button class="btn btn-primary" id="submit-btn" data-action="submit-prompt" style="flex:1;justify-content:center">Submit →</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-evaluating" class="screen hidden">
+  <div class="eval-box">
+    <div class="eval-title">Evaluating your prompt...</div>
+    <div class="eval-subtitle">Gemini is generating and comparing outputs</div>
+    <div class="eval-steps">
+      <div class="eval-step" id="eval-step-1">
+        <div class="eval-step-icon">1</div>
+        <div class="eval-step-text">
+          <div class="eval-step-name">Parsing your prompt</div>
+          <div class="eval-step-detail">Analysing prompt structure and intent</div>
+        </div>
+      </div>
+      <div class="eval-step" id="eval-step-2">
+        <div class="eval-step-icon">2</div>
+        <div class="eval-step-text">
+          <div class="eval-step-name">Generating HTML output</div>
+          <div class="eval-step-detail">Asking Gemini to produce the output from your prompt</div>
+        </div>
+      </div>
+      <div class="eval-step" id="eval-step-3">
+        <div class="eval-step-icon">3</div>
+        <div class="eval-step-text">
+          <div class="eval-step-name">Semantic comparison</div>
+          <div class="eval-step-detail">Comparing your output vs the target on all 4 habits</div>
+        </div>
+      </div>
+      <div class="eval-step" id="eval-step-4">
+        <div class="eval-step-icon">4</div>
+        <div class="eval-step-text">
+          <div class="eval-step-name">Scoring habit dimensions</div>
+          <div class="eval-step-detail">Breaking down where you gained and lost points</div>
+        </div>
+      </div>
+      <div class="eval-step" id="eval-step-5">
+        <div class="eval-step-icon">5</div>
+        <div class="eval-step-text">
+          <div class="eval-step-name">Building feedback</div>
+          <div class="eval-step-detail">Preparing your personalised habit tip</div>
+        </div>
+      </div>
+    </div>
+    <div class="eval-progress"><div class="eval-progress-fill" id="eval-progress-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div id="screen-feedback" class="screen hidden">
+  <div class="feedback-header">
+    <div>
+      <div class="feedback-title" id="feedback-round-title"></div>
+      <div style="color:var(--text2);font-size:0.8rem;margin-top:2px" id="feedback-habit-badge"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div>
+        <div style="font-size:0.65rem;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Overall Score</div>
+        <div class="score-badge" id="overall-score-display">—</div>
+      </div>
+      <button class="btn btn-primary btn-sm" data-action="next-round">Next Round →</button>
+    </div>
+  </div>
+
+  <div class="iframe-compare">
+    <div class="iframe-wrap">
+      <div class="iframe-label original"><span class="dot"></span>Target Output</div>
+      <iframe id="compare-original" class="compare-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+    <div class="iframe-wrap">
+      <div class="iframe-label generated"><span class="dot"></span>Your Generated Output</div>
+      <iframe id="compare-generated" class="compare-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+  </div>
+
+  <div class="feedback-bottom">
+    <div class="card">
+      <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:14px">Habit Scores</div>
+      <div class="score-rows">
+        <div class="score-row">
+          <div class="score-row-label"><span class="badge badge-conciseness">✂️ Conciseness</span></div>
+          <div class="score-bar-bg"><div class="score-bar-fill" id="fb-bar-conciseness" style="width:0%;background:#6366f1"></div></div>
+          <div class="score-val" id="fb-score-conciseness">0</div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-label"><span class="badge badge-context">🎯 Context</span></div>
+          <div class="score-bar-bg"><div class="score-bar-fill" id="fb-bar-context" style="width:0%;background:#3b82f6"></div></div>
+          <div class="score-val" id="fb-score-context">0</div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-label"><span class="badge badge-tone">🎨 Tone & Format</span></div>
+          <div class="score-bar-bg"><div class="score-bar-fill" id="fb-bar-tone" style="width:0%;background:#a855f7"></div></div>
+          <div class="score-val" id="fb-score-tone">0</div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-label"><span class="badge badge-examples">💡 Examples</span></div>
+          <div class="score-bar-bg"><div class="score-bar-fill" id="fb-bar-examples" style="width:0%;background:#22c55e"></div></div>
+          <div class="score-val" id="fb-score-examples">0</div>
+        </div>
+      </div>
+      <div id="key-elements-section" style="margin-top:16px">
+        <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:10px">Key Elements</div>
+        <div class="key-elements-list" id="key-elements-list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="tip-header">Habit Tip</div>
+      <div class="tip-box" id="habit-tip"></div>
+      <div class="ideal-prompt-box">
+        <div class="ideal-prompt-label">Ideal Prompt Context</div>
+        <div class="ideal-prompt-text" id="ideal-prompt-display"></div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:8px">Your Prompt</div>
+        <div style="font-family:var(--mono);font-size:0.78rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text2);line-height:1.6" id="your-prompt-display"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-summary" class="screen hidden">
+  <div class="summary-header">
+    <div class="summary-title">Session Complete 🎉</div>
+    <div class="summary-subtitle" id="summary-subtitle"></div>
+  </div>
+  <div class="card summary-radar">
+    <canvas id="summary-radar-chart" height="280"></canvas>
+  </div>
+  <div class="summary-rounds" id="summary-rounds"></div>
+  <div class="summary-actions">
+    <button class="btn btn-secondary" data-action="go-dashboard">View Dashboard</button>
+    <button class="btn btn-primary" data-action="start-session">New Session →</button>
+  </div>
+</div>
+
+</div><!-- /#app -->
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'promptgym_v2';
+const DEFAULT_STATE = {
+  apiKey: '',
+  totalRounds: 0,
+  sessions: 0,
+  lastDate: null,
+  streak: 0,
+  habitScores: {
+    CONCISENESS: [],
+    CONTEXT: [],
+    TONE_FORMAT: [],
+    EXAMPLES: []
+  },
+  history: [] // { roundId, score, scores, prompt, ts }
+};
+
+const State = {
+  data: null,
+  load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      this.data = deepMerge(JSON.parse(JSON.stringify(DEFAULT_STATE)), saved);
+    } catch(e) {
+      this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
+  },
+  save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+  },
+  get(k) { return this.data[k]; },
+  set(k, v) { this.data[k] = v; this.save(); }
+};
+
+function deepMerge(base, override) {
+  for (const k in override) {
+    if (override[k] && typeof override[k] === 'object' && !Array.isArray(override[k])) {
+      base[k] = deepMerge(base[k] || {}, override[k]);
+    } else {
+      base[k] = override[k];
+    }
+  }
+  return base;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SESSION
+// ═══════════════════════════════════════════════════════════════
+const Session = {
+  rounds: [],       // rounds to play
+  idx: 0,           // current index
+  results: [],      // completed results
+  hintLevel: 0,     // 0-4 hints shown this round
+  currentRound: null,
+  generatedHTML: '',
+
+  start(rounds) {
+    this.rounds = shuffle([...rounds]);
+    this.idx = 0;
+    this.results = [];
+    this.currentRound = null;
+    this.generatedHTML = '';
+  },
+
+  current() { return this.rounds[this.idx]; },
+  hasMore() { return this.idx < this.rounds.length - 1; },
+
+  record(result) {
+    this.results.push(result);
+    // persist to state
+    const state = State.data;
+    state.totalRounds++;
+    state.history.unshift({ ...result, ts: Date.now() });
+    if (state.history.length > 200) state.history.pop();
+    // habit scores
+    const r = result;
+    state.habitScores.CONCISENESS.push(r.scores.conciseness);
+    state.habitScores.CONTEXT.push(r.scores.context);
+    state.habitScores.TONE_FORMAT.push(r.scores.tone);
+    state.habitScores.EXAMPLES.push(r.scores.examples);
+    // streak
+    const today = new Date().toDateString();
+    if (state.lastDate !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      state.streak = (state.lastDate === yesterday) ? state.streak + 1 : 1;
+      state.lastDate = today;
+    }
+    State.save();
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// GEMINI API
+// ═══════════════════════════════════════════════════════════════
+const API = {
+  MODEL: 'gemini-2.0-flash',
+  BASE: 'https://generativelanguage.googleapis.com/v1beta/models',
+
+  async call(prompt, systemInstruction = '') {
+    const key = State.get('apiKey');
+    const url = `${this.BASE}/${this.MODEL}:generateContent?key=${key}`;
+    const body = {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
+    };
+    if (systemInstruction) {
+      body.systemInstruction = { parts: [{ text: systemInstruction }] };
+    }
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `HTTP ${resp.status}`);
+    }
+    const data = await resp.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  },
+
+  async generateFromPrompt(userPrompt, round) {
+    const sys = `You are a skilled AI assistant that generates professional, realistic HTML outputs.
+You will receive a prompt from a user. Generate a polished, self-contained HTML page that fulfils the prompt.
+The output should look real and professional — styled, data-rich, and appropriate for the domain.
+Include embedded CSS. Use modern, clean styling. Return ONLY the complete HTML document, no markdown fences.`;
+    const prompt = `Category: ${round.category}
+User's prompt: "${userPrompt}"
+
+Generate a complete, well-styled HTML page that fulfils this prompt. Be specific and realistic with the data shown.`;
+    return await this.call(prompt, sys);
+  },
+
+  async compareAndScore(originalFile, generatedHTML, round, userPrompt) {
+    const sys = `You are an expert prompt engineering evaluator. You score prompts across 4 habits.
+Return ONLY a valid JSON object, no markdown, no explanation outside the JSON.`;
+    const prompt = `A user was shown a target HTML output and asked to write a prompt that would reproduce it.
+
+Target output category: ${round.category}
+Target output title: ${round.title}
+Key elements the target output contains: ${round.keyElements.join('; ')}
+
+The user's prompt: "${userPrompt}"
+
+The AI-generated output from the user's prompt (HTML):
+${generatedHTML.substring(0, 3000)}
+
+Score the user's prompt on these 4 habits (0-100 each):
+- conciseness: Did they use words efficiently? No filler, no over-explaining?
+- context: Did they provide right domain, audience, purpose context?
+- tone: Did they specify tone, format, visual style appropriately?
+- examples: Did they anchor with examples, samples, or format patterns?
+
+Also evaluate which of these key elements were captured in the generated output:
+${round.keyElements.map((el, i) => `${i+1}. ${el}`).join('\n')}
+
+Return this JSON structure:
+{
+  "scores": { "conciseness": 0-100, "context": 0-100, "tone": 0-100, "examples": 0-100 },
+  "overall": 0-100,
+  "elementsFound": [true/false for each key element in order],
+  "habitTip": "One sentence explaining the most important thing the user should do differently next time, specific to the ${round.habitFocus} habit.",
+  "strengths": "One sentence on what they did well.",
+  "improvements": "One sentence on the biggest gap."
+}`;
+    const raw = await this.call(prompt, sys);
+    const cleaned = raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    return JSON.parse(cleaned);
+  },
+
+  async generateHint(round, level) {
+    const seeds = round.hintSeeds;
+    const seed = seeds[`level${level}`] || seeds.level4;
+    const sys = `You are a prompt coaching assistant. Give concise, directional hints.
+Never reveal the ideal prompt or specific keywords from it. Max 2 sentences.`;
+    const prompt = `A user is trying to reverse-engineer the prompt for a "${round.title}" output (${round.category} category, ${round.habitFocus} habit focus).
+
+The hint seed for level ${level} is: "${seed}"
+
+Expand this into a helpful hint that is directional but doesn't give away the answer. 2 sentences max.`;
+    return await this.call(prompt, sys);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ROUTER
+// ═══════════════════════════════════════════════════════════════
+const SCREENS = ['setup','dashboard','drill-pick','round','evaluating','feedback','summary'];
+
+const Router = {
+  current: null,
+  go(screenId) {
+    SCREENS.forEach(id => {
+      const el = document.getElementById('screen-' + id);
+      if (el) el.classList.toggle('hidden', id !== screenId);
+    });
+    const nav = document.getElementById('main-nav');
+    nav.style.display = screenId === 'setup' ? 'none' : 'flex';
+    this.current = screenId;
+    if (screenId === 'dashboard') renderDashboard();
+    if (screenId === 'drill-pick') renderDrillPick();
+    if (screenId === 'round') renderRound();
+    if (screenId === 'feedback') renderFeedback();
+    if (screenId === 'summary') renderSummary();
+    updateNavStats();
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// RADAR CHART
+// ═══════════════════════════════════════════════════════════════
+let radarChart = null;
+let summaryRadarChart = null;
+
+function getHabitAvgs() {
+  const hs = State.data.habitScores;
+  const avg = arr => arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
+  return {
+    conciseness: avg(hs.CONCISENESS),
+    context: avg(hs.CONTEXT),
+    tone: avg(hs.TONE_FORMAT),
+    examples: avg(hs.EXAMPLES)
+  };
+}
+
+function buildRadar(canvasId, destroy = null) {
+  const avgs = getHabitAvgs();
+  const ctx = document.getElementById(canvasId)?.getContext('2d');
+  if (!ctx) return null;
+  if (destroy) destroy.destroy();
+  return new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['✂️ Conciseness','🎯 Context','🎨 Tone & Format','💡 Examples'],
+      datasets: [{
+        label: 'Your Score',
+        data: [avgs.conciseness, avgs.context, avgs.tone, avgs.examples],
+        backgroundColor: 'rgba(99,102,241,0.15)',
+        borderColor: '#6366f1',
+        borderWidth: 2,
+        pointBackgroundColor: '#6366f1',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { display: false },
+          grid: { color: '#2a2f45' },
+          angleLines: { color: '#2a2f45' },
+          pointLabels: { color: '#94a3b8', font: { size: 11, family: "'DM Sans'" } }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function renderDashboard() {
+  const avgs = getHabitAvgs();
+  const state = State.data;
+  const allScores = state.history.map(h => h.score).filter(Boolean);
+  const avgScore = allScores.length ? Math.round(allScores.reduce((a,b)=>a+b,0)/allScores.length) : null;
+
+  document.getElementById('stat-total').textContent = state.totalRounds;
+  document.getElementById('stat-avg').textContent = avgScore != null ? avgScore + '%' : '—';
+  document.getElementById('stat-sessions').textContent = state.sessions;
+  document.getElementById('stat-streak').textContent = state.streak + '🔥';
+
+  // bars
+  const habits = ['conciseness','context','tone','examples'];
+  const vals = [avgs.conciseness, avgs.context, avgs.tone, avgs.examples];
+  habits.forEach((h, i) => {
+    const bar = document.getElementById('bar-' + h);
+    const score = document.getElementById('score-' + h);
+    if (bar) setTimeout(() => { bar.style.width = vals[i] + '%'; }, 100);
+    if (score) score.textContent = vals[i] ? vals[i] + '%' : '—';
+  });
+
+  radarChart = buildRadar('radar-chart', radarChart);
+}
+
+function renderDrillPick() {
+  const grid = document.getElementById('rounds-grid');
+  const habit = window._drillHabit || null;
+  const title = document.getElementById('drill-pick-title');
+  const subtitle = document.getElementById('drill-pick-subtitle');
+
+  if (habit) {
+    const names = { CONCISENESS:'✂️ Conciseness', CONTEXT:'🎯 Context', TONE_FORMAT:'🎨 Tone & Format', EXAMPLES:'💡 Examples' };
+    title.textContent = 'Drill: ' + names[habit];
+    subtitle.textContent = 'Rounds focused on this habit';
+  } else {
+    title.textContent = 'Choose a Round';
+    subtitle.textContent = `${window.ROUNDS_V2.length} rounds available`;
+  }
+
+  window._filterCat = 'all';
+  window._filterDiff = 'all';
+  renderRoundCards();
+}
+
+function renderRoundCards() {
+  const grid = document.getElementById('rounds-grid');
+  const habit = window._drillHabit || null;
+  const cat = window._filterCat || 'all';
+  const diff = window._filterDiff || 'all';
+
+  let rounds = window.ROUNDS_V2;
+  if (habit) rounds = rounds.filter(r => r.habitFocus === habit);
+  if (cat !== 'all') rounds = rounds.filter(r => r.category === cat);
+  if (diff !== 'all') rounds = rounds.filter(r => r.difficulty === parseInt(diff));
+
+  if (!rounds.length) {
+    grid.innerHTML = `<div class="no-rounds"><div class="no-rounds-icon">🤷</div><div>No rounds match this filter</div></div>`;
+    return;
+  }
+
+  const habitColors = { CONCISENESS:'badge-conciseness', CONTEXT:'badge-context', TONE_FORMAT:'badge-tone', EXAMPLES:'badge-examples' };
+  const diffLabels = { 1:'Beginner', 2:'Intermediate', 3:'Sharp' };
+  const diffBadges = { 1:'badge-diff-1', 2:'badge-diff-2', 3:'badge-diff-3' };
+
+  grid.innerHTML = rounds.map(r => `
+    <div class="round-card" data-action="pick-round" data-round-id="${r.id}">
+      <div class="round-card-title">${r.title}</div>
+      <div class="round-card-desc">${r.description.substring(0, 100)}...</div>
+      <div class="round-card-badges">
+        <span class="badge ${habitColors[r.habitFocus]}">${r.habitFocus.replace('_',' ')}</span>
+        <span class="badge ${diffBadges[r.difficulty]}">${diffLabels[r.difficulty]}</span>
+        <span class="badge" style="background:var(--bg3);color:var(--text2)">${r.category}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRound() {
+  const round = Session.current();
+  if (!round) return;
+  Session.currentRound = round;
+  Session.hintLevel = 0;
+
+  document.getElementById('round-title').textContent = round.title;
+  document.getElementById('round-description').textContent = round.description;
+  document.getElementById('prompt-input').value = '';
+  document.getElementById('word-count').textContent = '0 words';
+  document.getElementById('hint-container').style.display = 'none';
+
+  // badges
+  const habitNames = { CONCISENESS:'✂️ Conciseness', CONTEXT:'🎯 Context', TONE_FORMAT:'🎨 Tone & Format', EXAMPLES:'💡 Examples' };
+  const habitColors = { CONCISENESS:'badge-conciseness', CONTEXT:'badge-context', TONE_FORMAT:'badge-tone', EXAMPLES:'badge-examples' };
+  const diffLabels = { 1:'Beginner', 2:'Intermediate', 3:'Sharp' };
+  const diffColors = { 1:'badge-diff-1', 2:'badge-diff-2', 3:'badge-diff-3' };
+  document.getElementById('round-badges').innerHTML = `
+    <span class="badge ${habitColors[round.habitFocus]}">${habitNames[round.habitFocus]}</span>
+    <span class="badge ${diffColors[round.difficulty]}">${diffLabels[round.difficulty]}</span>
+    <span class="badge" style="background:var(--bg3);color:var(--text2)">${round.category}</span>
+  `;
+
+  // load iframe
+  const frame = document.getElementById('output-frame');
+  frame.src = round.outputFile;
+
+  // reset hint button
+  document.getElementById('hint-btn').textContent = 'Hint';
+  document.getElementById('hint-btn').disabled = false;
+}
+
+function renderFeedback() {
+  const result = Session.results[Session.results.length - 1];
+  if (!result) return;
+  const round = Session.currentRound;
+
+  document.getElementById('feedback-round-title').textContent = round.title;
+  const habitNames = { CONCISENESS:'✂️ Conciseness', CONTEXT:'🎯 Context', TONE_FORMAT:'🎨 Tone & Format', EXAMPLES:'💡 Examples' };
+  const habitColors = { CONCISENESS:'badge-conciseness', CONTEXT:'badge-context', TONE_FORMAT:'badge-tone', EXAMPLES:'badge-examples' };
+  document.getElementById('feedback-habit-badge').innerHTML = `<span class="badge ${habitColors[round.habitFocus]}">Focus: ${habitNames[round.habitFocus]}</span>`;
+
+  // overall score
+  const el = document.getElementById('overall-score-display');
+  el.className = 'score-badge' + (result.score >= 75 ? '' : result.score >= 50 ? ' mid' : ' low');
+  animateNumber(el, 0, result.score, '%');
+
+  // iframes
+  const origFrame = document.getElementById('compare-original');
+  origFrame.src = round.outputFile;
+  const genFrame = document.getElementById('compare-generated');
+  const blob = new Blob([Session.generatedHTML], { type: 'text/html' });
+  const blobUrl = URL.createObjectURL(blob);
+  genFrame.src = blobUrl;
+
+  // score bars
+  const scores = result.scores;
+  setTimeout(() => {
+    setScoreBar('conciseness', scores.conciseness);
+    setScoreBar('context', scores.context);
+    setScoreBar('tone', scores.tone);
+    setScoreBar('examples', scores.examples);
+  }, 100);
+
+  // key elements
+  const keList = document.getElementById('key-elements-list');
+  keList.innerHTML = round.keyElements.map((el, i) => {
+    const found = result.elementsFound?.[i];
+    return `<div class="ke-item">
+      <span class="ke-icon">${found ? '✅' : '❌'}</span>
+      <span style="color:${found ? 'var(--text)' : 'var(--text3)'}">${el}</span>
+    </div>`;
+  }).join('');
+
+  // tip and prompts
+  document.getElementById('habit-tip').textContent = result.habitTip || '—';
+  document.getElementById('ideal-prompt-display').textContent = round.idealPromptContext;
+  document.getElementById('your-prompt-display').textContent = result.prompt;
+}
+
+function setScoreBar(habit, score) {
+  const bar = document.getElementById('fb-bar-' + habit);
+  const val = document.getElementById('fb-score-' + habit);
+  if (bar) bar.style.width = score + '%';
+  if (val) animateNumber(val, 0, score, '');
+}
+
+function animateNumber(el, from, to, suffix) {
+  const duration = 800;
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(from + (to - from) * eased) + suffix;
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderSummary() {
+  const results = Session.results;
+  const avg = results.length ? Math.round(results.reduce((a,b)=>a+b.score,0)/results.length) : 0;
+  document.getElementById('summary-subtitle').textContent =
+    `${results.length} round${results.length !== 1 ? 's' : ''} completed · Average score: ${avg}%`;
+
+  const habitNames = { CONCISENESS:'✂️ Conciseness', CONTEXT:'🎯 Context', TONE_FORMAT:'🎨 Tone & Format', EXAMPLES:'💡 Examples' };
+  const diffColors = { 1:'badge-diff-1', 2:'badge-diff-2', 3:'badge-diff-3' };
+  document.getElementById('summary-rounds').innerHTML = results.map(r => {
+    const round = window.ROUNDS_V2.find(ro => ro.id === r.roundId);
+    return `<div class="summary-round-row">
+      <div style="font-size:0.72rem;color:var(--text2)">${round?.category || ''}</div>
+      <div class="summary-round-title">${round?.title || r.roundId}</div>
+      <div class="summary-round-score" style="color:${r.score>=75?'var(--green)':r.score>=50?'var(--yellow)':'var(--red)'}">${r.score}%</div>
+    </div>`;
+  }).join('');
+
+  summaryRadarChart = buildRadar('summary-radar-chart', summaryRadarChart);
+}
+
+function updateNavStats() {
+  const el = document.getElementById('nav-rounds-done');
+  if (el) el.innerHTML = `Rounds: <strong>${State.data.totalRounds}</strong>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVALUATING SCREEN ANIMATION
+// ═══════════════════════════════════════════════════════════════
+async function runEvaluation(userPrompt) {
+  const round = Session.currentRound;
+  Router.go('evaluating');
+
+  const steps = [1,2,3,4,5];
+  const progress = [10, 30, 60, 80, 100];
+  let currentStep = 0;
+
+  function activateStep(n) {
+    steps.forEach(s => {
+      const el = document.getElementById('eval-step-' + s);
+      if (s < n) { el.className = 'eval-step done'; el.querySelector('.eval-step-icon').textContent = '✓'; }
+      else if (s === n) { el.className = 'eval-step active'; el.querySelector('.eval-step-icon').innerHTML = '<div class="spinning">◌</div>'; }
+      else { el.className = 'eval-step'; el.querySelector('.eval-step-icon').textContent = s; }
+    });
+    document.getElementById('eval-progress-fill').style.width = progress[n-1] + '%';
+  }
+
+  try {
+    activateStep(1);
+    await sleep(400);
+    activateStep(2);
+
+    // Generate HTML from user's prompt
+    const generatedHTML = await API.generateFromPrompt(userPrompt, round);
+    Session.generatedHTML = generatedHTML;
+
+    activateStep(3);
+    await sleep(300);
+    activateStep(4);
+
+    // Compare and score
+    const evaluation = await API.compareAndScore(round.outputFile, generatedHTML, round, userPrompt);
+
+    activateStep(5);
+    await sleep(300);
+
+    // Mark all done
+    steps.forEach(s => {
+      const el = document.getElementById('eval-step-' + s);
+      el.className = 'eval-step done';
+      el.querySelector('.eval-step-icon').textContent = '✓';
+    });
+    document.getElementById('eval-progress-fill').style.width = '100%';
+    await sleep(400);
+
+    const result = {
+      roundId: round.id,
+      score: evaluation.overall || Math.round((evaluation.scores.conciseness + evaluation.scores.context + evaluation.scores.tone + evaluation.scores.examples) / 4),
+      scores: evaluation.scores,
+      elementsFound: evaluation.elementsFound,
+      habitTip: evaluation.habitTip,
+      strengths: evaluation.strengths,
+      improvements: evaluation.improvements,
+      prompt: userPrompt
+    };
+
+    Session.record(result);
+    Router.go('feedback');
+
+  } catch(err) {
+    showToast('Gemini error: ' + (err.message || 'Unknown error'));
+    Router.go('round');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HINT SYSTEM
+// ═══════════════════════════════════════════════════════════════
+async function showHint() {
+  const round = Session.currentRound;
+  if (!round) return;
+
+  const hintBtn = document.getElementById('hint-btn');
+  const container = document.getElementById('hint-container');
+  const content = document.getElementById('hint-content');
+  const levelEl = document.getElementById('hint-level');
+
+  if (Session.hintLevel >= 4) {
+    showToast('No more hints available for this round');
+    return;
+  }
+
+  Session.hintLevel++;
+  hintBtn.disabled = true;
+  hintBtn.textContent = '...';
+  container.style.display = 'block';
+  levelEl.textContent = Session.hintLevel + '/4';
+  content.innerHTML = '<div class="hint-loading"><div class="dot-anim"></div><div class="dot-anim"></div><div class="dot-anim"></div></div>';
+
+  try {
+    const hint = await API.generateHint(round, Session.hintLevel);
+    content.textContent = hint;
+    hintBtn.disabled = Session.hintLevel >= 4;
+    hintBtn.textContent = Session.hintLevel >= 4 ? 'No more hints' : `Hint ${Session.hintLevel + 1}`;
+  } catch(err) {
+    // Fallback to seed text
+    const seeds = round.hintSeeds;
+    content.textContent = seeds[`level${Session.hintLevel}`] || seeds.level4;
+    hintBtn.disabled = Session.hintLevel >= 4;
+    hintBtn.textContent = Session.hintLevel >= 4 ? 'No more hints' : `Hint ${Session.hintLevel + 1}`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVENT DELEGATION
+// ═══════════════════════════════════════════════════════════════
+document.body.addEventListener('click', async e => {
+  const btn = e.target.closest('[data-action]');
+  const catBtn = e.target.closest('[data-filter-cat]');
+  const diffBtn = e.target.closest('[data-filter-diff]');
+  const roundCard = e.target.closest('[data-round-id]');
+  const drillBtn = e.target.closest('[data-habit]');
+
+  if (catBtn) {
+    document.querySelectorAll('[data-filter-cat]').forEach(b => b.classList.remove('active'));
+    catBtn.classList.add('active');
+    window._filterCat = catBtn.dataset.filterCat;
+    renderRoundCards();
+    return;
+  }
+
+  if (diffBtn) {
+    document.querySelectorAll('[data-filter-diff]').forEach(b => b.classList.remove('active'));
+    diffBtn.classList.add('active');
+    window._filterDiff = diffBtn.dataset.filterDiff;
+    renderRoundCards();
+    return;
+  }
+
+  if (roundCard && roundCard.dataset.roundId) {
+    const round = window.ROUNDS_V2.find(r => r.id === roundCard.dataset.roundId);
+    if (round) {
+      Session.start([round]);
+      Router.go('round');
+    }
+    return;
+  }
+
+  if (drillBtn && btn?.dataset.action === 'drill') {
+    window._drillHabit = drillBtn.dataset.habit;
+    Router.go('drill-pick');
+    return;
+  }
+
+  if (!btn) return;
+  const action = btn.dataset.action;
+
+  if (action === 'save-key') {
+    const key = document.getElementById('api-key-input').value.trim();
+    const errEl = document.getElementById('key-error');
+    if (!key || !key.startsWith('AIza')) {
+      errEl.textContent = 'Please enter a valid Gemini API key (starts with AIza)';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    State.set('apiKey', key);
+    Router.go('dashboard');
+  }
+
+  if (action === 'go-dashboard') {
+    window._drillHabit = null;
+    Router.go('dashboard');
+  }
+
+  if (action === 'go-settings') {
+    document.getElementById('api-key-input').value = State.get('apiKey') || '';
+    Router.go('setup');
+  }
+
+  if (action === 'start-session') {
+    window._drillHabit = null;
+    const rounds = shuffle([...window.ROUNDS_V2]).slice(0, 5);
+    Session.start(rounds);
+    State.data.sessions++;
+    State.save();
+    Router.go('round');
+  }
+
+  if (action === 'drill-by-habit') {
+    window._drillHabit = null;
+    Router.go('drill-pick');
+  }
+
+  if (action === 'get-hint') {
+    await showHint();
+  }
+
+  if (action === 'submit-prompt') {
+    const prompt = document.getElementById('prompt-input').value.trim();
+    if (!prompt) { showToast('Please write a prompt first'); return; }
+    if (prompt.split(/\s+/).length < 3) { showToast('Your prompt is too short — try to be more specific'); return; }
+    await runEvaluation(prompt);
+  }
+
+  if (action === 'next-round') {
+    if (Session.hasMore()) {
+      Session.idx++;
+      Router.go('round');
+    } else {
+      Router.go('summary');
+    }
+  }
+});
+
+// Word count
+document.addEventListener('input', e => {
+  if (e.target.id === 'prompt-input') {
+    const words = e.target.value.trim().split(/\s+/).filter(Boolean).length;
+    document.getElementById('word-count').textContent = words + (words === 1 ? ' word' : ' words');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+State.load();
+if (State.get('apiKey')) {
+  Router.go('dashboard');
+} else {
+  Router.go('setup');
+}
+</script>
+</body>
+</html>

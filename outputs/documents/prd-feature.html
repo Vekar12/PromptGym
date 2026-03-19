@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PRD — Smart Re-engagement Nudge</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #111; padding: 32px 40px; max-width: 780px; margin: 0 auto; font-size: 0.84rem; line-height: 1.65; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #6200ea; padding-bottom: 14px; margin-bottom: 24px; }
+  .doc-type { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #6200ea; }
+  .doc-name { font-size: 1.25rem; font-weight: 800; color: #1a1a1a; margin-top: 4px; }
+  .meta-pill { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill { border-radius: 20px; padding: 3px 10px; font-size: 0.68rem; font-weight: 700; }
+  .pill-draft { background: #fff3e0; color: #bf360c; }
+  .pill-pm { background: #ede7f6; color: #4527a0; }
+  h2 { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #6200ea; border-bottom: 1px solid #ede7f6; padding-bottom: 6px; margin: 24px 0 12px; }
+  p { margin-bottom: 10px; color: #333; }
+  .user-stories { display: flex; flex-direction: column; gap: 10px; }
+  .story { border-left: 4px solid #6200ea; background: #f9f5ff; border-radius: 0 6px 6px 0; padding: 10px 14px; }
+  .story-as { font-size: 0.7rem; font-weight: 700; color: #6200ea; text-transform: uppercase; margin-bottom: 4px; }
+  .story-text { color: #222; }
+  .story-ac { margin-top: 6px; font-size: 0.75rem; color: #555; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .box { background: #f5f5f5; border-radius: 8px; padding: 14px 16px; }
+  .box h3 { font-size: 0.75rem; font-weight: 700; color: #444; margin-bottom: 8px; }
+  ul { padding-left: 16px; }
+  ul li { margin-bottom: 5px; color: #333; }
+  .metric-table { width: 100%; border-collapse: collapse; }
+  .metric-table th { text-align: left; padding: 8px 10px; background: #ede7f6; font-size: 0.75rem; font-weight: 700; color: #4527a0; }
+  .metric-table td { padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 0.8rem; color: #333; }
+  .note { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 10px 14px; font-size: 0.78rem; color: #555; }
+  .note strong { color: #e65100; }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <div>
+    <div class="doc-type">Product Requirements Document</div>
+    <div class="doc-name">Smart Re-engagement Nudge</div>
+  </div>
+  <div class="meta-pill">
+    <span class="pill pill-draft">Draft v0.3</span>
+    <span class="pill pill-pm">PM: Ishaan D.</span>
+  </div>
+</div>
+
+<h2>Overview</h2>
+<p>Implement a personalised in-app nudge system that prompts dormant users (no activity ≥7 days) to complete their highest-value incomplete action. The nudge is triggered by ML model output, uses dynamic copy, and targets the specific screen where the user last dropped off.</p>
+
+<h2>Problem</h2>
+<p>28% of activated users go dormant within 14 days of signup. Current re-engagement is limited to weekly email blasts with generic CTAs — open rate 9%, click-through 1.2%. No in-app mechanism exists for users who return but don't know what to do next.</p>
+
+<h2>User Stories</h2>
+<div class="user-stories">
+  <div class="story">
+    <div class="story-as">As a returning user</div>
+    <div class="story-text">I want to see a contextual prompt telling me what to do next, so I can pick up where I left off without hunting through menus.</div>
+    <div class="story-ac">AC: Nudge appears within 3s of app open if dormancy criteria met.</div>
+  </div>
+  <div class="story">
+    <div class="story-as">As a power user</div>
+    <div class="story-text">I want to be able to dismiss nudges permanently for actions I've decided to skip, so I'm not pestered repeatedly.</div>
+    <div class="story-ac">AC: Dismiss stores preference; same nudge-type not shown for 30 days.</div>
+  </div>
+</div>
+
+<h2>Functional Requirements</h2>
+<div class="two-col">
+  <div class="box">
+    <h3>Must Have</h3>
+    <ul>
+      <li>Dormancy trigger: ≥7 days inactive</li>
+      <li>3 nudge types: complete profile, first transaction, invite contact</li>
+      <li>Deep-link to relevant screen</li>
+      <li>Dismiss + snooze (24h / 7d) options</li>
+      <li>A/B test framework hooks</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>Nice to Have</h3>
+    <ul>
+      <li>ML-ranked nudge selection (v2)</li>
+      <li>Personalised copy using user name + action</li>
+      <li>Animated nudge card (Lottie)</li>
+      <li>Nudge performance dashboard for PM</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Success Metrics</h2>
+<table class="metric-table">
+  <thead><tr><th>Metric</th><th>Baseline</th><th>Target (90 days)</th></tr></thead>
+  <tbody>
+    <tr><td>D14 retention (dormant cohort)</td><td>18%</td><td>28%</td></tr>
+    <tr><td>Nudge → action conversion</td><td>–</td><td>≥22%</td></tr>
+    <tr><td>Dismiss rate</td><td>–</td><td>&lt;40%</td></tr>
+  </tbody>
+</table>
+
+<h2>Open Questions</h2>
+<div class="note"><strong>⚠ Unresolved:</strong> Should dormancy be calculated from last login or last meaningful action? Product &amp; Data to align by March 24 — this affects ML feature engineering.</div>
+</body>
+</html>

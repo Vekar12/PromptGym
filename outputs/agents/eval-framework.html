@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LLM Eval Framework</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #e6edf3; padding: 28px; font-size: 0.83rem; }
+  h1 { font-size: 1.1rem; font-weight: 800; color: #d2a650; margin-bottom: 4px; }
+  .subtitle { color: #8b949e; font-size: 0.75rem; margin-bottom: 24px; }
+  .section-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #8b949e; margin: 20px 0 10px; border-top: 1px solid #21262d; padding-top: 16px; }
+  .eval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .eval-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px; }
+  .eval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .eval-name { font-weight: 700; font-size: 0.85rem; }
+  .eval-type { font-size: 0.65rem; background: #21262d; border-radius: 4px; padding: 2px 7px; color: #8b949e; }
+  .eval-desc { font-size: 0.75rem; color: #8b949e; margin-bottom: 10px; line-height: 1.5; }
+  .eval-method { font-size: 0.7rem; font-family: monospace; background: #0d1117; border-radius: 4px; padding: 6px 8px; color: #79c0ff; }
+  .score-bar-wrap { margin-top: 24px; }
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .score-name { width: 160px; min-width: 160px; font-size: 0.78rem; color: #e6edf3; }
+  .bar-bg { flex: 1; background: #21262d; border-radius: 4px; height: 10px; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .score-val { width: 36px; text-align: right; font-family: monospace; font-size: 0.78rem; font-weight: 700; }
+  .green { background: #3fb950; }
+  .yellow { background: #d2a650; }
+  .red { background: #f85149; }
+  .c-green { color: #3fb950; }
+  .c-yellow { color: #d2a650; }
+  .c-red { color: #f85149; }
+  .harness-table { width: 100%; border-collapse: collapse; }
+  .harness-table th { text-align: left; padding: 8px 10px; background: #161b22; font-size: 0.72rem; font-weight: 700; color: #8b949e; border-bottom: 1px solid #30363d; }
+  .harness-table td { padding: 8px 10px; border-bottom: 1px solid #21262d; font-size: 0.78rem; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  code { font-family: monospace; background: #21262d; padding: 1px 5px; border-radius: 3px; font-size: 0.75rem; color: #79c0ff; }
+</style>
+</head>
+<body>
+<h1>LLM Evaluation Framework</h1>
+<p class="subtitle">Systematic eval harness for agent output quality — v2.1</p>
+
+<div class="section-label">Eval Dimensions</div>
+<div class="eval-grid">
+  <div class="eval-card">
+    <div class="eval-header"><span class="eval-name">Faithfulness</span><span class="eval-type">Reference-free</span></div>
+    <div class="eval-desc">Does the output contain only claims supported by the provided context? Detects hallucinations and unsupported assertions.</div>
+    <div class="eval-method">method: nli_entailment(context, output)</div>
+  </div>
+  <div class="eval-card">
+    <div class="eval-header"><span class="eval-name">Task Completion</span><span class="eval-type">Rubric-based</span></div>
+    <div class="eval-desc">Does the output address all sub-tasks in the prompt? Scored 0–5 against a rubric defined per task type.</div>
+    <div class="eval-method">method: llm_judge(rubric, output)</div>
+  </div>
+  <div class="eval-card">
+    <div class="eval-header"><span class="eval-name">Format Adherence</span><span class="eval-type">Structural</span></div>
+    <div class="eval-desc">Does the output match the required format (JSON schema, markdown headers, word limits)? Hard pass/fail.</div>
+    <div class="eval-method">method: schema_validate(output, spec)</div>
+  </div>
+  <div class="eval-card">
+    <div class="eval-header"><span class="eval-name">Tone Consistency</span><span class="eval-type">Embedding-based</span></div>
+    <div class="eval-desc">Is the tone aligned with target persona? Cosine similarity against 20 gold-standard reference outputs.</div>
+    <div class="eval-method">method: embed_cosine(output, gold_set)</div>
+  </div>
+</div>
+
+<div class="section-label">Current Scores — Production (last 500 evals)</div>
+<div class="score-bar-wrap">
+  <div class="score-row"><span class="score-name">Faithfulness</span><div class="bar-bg"><div class="bar-fill green" style="width:91%"></div></div><span class="score-val c-green">0.91</span></div>
+  <div class="score-row"><span class="score-name">Task Completion</span><div class="bar-bg"><div class="bar-fill green" style="width:87%"></div></div><span class="score-val c-green">0.87</span></div>
+  <div class="score-row"><span class="score-name">Format Adherence</span><div class="bar-bg"><div class="bar-fill yellow" style="width:76%"></div></div><span class="score-val c-yellow">0.76</span></div>
+  <div class="score-row"><span class="score-name">Tone Consistency</span><div class="bar-bg"><div class="bar-fill green" style="width:83%"></div></div><span class="score-val c-green">0.83</span></div>
+  <div class="score-row"><span class="score-name">Latency P95</span><div class="bar-bg"><div class="bar-fill red" style="width:58%"></div></div><span class="score-val c-red">4.2s</span></div>
+</div>
+
+<div class="section-label">Eval Harness — Test Suite Registry</div>
+<table class="harness-table">
+  <thead><tr><th>Suite</th><th>Cases</th><th>Evaluator</th><th>Threshold</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>customer-support-v3</td><td>120</td><td><code>llm_judge</code></td><td>≥0.85</td><td><span class="status-dot" style="background:#3fb950"></span>Passing</td></tr>
+    <tr><td>sql-generation-v2</td><td>85</td><td><code>schema_validate</code></td><td>100% valid</td><td><span class="status-dot" style="background:#3fb950"></span>Passing</td></tr>
+    <tr><td>report-writer-v1</td><td>40</td><td><code>nli_entailment</code></td><td>≥0.88</td><td><span class="status-dot" style="background:#d2a650"></span>Warning</td></tr>
+    <tr><td>tone-formal-v2</td><td>60</td><td><code>embed_cosine</code></td><td>≥0.80</td><td><span class="status-dot" style="background:#3fb950"></span>Passing</td></tr>
+  </tbody>
+</table>
+</body>
+</html>

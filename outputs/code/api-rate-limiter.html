@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>API Rate Limiter</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; padding: 0; font-size: 0.83rem; }
+  .toolbar { background: #181825; border-bottom: 1px solid #313244; padding: 10px 20px; display: flex; align-items: center; gap: 12px; }
+  .file-name { font-family: monospace; font-size: 0.82rem; color: #cba6f7; }
+  .badge { background: #313244; border-radius: 4px; padding: 2px 8px; font-size: 0.65rem; font-weight: 700; color: #a6e3a1; }
+  .editor { padding: 20px 0; }
+  pre { margin: 0; padding: 0 20px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.76rem; line-height: 1.75; }
+  .line { display: flex; }
+  .ln { width: 32px; min-width: 32px; color: #45475a; text-align: right; padding-right: 16px; user-select: none; }
+  .code { white-space: pre; }
+  .kw { color: #cba6f7; }
+  .fn { color: #89b4fa; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .cls { color: #f38ba8; }
+  .dec { color: #f9e2af; }
+  .test-panel { background: #11111b; border-top: 1px solid #313244; padding: 16px 20px; }
+  .test-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #6c7086; margin-bottom: 10px; }
+  .test-line { font-family: monospace; font-size: 0.76rem; line-height: 1.8; }
+  .t-ok { color: #a6e3a1; }
+  .t-fail { color: #f38ba8; }
+  .t-skip { color: #6c7086; }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <span class="file-name">rate_limiter.py</span>
+  <span class="badge">Python 3.11</span>
+  <span class="badge">Token Bucket Algorithm</span>
+</div>
+<div class="editor">
+<pre>
+<div class="line"><span class="ln">1</span><span class="code"><span class="kw">import</span> <span class="var">time</span>, <span class="var">threading</span></span></div>
+<div class="line"><span class="ln">2</span><span class="code"><span class="kw">from</span> <span class="var">collections</span> <span class="kw">import</span> <span class="cls">defaultdict</span></span></div>
+<div class="line"><span class="ln">3</span><span class="code"><span class="kw">from</span> <span class="var">functools</span> <span class="kw">import</span> <span class="var">wraps</span></span></div>
+<div class="line"><span class="ln">4</span><span class="code"></span></div>
+<div class="line"><span class="ln">5</span><span class="code"><span class="kw">class</span> <span class="cls">TokenBucket</span>:</span></div>
+<div class="line"><span class="ln">6</span><span class="code">    <span class="cmt">"""Thread-safe token bucket rate limiter.</span></span></div>
+<div class="line"><span class="ln">7</span><span class="code"><span class="cmt">    capacity: max tokens (burst limit)</span></span></div>
+<div class="line"><span class="ln">8</span><span class="code"><span class="cmt">    rate: tokens added per second (sustained rate)</span></span></div>
+<div class="line"><span class="ln">9</span><span class="code"><span class="cmt">    """</span></span></div>
+<div class="line"><span class="ln">10</span><span class="code">    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, capacity: <span class="var">float</span>, rate: <span class="var">float</span>):</span></div>
+<div class="line"><span class="ln">11</span><span class="code">        <span class="kw">self</span>.<span class="var">capacity</span> = capacity</span></div>
+<div class="line"><span class="ln">12</span><span class="code">        <span class="kw">self</span>.<span class="var">rate</span> = rate</span></div>
+<div class="line"><span class="ln">13</span><span class="code">        <span class="kw">self</span>.<span class="var">tokens</span> = capacity</span></div>
+<div class="line"><span class="ln">14</span><span class="code">        <span class="kw">self</span>.<span class="var">last_refill</span> = <span class="var">time</span>.<span class="fn">monotonic</span>()</span></div>
+<div class="line"><span class="ln">15</span><span class="code">        <span class="kw">self</span>.<span class="var">_lock</span> = <span class="var">threading</span>.<span class="cls">Lock</span>()</span></div>
+<div class="line"><span class="ln">16</span><span class="code"></span></div>
+<div class="line"><span class="ln">17</span><span class="code">    <span class="kw">def</span> <span class="fn">_refill</span>(<span class="kw">self</span>):</span></div>
+<div class="line"><span class="ln">18</span><span class="code">        <span class="var">now</span> = <span class="var">time</span>.<span class="fn">monotonic</span>()</span></div>
+<div class="line"><span class="ln">19</span><span class="code">        <span class="var">added</span> = (<span class="var">now</span> - <span class="kw">self</span>.<span class="var">last_refill</span>) * <span class="kw">self</span>.<span class="var">rate</span></span></div>
+<div class="line"><span class="ln">20</span><span class="code">        <span class="kw">self</span>.<span class="var">tokens</span> = <span class="fn">min</span>(<span class="kw">self</span>.<span class="var">capacity</span>, <span class="kw">self</span>.<span class="var">tokens</span> + <span class="var">added</span>)</span></div>
+<div class="line"><span class="ln">21</span><span class="code">        <span class="kw">self</span>.<span class="var">last_refill</span> = <span class="var">now</span></span></div>
+<div class="line"><span class="ln">22</span><span class="code"></span></div>
+<div class="line"><span class="ln">23</span><span class="code">    <span class="kw">def</span> <span class="fn">consume</span>(<span class="kw">self</span>, tokens: <span class="var">float</span> = <span class="num">1</span>) -> <span class="var">bool</span>:</span></div>
+<div class="line"><span class="ln">24</span><span class="code">        <span class="kw">with</span> <span class="kw">self</span>.<span class="var">_lock</span>:</span></div>
+<div class="line"><span class="ln">25</span><span class="code">            <span class="kw">self</span>.<span class="fn">_refill</span>()</span></div>
+<div class="line"><span class="ln">26</span><span class="code">            <span class="kw">if</span> <span class="kw">self</span>.<span class="var">tokens</span> >= tokens:</span></div>
+<div class="line"><span class="ln">27</span><span class="code">                <span class="kw">self</span>.<span class="var">tokens</span> -= tokens</span></div>
+<div class="line"><span class="ln">28</span><span class="code">                <span class="kw">return</span> <span class="kw">True</span></span></div>
+<div class="line"><span class="ln">29</span><span class="code">            <span class="kw">return</span> <span class="kw">False</span></span></div>
+<div class="line"><span class="ln">30</span><span class="code"></span></div>
+<div class="line"><span class="ln">31</span><span class="code"><span class="kw">class</span> <span class="cls">RateLimiter</span>:</span></div>
+<div class="line"><span class="ln">32</span><span class="code">    <span class="cmt">"""Per-client rate limiter using token buckets."""</span></span></div>
+<div class="line"><span class="ln">33</span><span class="code">    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, capacity=<span class="num">10</span>, rate=<span class="num">2</span>):</span></div>
+<div class="line"><span class="ln">34</span><span class="code">        <span class="kw">self</span>.<span class="var">_buckets</span> = <span class="cls">defaultdict</span>(<span class="kw">lambda</span>: <span class="cls">TokenBucket</span>(capacity, rate))</span></div>
+<div class="line"><span class="ln">35</span><span class="code"></span></div>
+<div class="line"><span class="ln">36</span><span class="code">    <span class="kw">def</span> <span class="fn">is_allowed</span>(<span class="kw">self</span>, client_id: <span class="var">str</span>) -> <span class="var">bool</span>:</span></div>
+<div class="line"><span class="ln">37</span><span class="code">        <span class="kw">return</span> <span class="kw">self</span>.<span class="var">_buckets</span>[<span class="var">client_id</span>].<span class="fn">consume</span>()</span></div>
+<div class="line"><span class="ln">38</span><span class="code"></span></div>
+<div class="line"><span class="ln">39</span><span class="code">    <span class="kw">def</span> <span class="fn">middleware</span>(<span class="kw">self</span>, get_client_id):</span></div>
+<div class="line"><span class="ln">40</span><span class="code">        <span class="kw">def</span> <span class="fn">decorator</span>(<span class="var">func</span>):</span></div>
+<div class="line"><span class="ln">41</span><span class="code">            <span class="dec">@wraps</span>(<span class="var">func</span>)</span></div>
+<div class="line"><span class="ln">42</span><span class="code">            <span class="kw">def</span> <span class="fn">wrapper</span>(*<span class="var">args</span>, **<span class="var">kwargs</span>):</span></div>
+<div class="line"><span class="ln">43</span><span class="code">                <span class="var">cid</span> = <span class="fn">get_client_id</span>(*<span class="var">args</span>, **<span class="var">kwargs</span>)</span></div>
+<div class="line"><span class="ln">44</span><span class="code">                <span class="kw">if</span> <span class="kw">not</span> <span class="kw">self</span>.<span class="fn">is_allowed</span>(<span class="var">cid</span>):</span></div>
+<div class="line"><span class="ln">45</span><span class="code">                    <span class="kw">raise</span> <span class="cls">Exception</span>(<span class="str">"429 Too Many Requests"</span>)</span></div>
+<div class="line"><span class="ln">46</span><span class="code">                <span class="kw">return</span> <span class="fn">func</span>(*<span class="var">args</span>, **<span class="var">kwargs</span>)</span></div>
+<div class="line"><span class="ln">47</span><span class="code">            <span class="kw">return</span> <span class="var">wrapper</span></span></div>
+<div class="line"><span class="ln">48</span><span class="code">        <span class="kw">return</span> <span class="var">decorator</span></span></div>
+</pre>
+</div>
+<div class="test-panel">
+  <div class="test-label">Test Suite — pytest output</div>
+  <div class="test-line t-ok">✓ test_bucket_allows_within_capacity (0.001s)</div>
+  <div class="test-line t-ok">✓ test_bucket_rejects_over_limit (0.001s)</div>
+  <div class="test-line t-ok">✓ test_bucket_refills_over_time (1.003s)</div>
+  <div class="test-line t-ok">✓ test_per_client_isolation (0.002s)</div>
+  <div class="test-line t-ok">✓ test_middleware_raises_429 (0.001s)</div>
+  <div class="test-line t-ok">✓ test_thread_safety_concurrent_requests (0.214s)</div>
+  <div class="test-line" style="color:#cdd6f4;margin-top:8px">6 passed in 1.22s</div>
+</div>
+</body>
+</html>

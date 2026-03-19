@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project Brief</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #1a1a1a; padding: 32px 40px; max-width: 760px; margin: 0 auto; font-size: 0.85rem; line-height: 1.6; }
+  .cover { background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; border-radius: 10px; padding: 28px 32px; margin-bottom: 28px; }
+  .cover .badge { display: inline-block; background: rgba(255,255,255,0.2); border-radius: 4px; padding: 3px 10px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+  .cover h1 { font-size: 1.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
+  .cover .meta { font-size: 0.75rem; opacity: 0.85; display: flex; gap: 20px; }
+  .section { margin-bottom: 24px; }
+  h2 { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #1565c0; border-bottom: 2px solid #e3eaf5; padding-bottom: 6px; margin-bottom: 12px; }
+  p { margin-bottom: 10px; color: #333; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .box { background: #f5f7ff; border-radius: 8px; padding: 14px 16px; }
+  .box h3 { font-size: 0.75rem; font-weight: 700; color: #555; margin-bottom: 8px; }
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 4px 0; padding-left: 16px; position: relative; color: #333; }
+  ul li::before { content: '→'; position: absolute; left: 0; color: #1565c0; font-weight: 700; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .kpi { text-align: center; background: #e8f0fe; border-radius: 8px; padding: 12px; }
+  .kpi-val { font-size: 1.4rem; font-weight: 800; color: #1565c0; }
+  .kpi-label { font-size: 0.68rem; color: #555; font-weight: 600; text-transform: uppercase; }
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .tl-row { display: flex; gap: 14px; align-items: flex-start; }
+  .tl-dot { width: 12px; height: 12px; min-width: 12px; background: #1565c0; border-radius: 50%; margin-top: 4px; position: relative; }
+  .tl-dot::after { content: ''; position: absolute; left: 5px; top: 12px; width: 2px; height: 32px; background: #c5d3ee; }
+  .tl-row:last-child .tl-dot::after { display: none; }
+  .tl-content { padding-bottom: 20px; }
+  .tl-date { font-size: 0.68rem; font-weight: 700; color: #1565c0; text-transform: uppercase; }
+  .tl-text { font-size: 0.8rem; color: #333; }
+  .risk-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #eee; }
+  .risk-pill { border-radius: 4px; padding: 2px 8px; font-size: 0.68rem; font-weight: 700; min-width: 52px; text-align: center; }
+  .high { background: #fce4ec; color: #b71c1c; }
+  .med { background: #fff8e1; color: #e65100; }
+  .low { background: #e8f5e9; color: #1b5e20; }
+  .risk-text { font-size: 0.78rem; color: #333; }
+  .risk-mit { font-size: 0.72rem; color: #666; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="badge">Project Brief · Confidential</div>
+  <h1>Driver App Revamp — Phase 2</h1>
+  <div class="meta">
+    <span>Owner: Ananya R.</span>
+    <span>Version: 1.2</span>
+    <span>Updated: 19 Mar 2026</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Problem Statement</h2>
+  <p>Driver app task-completion rate is 67% vs 84% industry benchmark. Exit surveys cite confusing route-change flow and lack of real-time earnings visibility as top blockers. Current app has 4.1-star rating on Play Store with 38% of 1–2 star reviews mentioning UX issues.</p>
+</div>
+
+<div class="section">
+  <h2>Success Metrics</h2>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-val">≥82%</div><div class="kpi-label">Task Completion</div></div>
+    <div class="kpi"><div class="kpi-val">4.6★</div><div class="kpi-label">Play Store Rating</div></div>
+    <div class="kpi"><div class="kpi-val">&lt;45s</div><div class="kpi-label">Avg Route-Change Time</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Scope</h2>
+  <div class="two-col">
+    <div class="box">
+      <h3>In Scope</h3>
+      <ul>
+        <li>Earnings dashboard (real-time)</li>
+        <li>Route-change flow redesign</li>
+        <li>Offline-first sync for low-connectivity zones</li>
+        <li>Push notification preferences</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Out of Scope</h3>
+      <ul>
+        <li>iOS version (Q4 initiative)</li>
+        <li>Vehicle document management</li>
+        <li>Driver-to-driver chat</li>
+        <li>Backend dispatch engine changes</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Timeline</h2>
+  <div class="timeline">
+    <div class="tl-row"><div class="tl-dot"></div><div class="tl-content"><div class="tl-date">Mar 28</div><div class="tl-text">Design handoff — all flows finalised</div></div></div>
+    <div class="tl-row"><div class="tl-dot"></div><div class="tl-content"><div class="tl-date">Apr 18</div><div class="tl-text">Internal beta — 50 drivers in Pune</div></div></div>
+    <div class="tl-row"><div class="tl-dot"></div><div class="tl-content"><div class="tl-date">May 5</div><div class="tl-text">Staged rollout — 10% of fleet</div></div></div>
+    <div class="tl-row"><div class="tl-dot"></div><div class="tl-content"><div class="tl-date">May 26</div><div class="tl-text">Full launch + monitoring dashboards live</div></div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Risks</h2>
+  <div class="risk-row"><span class="risk-pill high">High</span><div><div class="risk-text">Offline sync edge cases on 2G networks</div><div class="risk-mit">Mitigation: Dedicated QA in Tier-3 city test environment</div></div></div>
+  <div class="risk-row"><span class="risk-pill med">Medium</span><div><div class="risk-text">Driver resistance to new earnings UI</div><div class="risk-mit">Mitigation: Champion program — 20 early-adopter drivers</div></div></div>
+  <div class="risk-row"><span class="risk-pill low">Low</span><div><div class="risk-text">Backend API latency for real-time earnings</div><div class="risk-mit">Mitigation: Optimistic UI + 5s polling fallback</div></div></div>
+</div>
+</body>
+</html>

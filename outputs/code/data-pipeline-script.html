@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Data Pipeline Script</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; padding: 0; font-size: 0.83rem; }
+  .toolbar { background: #181825; border-bottom: 1px solid #313244; padding: 10px 20px; display: flex; align-items: center; gap: 12px; }
+  .file-name { font-family: monospace; font-size: 0.82rem; color: #cba6f7; }
+  .badge { background: #313244; border-radius: 4px; padding: 2px 8px; font-size: 0.65rem; font-weight: 700; color: #a6e3a1; }
+  .editor { padding: 20px 0; }
+  pre { margin: 0; padding: 0 20px; font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace; font-size: 0.78rem; line-height: 1.7; overflow-x: auto; }
+  .line { display: flex; }
+  .ln { width: 32px; min-width: 32px; color: #45475a; text-align: right; padding-right: 16px; user-select: none; }
+  .code { white-space: pre; }
+  .kw { color: #cba6f7; } /* keyword */
+  .fn { color: #89b4fa; } /* function */
+  .str { color: #a6e3a1; } /* string */
+  .num { color: #fab387; } /* number */
+  .cmt { color: #6c7086; font-style: italic; } /* comment */
+  .cls { color: #f38ba8; } /* class */
+  .dec { color: #f9e2af; } /* decorator */
+  .var { color: #cdd6f4; } /* variable */
+  .output-panel { background: #11111b; border-top: 1px solid #313244; padding: 16px 20px; }
+  .out-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #6c7086; margin-bottom: 8px; }
+  .out-line { font-family: monospace; font-size: 0.78rem; line-height: 1.7; }
+  .out-ok { color: #a6e3a1; }
+  .out-warn { color: #f9e2af; }
+  .out-err { color: #f38ba8; }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <span class="file-name">etl_pipeline.py</span>
+  <span class="badge">Python 3.11</span>
+  <span class="badge">Apache Airflow 2.8</span>
+</div>
+<div class="editor">
+<pre>
+<div class="line"><span class="ln">1</span><span class="code"><span class="kw">from</span> <span class="var">datetime</span> <span class="kw">import</span> <span class="var">datetime</span>, <span class="var">timedelta</span></span></div>
+<div class="line"><span class="ln">2</span><span class="code"><span class="kw">from</span> <span class="var">airflow</span> <span class="kw">import</span> <span class="cls">DAG</span></span></div>
+<div class="line"><span class="ln">3</span><span class="code"><span class="kw">from</span> <span class="var">airflow.operators.python</span> <span class="kw">import</span> <span class="cls">PythonOperator</span></span></div>
+<div class="line"><span class="ln">4</span><span class="code"><span class="kw">from</span> <span class="var">airflow.providers.postgres.hooks.postgres</span> <span class="kw">import</span> <span class="cls">PostgresHook</span></span></div>
+<div class="line"><span class="ln">5</span><span class="code"><span class="kw">import</span> <span class="var">pandas</span> <span class="kw">as</span> <span class="var">pd</span></span></div>
+<div class="line"><span class="ln">6</span><span class="code"><span class="kw">import</span> <span class="var">logging</span></span></div>
+<div class="line"><span class="ln">7</span><span class="code"></span></div>
+<div class="line"><span class="ln">8</span><span class="code"><span class="var">logger</span> = <span class="var">logging</span>.<span class="fn">getLogger</span>(<span class="var">__name__</span>)</span></div>
+<div class="line"><span class="ln">9</span><span class="code"></span></div>
+<div class="line"><span class="ln">10</span><span class="code"><span class="var">DEFAULT_ARGS</span> = {</span></div>
+<div class="line"><span class="ln">11</span><span class="code">    <span class="str">"owner"</span>: <span class="str">"data-eng"</span>,</span></div>
+<div class="line"><span class="ln">12</span><span class="code">    <span class="str">"retries"</span>: <span class="num">3</span>,</span></div>
+<div class="line"><span class="ln">13</span><span class="code">    <span class="str">"retry_delay"</span>: <span class="fn">timedelta</span>(minutes=<span class="num">5</span>),</span></div>
+<div class="line"><span class="ln">14</span><span class="code">    <span class="str">"email_on_failure"</span>: <span class="kw">True</span>,</span></div>
+<div class="line"><span class="ln">15</span><span class="code">    <span class="str">"email"</span>: [<span class="str">"data-alerts@company.com"</span>],</span></div>
+<div class="line"><span class="ln">16</span><span class="code">}</span></div>
+<div class="line"><span class="ln">17</span><span class="code"></span></div>
+<div class="line"><span class="ln">18</span><span class="code"><span class="kw">def</span> <span class="fn">extract_raw_events</span>(<span class="var">**context</span>):</span></div>
+<div class="line"><span class="ln">19</span><span class="code">    <span class="cmt">"""Extract events from source Postgres, push to XCom."""</span></div>
+<div class="line"><span class="ln">20</span><span class="code">    <span class="var">hook</span> = <span class="cls">PostgresHook</span>(postgres_conn_id=<span class="str">"source_db"</span>)</span></div>
+<div class="line"><span class="ln">21</span><span class="code">    <span class="var">run_date</span> = <span class="var">context</span>[<span class="str">"ds"</span>]</span></div>
+<div class="line"><span class="ln">22</span><span class="code">    <span class="var">sql</span> = <span class="str">f"""</span></div>
+<div class="line"><span class="ln">23</span><span class="code"><span class="str">        SELECT event_id, user_id, event_type, ts, payload</span></div>
+<div class="line"><span class="ln">24</span><span class="code"><span class="str">        FROM raw_events</span></div>
+<div class="line"><span class="ln">25</span><span class="code"><span class="str">        WHERE DATE(ts) = '{run_date}'</span></div>
+<div class="line"><span class="ln">26</span><span class="code"><span class="str">          AND event_type IN ('purchase', 'signup', 'churn')</span></div>
+<div class="line"><span class="ln">27</span><span class="code"><span class="str">    """</span></span></div>
+<div class="line"><span class="ln">28</span><span class="code">    <span class="var">df</span> = <span class="var">hook</span>.<span class="fn">get_pandas_df</span>(<span class="var">sql</span>)</span></div>
+<div class="line"><span class="ln">29</span><span class="code">    <span class="var">logger</span>.<span class="fn">info</span>(<span class="str">f"Extracted {len(df)} rows for {run_date}"</span>)</span></div>
+<div class="line"><span class="ln">30</span><span class="code">    <span class="kw">return</span> <span class="var">df</span>.<span class="fn">to_json</span>()</span></div>
+<div class="line"><span class="ln">31</span><span class="code"></span></div>
+<div class="line"><span class="ln">32</span><span class="code"><span class="kw">def</span> <span class="fn">transform_events</span>(<span class="var">**context</span>):</span></div>
+<div class="line"><span class="ln">33</span><span class="code">    <span class="cmt">"""Normalise, dedupe, enrich with user metadata."""</span></div>
+<div class="line"><span class="ln">34</span><span class="code">    <span class="var">raw</span> = <span class="var">context</span>[<span class="str">"ti"</span>].<span class="fn">xcom_pull</span>(task_ids=<span class="str">"extract"</span>)</span></div>
+<div class="line"><span class="ln">35</span><span class="code">    <span class="var">df</span> = <span class="var">pd</span>.<span class="fn">read_json</span>(<span class="var">raw</span>)</span></div>
+<div class="line"><span class="ln">36</span><span class="code">    <span class="var">df</span> = <span class="var">df</span>.<span class="fn">drop_duplicates</span>(subset=[<span class="str">"event_id"</span>])</span></div>
+<div class="line"><span class="ln">37</span><span class="code">    <span class="var">df</span>[<span class="str">"event_date"</span>] = <span class="var">pd</span>.<span class="fn">to_datetime</span>(<span class="var">df</span>[<span class="str">"ts"</span>]).<span class="fn">dt</span>.<span class="fn">date</span></span></div>
+<div class="line"><span class="ln">38</span><span class="code">    <span class="var">df</span>[<span class="str">"revenue_usd"</span>] = <span class="var">df</span>.<span class="fn">apply</span>(<span class="fn">_extract_revenue</span>, axis=<span class="num">1</span>)</span></div>
+<div class="line"><span class="ln">39</span><span class="code">    <span class="var">logger</span>.<span class="fn">info</span>(<span class="str">f"Transformed: {len(df)} clean rows"</span>)</span></div>
+<div class="line"><span class="ln">40</span><span class="code">    <span class="kw">return</span> <span class="var">df</span>.<span class="fn">to_json</span>()</span></div>
+<div class="line"><span class="ln">41</span><span class="code"></span></div>
+<div class="line"><span class="ln">42</span><span class="code"><span class="kw">def</span> <span class="fn">load_to_warehouse</span>(<span class="var">**context</span>):</span></div>
+<div class="line"><span class="ln">43</span><span class="code">    <span class="cmt">"""Upsert into DWH fact table."""</span></div>
+<div class="line"><span class="ln">44</span><span class="code">    <span class="var">df</span> = <span class="var">pd</span>.<span class="fn">read_json</span>(<span class="var">context</span>[<span class="str">"ti"</span>].<span class="fn">xcom_pull</span>(task_ids=<span class="str">"transform"</span>))</span></div>
+<div class="line"><span class="ln">45</span><span class="code">    <span class="var">hook</span> = <span class="cls">PostgresHook</span>(postgres_conn_id=<span class="str">"dwh_db"</span>)</span></div>
+<div class="line"><span class="ln">46</span><span class="code">    <span class="var">hook</span>.<span class="fn">insert_rows</span>(<span class="str">"fact_events"</span>, <span class="var">df</span>.<span class="fn">values</span>.<span class="fn">tolist</span>(),</span></div>
+<div class="line"><span class="ln">47</span><span class="code">                     target_fields=<span class="var">df</span>.<span class="fn">columns</span>.<span class="fn">tolist</span>(),</span></div>
+<div class="line"><span class="ln">48</span><span class="code">                     replace=<span class="kw">True</span>, replace_index=[<span class="str">"event_id"</span>])</span></div>
+<div class="line"><span class="ln">49</span><span class="code">    <span class="var">logger</span>.<span class="fn">info</span>(<span class="str">f"Loaded {len(df)} rows to fact_events"</span>)</span></div>
+<div class="line"><span class="ln">50</span><span class="code"></span></div>
+<div class="line"><span class="ln">51</span><span class="code"><span class="kw">with</span> <span class="cls">DAG</span>(</span></div>
+<div class="line"><span class="ln">52</span><span class="code">    <span class="str">"daily_events_etl"</span>,</span></div>
+<div class="line"><span class="ln">53</span><span class="code">    default_args=<span class="var">DEFAULT_ARGS</span>,</span></div>
+<div class="line"><span class="ln">54</span><span class="code">    schedule_interval=<span class="str">"@daily"</span>,</span></div>
+<div class="line"><span class="ln">55</span><span class="code">    start_date=<span class="fn">datetime</span>(<span class="num">2026</span>, <span class="num">1</span>, <span class="num">1</span>),</span></div>
+<div class="line"><span class="ln">56</span><span class="code">    catchup=<span class="kw">False</span>,</span></div>
+<div class="line"><span class="ln">57</span><span class="code">) <span class="kw">as</span> <span class="var">dag</span>:</span></div>
+<div class="line"><span class="ln">58</span><span class="code">    <span class="var">t1</span> = <span class="cls">PythonOperator</span>(task_id=<span class="str">"extract"</span>, python_callable=<span class="fn">extract_raw_events</span>)</span></div>
+<div class="line"><span class="ln">59</span><span class="code">    <span class="var">t2</span> = <span class="cls">PythonOperator</span>(task_id=<span class="str">"transform"</span>, python_callable=<span class="fn">transform_events</span>)</span></div>
+<div class="line"><span class="ln">60</span><span class="code">    <span class="var">t3</span> = <span class="cls">PythonOperator</span>(task_id=<span class="str">"load"</span>, python_callable=<span class="fn">load_to_warehouse</span>)</span></div>
+<div class="line"><span class="ln">61</span><span class="code">    <span class="var">t1</span> >> <span class="var">t2</span> >> <span class="var">t3</span></span></div>
+</pre>
+</div>
+<div class="output-panel">
+  <div class="out-label">Last Run Output</div>
+  <div class="out-line out-ok">[2026-03-19 06:00:02] INFO - Extracted 14,832 rows for 2026-03-18</div>
+  <div class="out-line out-ok">[2026-03-19 06:00:08] INFO - Transformed: 14,791 clean rows</div>
+  <div class="out-line out-warn">[2026-03-19 06:00:08] WARNING - 41 duplicate event_ids dropped</div>
+  <div class="out-line out-ok">[2026-03-19 06:00:15] INFO - Loaded 14,791 rows to fact_events</div>
+  <div class="out-line out-ok">[2026-03-19 06:00:15] INFO - DAG run succeeded. Duration: 13.2s</div>
+</div>
+</body>
+</html>

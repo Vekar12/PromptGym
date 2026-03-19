@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Executive Briefing — iLens Transformation Q1 Progress</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #ffffff;
+    color: #1A1A2E;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  /* Top banner */
+  .banner {
+    background: #1A1A2E;
+    border-radius: 12px;
+    padding: 22px 28px;
+    margin-bottom: 26px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .banner-left .doc-type {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #A5B4FC;
+    margin-bottom: 6px;
+  }
+  .banner-left h1 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .banner-right {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+  }
+  .banner-meta {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    text-align: right;
+  }
+  .classification-badge {
+    background: #EF4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  section { margin-bottom: 24px; }
+  h2 {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #9CA3AF;
+    margin-bottom: 10px;
+  }
+
+  /* Situation */
+  .situation-box {
+    background: #F0F4FF;
+    border: 1px solid #C7D2FE;
+    border-left: 4px solid #6366F1;
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 14px;
+    color: #1E1B4B;
+    line-height: 1.7;
+  }
+
+  /* Key Metrics */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+  .metric-card {
+    background: #F9FAFB;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+  .metric-number {
+    font-size: 30px;
+    font-weight: 900;
+    color: #1A1A2E;
+    margin-bottom: 3px;
+  }
+  .metric-label {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 10px;
+  }
+  .metric-sub {
+    font-size: 11.5px;
+    color: #9CA3AF;
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .metric-base {
+    background: #FEE2E2;
+    color: #991B1B;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-weight: 600;
+  }
+  .metric-target {
+    background: #D1FAE5;
+    color: #065F46;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-weight: 600;
+  }
+
+  /* Workstreams table */
+  .workstream-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .workstream-table thead tr {
+    background: #1A1A2E;
+    color: #fff;
+  }
+  .workstream-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .workstream-table tbody tr {
+    border-bottom: 1px solid #F3F4F6;
+  }
+  .workstream-table td {
+    padding: 12px 14px;
+    vertical-align: middle;
+  }
+  .rag-green {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #D1FAE5;
+    color: #065F46;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .rag-amber {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .rag-red {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FEE2E2;
+    color: #991B1B;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .rag-dot-g { width:8px;height:8px;border-radius:50%;background:#10B981;display:inline-block; }
+  .rag-dot-a { width:8px;height:8px;border-radius:50%;background:#F59E0B;display:inline-block; }
+  .rag-dot-r { width:8px;height:8px;border-radius:50%;background:#EF4444;display:inline-block; }
+  .ws-name { font-weight: 700; color: #1A1A2E; }
+  .ws-note { font-size: 12.5px; color: #6B7280; margin-top: 3px; }
+
+  /* Risks table */
+  .risk-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .risk-table thead tr { background: #374151; color: #fff; }
+  .risk-table th {
+    padding: 10px 13px;
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .risk-table tbody tr { border-bottom: 1px solid #F3F4F6; }
+  .risk-table td { padding: 11px 13px; vertical-align: top; color: #374151; }
+  .risk-high { color: #EF4444; font-weight: 700; }
+  .risk-medium { color: #F59E0B; font-weight: 700; }
+
+  /* Ask box */
+  .ask-box {
+    background: #1A1A2E;
+    color: #fff;
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .ask-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #A5B4FC;
+    margin-bottom: 8px;
+  }
+  .ask-text {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: #E5E7EB;
+  }
+  .ask-text strong { color: #fff; }
+
+  /* Next milestone */
+  .milestone-box {
+    background: #F0FDF4;
+    border: 1px solid #A7F3D0;
+    border-left: 4px solid #10B981;
+    border-radius: 8px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .milestone-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #065F46;
+    margin-bottom: 4px;
+  }
+  .milestone-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #065F46;
+  }
+  .milestone-date {
+    font-size: 15px;
+    font-weight: 800;
+    color: #10B981;
+    white-space: nowrap;
+  }
+
+  .footer {
+    margin-top: 28px;
+    padding-top: 14px;
+    border-top: 1px solid #E5E7EB;
+    font-size: 12px;
+    color: #9CA3AF;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<!-- Banner -->
+<div class="banner">
+  <div class="banner-left">
+    <div class="doc-type">Executive Briefing</div>
+    <h1>iLens Transformation — Q1 Progress</h1>
+  </div>
+  <div class="banner-right">
+    <div class="banner-meta">14 March 2025</div>
+    <div class="banner-meta">Prepared by: Transformation PMO</div>
+    <div class="classification-badge">Internal</div>
+  </div>
+</div>
+
+<!-- Situation -->
+<section>
+  <h2>Situation</h2>
+  <div class="situation-box">
+    iLens digitisation is in <strong>Month 3 of a 6-month transformation</strong>. The core disbursement workflow has been successfully migrated to the platform. However, the <strong>Legal</strong> and <strong>Credit</strong> stages are underperforming against TAT targets and require immediate attention.
+  </div>
+</section>
+
+<!-- Key Metrics -->
+<section>
+  <h2>Key Metrics</h2>
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-number">18.2d</div>
+      <div class="metric-label">End-to-End TAT</div>
+      <div class="metric-sub">
+        <span class="metric-base">Baseline: 24d</span>
+        <span class="metric-target">Target: 14d</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-number" style="color:#EF4444;">23%</div>
+      <div class="metric-label">Legal Stage Rework</div>
+      <div class="metric-sub">
+        <span class="metric-base">Baseline: 31%</span>
+        <span class="metric-target">Target: &lt;10%</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-number" style="color:#10B981;">87%</div>
+      <div class="metric-label">Files Processed Digitally</div>
+      <div class="metric-sub">
+        <span class="metric-base">Baseline: 12%</span>
+        <span class="metric-target">Target: 95%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Workstreams -->
+<section>
+  <h2>Progress by Workstream</h2>
+  <table class="workstream-table">
+    <thead>
+      <tr>
+        <th>Workstream</th>
+        <th>Status</th>
+        <th>Commentary</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="ws-name">Process Digitisation</td>
+        <td><span class="rag-green"><span class="rag-dot-g"></span> Green</span></td>
+        <td>87% files on iLens; on track for 95% by Apr 30</td>
+      </tr>
+      <tr>
+        <td class="ws-name">Legal Stage Optimisation</td>
+        <td><span class="rag-red"><span class="rag-dot-r"></span> Red</span></td>
+        <td>Rework at 23%, TAT at 4.8d vs 3d target; pre-check checklist in progress</td>
+      </tr>
+      <tr>
+        <td class="ws-name">Training &amp; Change Management</td>
+        <td><span class="rag-amber"><span class="rag-dot-a"></span> Amber</span></td>
+        <td>Training complete for 6/9 hubs; Dharavi, Andheri &amp; Kurla pending</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Top Risks -->
+<section>
+  <h2>Top Risks</h2>
+  <table class="risk-table">
+    <thead>
+      <tr>
+        <th>Risk</th>
+        <th>Likelihood</th>
+        <th>Impact</th>
+        <th>Mitigation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Legal SLA breach continues past Q1</td>
+        <td class="risk-high">High</td>
+        <td class="risk-high">High</td>
+        <td>Escalation matrix activated; interim manual review process in place</td>
+      </tr>
+      <tr>
+        <td>VAHAN API downtime disrupting challan filing</td>
+        <td class="risk-medium">Medium</td>
+        <td class="risk-medium">Medium</td>
+        <td>Offline backup process developed and documented</td>
+      </tr>
+      <tr>
+        <td>Attrition in Credit team</td>
+        <td class="risk-medium">Medium</td>
+        <td class="risk-high">High</td>
+        <td>Backfill request submitted to HR; senior credit analyst covering interim</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Ask from Leadership -->
+<section>
+  <h2>Ask from Leadership</h2>
+  <div class="ask-box">
+    <div class="ask-label">Decision Required</div>
+    <div class="ask-text">
+      Approve additional <strong>₹8L budget</strong> for the iLens Legal module enhancement (auto-document validation capability). Without this investment, the Legal stage target of <strong>&lt;3d TAT is unachievable by June 2025</strong>. PMO recommends expedited approval given the direct link to business KPIs.
+    </div>
+  </div>
+</section>
+
+<!-- Next Milestone -->
+<section>
+  <h2>Next Milestone</h2>
+  <div class="milestone-box">
+    <div>
+      <div class="milestone-label">Upcoming Milestone</div>
+      <div class="milestone-text">Hubs 7–9 onboarding complete</div>
+    </div>
+    <div class="milestone-date">31 March 2025</div>
+  </div>
+</section>
+
+<div class="footer">
+  <span>Executive Briefing — Internal Only — iLens Transformation PMO</span>
+  <span>14 March 2025</span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Design Specification — Loan File Pre-checker Agent</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a2e; max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
+
+  /* Header */
+  .doc-header { border-bottom: 3px solid #1a237e; padding-bottom: 20px; margin-bottom: 32px; }
+  .doc-type-badge { display: inline-block; background: #1a237e; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 3px; margin-bottom: 12px; }
+  .doc-title { font-size: 28px; font-weight: 700; color: #0d0d2b; margin-bottom: 6px; }
+  .doc-subtitle { font-size: 14px; color: #5c6bc0; margin-bottom: 16px; }
+  .doc-meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .doc-meta span { font-size: 12px; color: #666; }
+  .doc-meta span strong { color: #333; }
+
+  /* Section headers */
+  h2 { font-size: 15px; font-weight: 700; color: #1a237e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; padding-bottom: 6px; border-bottom: 1px solid #e8eaf6; }
+
+  section { margin-bottom: 36px; }
+
+  /* Overview grid */
+  .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .overview-item { background: #f5f6ff; border: 1px solid #e8eaf6; border-radius: 6px; padding: 14px 16px; }
+  .overview-item .label { font-size: 11px; font-weight: 600; color: #7986cb; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .overview-item .value { font-size: 14px; color: #1a1a2e; font-weight: 500; }
+
+  /* Tool cards */
+  .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .tool-card { border: 1px solid #c5cae9; border-radius: 8px; overflow: hidden; }
+  .tool-card-header { background: #1a237e; color: #fff; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+  .tool-name { font-size: 13px; font-weight: 700; font-family: 'Courier New', monospace; }
+  .tool-num { background: rgba(255,255,255,0.2); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .tool-card-body { padding: 14px 16px; background: #fafbff; }
+  .schema-row { margin-bottom: 10px; }
+  .schema-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #888; margin-bottom: 4px; }
+  .schema-code { font-family: 'Courier New', monospace; font-size: 11.5px; background: #eef0ff; border: 1px solid #c5cae9; border-radius: 4px; padding: 6px 10px; color: #283593; line-height: 1.5; word-break: break-all; }
+
+  /* Flowchart */
+  .flowchart { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .flow-node { width: 100%; max-width: 560px; }
+  .flow-box { border-radius: 8px; padding: 12px 20px; text-align: center; font-size: 13px; font-weight: 600; position: relative; }
+  .flow-box.trigger { background: #e3f2fd; border: 2px solid #1565c0; color: #0d47a1; }
+  .flow-box.action { background: #1a237e; border: 2px solid #1a237e; color: #fff; }
+  .flow-box.decision { background: #fff8e1; border: 2px solid #f9a825; color: #e65100; transform: none; }
+  .flow-box.pass { background: #e8f5e9; border: 2px solid #2e7d32; color: #1b5e20; }
+  .flow-box.fail { background: #ffebee; border: 2px solid #c62828; color: #b71c1c; }
+  .flow-box.end { background: #37474f; border: 2px solid #263238; color: #eceff1; }
+  .flow-sub { font-size: 11px; font-weight: 400; margin-top: 3px; opacity: 0.85; }
+  .arrow { display: flex; align-items: center; justify-content: center; height: 32px; color: #9e9e9e; font-size: 22px; line-height: 1; }
+  .branch-container { display: flex; width: 100%; max-width: 700px; gap: 16px; align-items: flex-start; }
+  .branch { flex: 1; display: flex; flex-direction: column; align-items: center; }
+  .branch-label { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; margin-bottom: 8px; }
+  .branch-label.pass { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .branch-label.fail { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+  .branch-box { width: 100%; border-radius: 7px; padding: 10px 14px; font-size: 12px; font-weight: 500; text-align: center; line-height: 1.5; }
+  .branch-box.pass { background: #e8f5e9; border: 1.5px solid #66bb6a; color: #1b5e20; }
+  .branch-box.fail { background: #ffebee; border: 1.5px solid #ef5350; color: #b71c1c; }
+
+  /* Guardrails */
+  .guardrails-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .guardrail-box { border: 2px solid #c62828; border-radius: 6px; padding: 14px 16px; background: #fff8f8; }
+  .guardrail-num { font-size: 11px; font-weight: 700; color: #c62828; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .guardrail-text { font-size: 13px; color: #333; line-height: 1.5; }
+
+  /* Escalation */
+  .escalation-box { background: #fff3e0; border: 2px solid #e65100; border-radius: 8px; padding: 18px 20px; }
+  .escalation-box .esc-title { font-size: 13px; font-weight: 700; color: #bf360c; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .escalation-box p { font-size: 13px; color: #4e342e; line-height: 1.6; }
+
+  /* Metrics */
+  .metrics-row { display: flex; gap: 16px; }
+  .metric-card { flex: 1; border: 1px solid #c5cae9; border-radius: 8px; padding: 16px; text-align: center; background: #f5f6ff; }
+  .metric-value { font-size: 26px; font-weight: 800; color: #1a237e; }
+  .metric-label { font-size: 11px; color: #666; margin-top: 4px; }
+
+  /* Sample IO */
+  .io-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .io-block { border-radius: 8px; overflow: hidden; }
+  .io-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 8px 14px; }
+  .io-label.input { background: #263238; color: #80cbc4; }
+  .io-label.output { background: #1a237e; color: #9fa8da; }
+  .io-code { font-family: 'Courier New', monospace; font-size: 11.5px; padding: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-all; }
+  .io-code.input { background: #2d3748; color: #e2e8f0; }
+  .io-code.output { background: #1e2a4a; color: #c3cfe2; }
+  .key-str { color: #81d4fa; }
+  .val-str { color: #a5d6a7; }
+  .val-num { color: #ffcc80; }
+  .val-arr { color: #ef9a9a; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="doc-type-badge">Agent Design Specification</div>
+  <div class="doc-title">Loan File Pre-checker Agent</div>
+  <div class="doc-subtitle">Technical specification for automated IGF-stage loan file validation before Legal review</div>
+  <div class="doc-meta">
+    <span><strong>Version:</strong> 1.2</span>
+    <span><strong>Status:</strong> Approved for Dev</span>
+    <span><strong>Owner:</strong> Legal Ops Team</span>
+    <span><strong>Last Updated:</strong> 12 March 2025</span>
+    <span><strong>System:</strong> iLens / CRM Integration</span>
+  </div>
+</div>
+
+<!-- AGENT OVERVIEW -->
+<section>
+  <h2>Agent Overview</h2>
+  <div class="overview-grid">
+    <div class="overview-item">
+      <div class="label">Agent Name</div>
+      <div class="value">Loan File Pre-checker Agent</div>
+    </div>
+    <div class="overview-item">
+      <div class="label">Purpose</div>
+      <div class="value">Auto-validate loan application files at IGF stage before Legal review</div>
+    </div>
+    <div class="overview-item">
+      <div class="label">Trigger Condition</div>
+      <div class="value">New file uploaded to iLens with status <strong>"Ready for Legal"</strong></div>
+    </div>
+    <div class="overview-item">
+      <div class="label">Output</div>
+      <div class="value">Validation report + Slack notification + CRM status update</div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS AVAILABLE -->
+<section>
+  <h2>Tools Available (4)</h2>
+  <div class="tools-grid">
+
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <span class="tool-num">1</span>
+        <span class="tool-name">document_reader</span>
+      </div>
+      <div class="tool-card-body">
+        <div class="schema-row">
+          <div class="schema-label">Input Schema</div>
+          <div class="schema-code">{ file_id: string,<br>&nbsp;&nbsp;pages: number[] }</div>
+        </div>
+        <div class="schema-row">
+          <div class="schema-label">Output Schema</div>
+          <div class="schema-code">{ text: string,<br>&nbsp;&nbsp;confidence: float,<br>&nbsp;&nbsp;missing_pages: number[] }</div>
+        </div>
+        <div class="schema-label" style="margin-top:4px">Use Case</div>
+        <div style="font-size:12px;color:#555;margin-top:3px;">Reads and OCR-processes uploaded documents from iLens storage.</div>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <span class="tool-num">2</span>
+        <span class="tool-name">checklist_validator</span>
+      </div>
+      <div class="tool-card-body">
+        <div class="schema-row">
+          <div class="schema-label">Input Schema</div>
+          <div class="schema-code">{ documents: object[],<br>&nbsp;&nbsp;checklist_version: string }</div>
+        </div>
+        <div class="schema-row">
+          <div class="schema-label">Output Schema</div>
+          <div class="schema-code">{ passed: boolean,<br>&nbsp;&nbsp;score: float,<br>&nbsp;&nbsp;failed_items: string[],<br>&nbsp;&nbsp;warnings: string[] }</div>
+        </div>
+        <div class="schema-label" style="margin-top:4px">Use Case</div>
+        <div style="font-size:12px;color:#555;margin-top:3px;">Validates documents against RBI / internal checklist requirements.</div>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <span class="tool-num">3</span>
+        <span class="tool-name">slack_notifier</span>
+      </div>
+      <div class="tool-card-body">
+        <div class="schema-row">
+          <div class="schema-label">Input Schema</div>
+          <div class="schema-code">{ channel: string,<br>&nbsp;&nbsp;message: string,<br>&nbsp;&nbsp;priority: "high" | "normal" }</div>
+        </div>
+        <div class="schema-row">
+          <div class="schema-label">Output Schema</div>
+          <div class="schema-code">{ sent: boolean,<br>&nbsp;&nbsp;timestamp: string }</div>
+        </div>
+        <div class="schema-label" style="margin-top:4px">Use Case</div>
+        <div style="font-size:12px;color:#555;margin-top:3px;">Sends internal Slack notifications to Legal or Sales channels.</div>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <span class="tool-num">4</span>
+        <span class="tool-name">crm_updater</span>
+      </div>
+      <div class="tool-card-body">
+        <div class="schema-row">
+          <div class="schema-label">Input Schema</div>
+          <div class="schema-code">{ file_id: string,<br>&nbsp;&nbsp;status: string,<br>&nbsp;&nbsp;notes: string }</div>
+        </div>
+        <div class="schema-row">
+          <div class="schema-label">Output Schema</div>
+          <div class="schema-code">{ updated: boolean,<br>&nbsp;&nbsp;updated_at: string }</div>
+        </div>
+        <div class="schema-label" style="margin-top:4px">Use Case</div>
+        <div style="font-size:12px;color:#555;margin-top:3px;">Updates iLens CRM with validation outcome and notes for audit trail.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- DECISION FLOW -->
+<section>
+  <h2>Decision Flow</h2>
+  <div style="display:flex; flex-direction:column; align-items:center;">
+
+    <div class="flow-node">
+      <div class="flow-box trigger">
+        <div>&#9201; Trigger: New File in iLens</div>
+        <div class="flow-sub">Status change detected: "Ready for Legal"</div>
+      </div>
+    </div>
+    <div class="arrow">&#8595;</div>
+
+    <div class="flow-node">
+      <div class="flow-box action">
+        <div>&#128225; Fetch Documents</div>
+        <div class="flow-sub">Tool: document_reader — reads all pages, computes confidence scores</div>
+      </div>
+    </div>
+    <div class="arrow">&#8595;</div>
+
+    <div class="flow-node">
+      <div class="flow-box action">
+        <div>&#10003; Run Checklist Validation</div>
+        <div class="flow-sub">Tool: checklist_validator — checks against current RBI/IGF checklist</div>
+      </div>
+    </div>
+    <div class="arrow">&#8595;</div>
+
+    <div class="flow-node">
+      <div class="flow-box decision">
+        <div>&#9654; Decision Gate: Score Threshold</div>
+        <div class="flow-sub">Evaluated: score &gt; 0.85 AND no critical failures</div>
+      </div>
+    </div>
+    <div class="arrow">&#8595;</div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label pass">&#10003; PASS — score &gt; 0.85</span>
+        <div class="branch-box pass">
+          Update CRM → <strong>"Legal Ready"</strong><br>
+          Notify Legal Team via Slack<br>
+          <span style="font-size:11px;">Tool: crm_updater + slack_notifier</span>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label fail">&#10005; FAIL — score &le; 0.85</span>
+        <div class="branch-box fail">
+          Update CRM → <strong>"Returned to Sales"</strong><br>
+          Notify Sales Manager with failed items<br>
+          <span style="font-size:11px;">Tool: crm_updater + slack_notifier</span>
+        </div>
+      </div>
+    </div>
+    <div class="arrow">&#8595;</div>
+
+    <div class="flow-node">
+      <div class="flow-box end">
+        &#9646; END — Audit log written to iLens
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- GUARDRAILS -->
+<section>
+  <h2>Guardrails</h2>
+  <div class="guardrails-grid">
+    <div class="guardrail-box">
+      <div class="guardrail-num">&#9888; Rule 1 — Document Integrity</div>
+      <div class="guardrail-text">Must NOT modify or delete any uploaded document. Agent is read-only with respect to iLens document storage.</div>
+    </div>
+    <div class="guardrail-box">
+      <div class="guardrail-num">&#9888; Rule 2 — Confidence Threshold</div>
+      <div class="guardrail-text">Must NOT approve a file with confidence score &lt; 0.80 on any critical document (KYC, income proof, property docs).</div>
+    </div>
+    <div class="guardrail-box">
+      <div class="guardrail-num">&#9888; Rule 3 — Notification Scope</div>
+      <div class="guardrail-text">Must NOT send notifications to external parties. All Slack messages must target internal channels only (verified by channel whitelist).</div>
+    </div>
+    <div class="guardrail-box">
+      <div class="guardrail-num">&#9888; Rule 4 — Checklist Currency</div>
+      <div class="guardrail-text">Must NOT proceed if checklist_version is outdated (&gt;30 days old). Agent must halt and alert compliance team for checklist refresh.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ESCALATION -->
+<section>
+  <h2>Escalation Condition</h2>
+  <div class="escalation-box">
+    <div class="esc-title">&#128680; Human-in-the-Loop Trigger</div>
+    <p>If <strong>document_reader confidence &lt; 0.60</strong> on any single page, the agent <strong>pauses immediately</strong> and routes the file to a human reviewer (Legal QA Team) via Slack. The notification includes: file ID, affected page numbers, and confidence scores for each flagged page. The agent does not proceed to checklist validation until human review is complete and a manual override is issued.</p>
+  </div>
+</section>
+
+<!-- SUCCESS METRICS -->
+<section>
+  <h2>Success Metrics</h2>
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-value">&gt;94%</div>
+      <div class="metric-label">Pre-check Accuracy</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">&lt;3%</div>
+      <div class="metric-label">False Positive Rate</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">&lt;90s</div>
+      <div class="metric-label">Processing Time / File</div>
+    </div>
+  </div>
+</section>
+
+<!-- SAMPLE I/O -->
+<section>
+  <h2>Sample Input / Output</h2>
+  <div class="io-grid">
+    <div class="io-block">
+      <div class="io-label input">&#8594; Input Payload</div>
+      <pre class="io-code input"><span class="key-str">"file_id"</span>: <span class="val-str">"ILNS-2024-4421"</span>,
+<span class="key-str">"trigger"</span>: <span class="val-str">"status_change"</span>,
+<span class="key-str">"new_status"</span>: <span class="val-str">"ready_for_legal"</span></pre>
+    </div>
+    <div class="io-block">
+      <div class="io-label output">&#8592; Output Payload</div>
+      <pre class="io-code output"><span class="key-str">"decision"</span>: <span class="val-str">"FAIL"</span>,
+<span class="key-str">"score"</span>: <span class="val-num">0.71</span>,
+<span class="key-str">"failed_items"</span>: <span class="val-arr">["NOC missing",
+  "Address proof expired"]</span>,
+<span class="key-str">"action"</span>: <span class="val-str">"returned_to_sales"</span>,
+<span class="key-str">"notified"</span>: <span class="val-arr">["priya.sharma@bank.in"]</span></pre>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fleet Ops — Morning Brief</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F8F9FA;
+      color: #1A1A2E;
+      width: 900px;
+      margin: 0 auto;
+      padding: 0 0 40px 0;
+    }
+
+    /* HEADER */
+    .header {
+      background: #1A1A2E;
+      color: #FFFFFF;
+      padding: 22px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+    .header-left p {
+      font-size: 13px;
+      color: #A0AEC0;
+      margin-top: 3px;
+    }
+    .header-badge {
+      background: #10B981;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* MAIN CONTENT */
+    .content {
+      padding: 28px 32px;
+    }
+
+    /* KPI ROW */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: #FFFFFF;
+      border-radius: 10px;
+      padding: 20px 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      border-top: 4px solid #E2E8F0;
+    }
+    .kpi-card.green  { border-top-color: #10B981; }
+    .kpi-card.amber  { border-top-color: #F59E0B; }
+    .kpi-card.red    { border-top-color: #EF4444; }
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+    }
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1A1A2E;
+      line-height: 1;
+    }
+    .kpi-value.green { color: #10B981; }
+    .kpi-value.amber { color: #F59E0B; }
+    .kpi-value.red   { color: #EF4444; }
+    .kpi-sub {
+      font-size: 12px;
+      color: #A0AEC0;
+      margin-top: 5px;
+    }
+
+    /* SECTION HEADING */
+    .section-heading {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1A1A2E;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #E2E8F0;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    /* TABLE */
+    .table-wrap {
+      background: #FFFFFF;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    thead th {
+      background: #1A1A2E;
+      color: #FFFFFF;
+      font-weight: 600;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      letter-spacing: 0.4px;
+    }
+    tbody tr {
+      border-bottom: 1px solid #EDF2F7;
+    }
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+    tbody tr:hover {
+      background: #F7FAFC;
+    }
+    tbody td {
+      padding: 12px 16px;
+      color: #2D3748;
+    }
+    tbody tr.row-red {
+      background: #FFF5F5;
+    }
+    tbody tr.row-red td {
+      color: #C53030;
+    }
+    tbody tr.row-red:hover {
+      background: #FED7D7;
+    }
+    .delay-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 12px;
+    }
+    .delay-badge.red    { background: #FED7D7; color: #C53030; }
+    .delay-badge.amber  { background: #FEFCBF; color: #B7791F; }
+    .delay-badge.green  { background: #C6F6D5; color: #276749; }
+
+    /* ALERTS PANEL */
+    .alerts-panel {
+      background: #FFFFFF;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .alerts-panel-header {
+      background: #1A1A2E;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+    }
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #EDF2F7;
+    }
+    .alert-item:last-child {
+      border-bottom: none;
+    }
+    .alert-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 11px;
+      border-radius: 20px;
+      white-space: nowrap;
+      min-width: 66px;
+      text-align: center;
+    }
+    .alert-badge.red   { background: #FED7D7; color: #C53030; }
+    .alert-badge.amber { background: #FEFCBF; color: #B7791F; }
+    .alert-text {
+      font-size: 13.5px;
+      color: #2D3748;
+    }
+    .alert-text strong {
+      color: #1A1A2E;
+    }
+
+    /* FOOTER */
+    .footer {
+      background: #1A1A2E;
+      color: #718096;
+      font-size: 12px;
+      padding: 13px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer span {
+      color: #A0AEC0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Fleet Ops — Morning Brief</h1>
+      <p>Saturday, 15 March 2025 &nbsp;|&nbsp; 06:00 AM &nbsp;|&nbsp; Mumbai Municipal Transport</p>
+    </div>
+    <div class="header-badge">LIVE</div>
+  </div>
+
+  <div class="content">
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card green">
+        <div class="kpi-label">Buses Active</div>
+        <div class="kpi-value green">38<span style="font-size:16px;color:#718096;">/42</span></div>
+        <div class="kpi-sub">4 offline today</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">On-Time %</div>
+        <div class="kpi-value green">84%</div>
+        <div class="kpi-sub">Target: ≥ 90%</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">Delayed Buses</div>
+        <div class="kpi-value red">4</div>
+        <div class="kpi-sub">2 critical (&gt;15 min)</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Driver No-shows</div>
+        <div class="kpi-value amber">2</div>
+        <div class="kpi-sub">Relief dispatched: 1</div>
+      </div>
+    </div>
+
+    <!-- ACTIVE DELAYS TABLE -->
+    <div class="section-heading">Active Delays</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Bus ID</th>
+            <th>Route</th>
+            <th>Delay</th>
+            <th>Reason</th>
+            <th>Action Taken</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MH-04-AB-1122</td>
+            <td>Route 7</td>
+            <td><span class="delay-badge amber">12 min</span></td>
+            <td>Heavy traffic</td>
+            <td>Rerouted</td>
+          </tr>
+          <tr class="row-red">
+            <td>MH-04-CD-3344</td>
+            <td>Route 12</td>
+            <td><span class="delay-badge red">18 min</span></td>
+            <td>Engine issue</td>
+            <td>Workshop called</td>
+          </tr>
+          <tr>
+            <td>MH-04-EF-5566</td>
+            <td>Route 3</td>
+            <td><span class="delay-badge green">8 min</span></td>
+            <td>Driver late</td>
+            <td>Relief sent</td>
+          </tr>
+          <tr class="row-red">
+            <td>MH-04-GH-7788</td>
+            <td>Route 19</td>
+            <td><span class="delay-badge red">22 min</span></td>
+            <td>Road block</td>
+            <td>Police notified</td>
+          </tr>
+          <tr>
+            <td>MH-04-IJ-9900</td>
+            <td>Route 5</td>
+            <td><span class="delay-badge green">6 min</span></td>
+            <td>Puncture</td>
+            <td>Spare deployed</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ALERTS PANEL -->
+    <div class="section-heading">Operational Alerts</div>
+    <div class="alerts-panel">
+      <div class="alerts-panel-header">3 Active Alerts — Requires Attention</div>
+      <div class="alert-item">
+        <div class="alert-badge red">&#128308; CRITICAL</div>
+        <div class="alert-text">
+          <strong>Fuel low:</strong> MH-04-AB-1122 — 18% remaining. Refuelling stop recommended before next trip.
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-badge amber">&#128993; WARNING</div>
+        <div class="alert-text">
+          <strong>Tyre check due:</strong> MH-04-CD-3344 — Overdue by 3 days. Schedule inspection at Kurla Depot.
+        </div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-badge amber">&#128993; PENDING</div>
+        <div class="alert-text">
+          <strong>Challan unfiled:</strong> MH-04-EF-5566 — 2 challans pending submission. File before EOD.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>Last updated: 06:00 AM</span>
+    <span>Next refresh: 06:30 AM</span>
+  </div>
+
+</body>
+</html>
