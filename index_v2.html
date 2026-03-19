@@ -267,35 +267,27 @@ textarea { resize: vertical; }
     <div class="setup-logo">Prompt<span>Gym</span></div>
     <div class="setup-tagline">See the output. Write the prompt. Build the habit.</div>
     <div class="setup-section">
-      <label class="label" for="api-key-input">Gemini API Key</label>
-      <input id="api-key-input" class="input" type="password" placeholder="AIza..." autocomplete="off">
-      <div style="font-size:0.72rem;color:var(--text3);margin-top:6px">Free at aistudio.google.com — no credit card needed. Stored locally, never sent anywhere else.</div>
+      <label class="label" for="api-key-input">Gemini API Key <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <input id="api-key-input" class="input" type="password" placeholder="AIza... (leave blank to use local scoring)" autocomplete="off">
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:6px">Free at aistudio.google.com — no credit card needed. Without a key the app still works using local prompt analysis.</div>
     </div>
     <div class="setup-section" style="margin-bottom:28px">
-      <div class="habits-grid">
-        <div class="habit-card">
-          <div class="habit-icon">✂️</div>
-          <div class="habit-name">Conciseness</div>
-          <div class="habit-desc">Every word earns its place</div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">What you get</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.75rem">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+          <div style="font-weight:700;color:var(--text);margin-bottom:4px">Without API key</div>
+          <div style="color:var(--text2)">✓ All 24 rounds<br>✓ Local prompt scoring<br>✓ Hints &amp; feedback<br>✗ No AI generation</div>
         </div>
-        <div class="habit-card">
-          <div class="habit-icon">🎯</div>
-          <div class="habit-name">Context</div>
-          <div class="habit-desc">Right background for the task</div>
-        </div>
-        <div class="habit-card">
-          <div class="habit-icon">🎨</div>
-          <div class="habit-name">Tone & Format</div>
-          <div class="habit-desc">Voice, style, structure specified</div>
-        </div>
-        <div class="habit-card">
-          <div class="habit-icon">💡</div>
-          <div class="habit-name">Examples</div>
-          <div class="habit-desc">Anchor with patterns and samples</div>
+        <div style="background:var(--accent-glow);border:1px solid var(--accent);border-radius:8px;padding:10px 12px">
+          <div style="font-weight:700;color:var(--accent);margin-bottom:4px">With Gemini key</div>
+          <div style="color:var(--text2)">✓ All of the above<br>✓ AI generates your output<br>✓ Side-by-side comparison<br>✓ Semantic scoring</div>
         </div>
       </div>
     </div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center" data-action="save-key">Start Training →</button>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1;justify-content:center" data-action="skip-key">Start without key</button>
+      <button class="btn btn-primary" style="flex:1;justify-content:center" data-action="save-key">Save key &amp; Start →</button>
+    </div>
     <div id="key-error" style="font-size:0.78rem;color:var(--red);margin-top:8px;display:none"></div>
   </div>
 </div>
@@ -487,10 +479,13 @@ textarea { resize: vertical; }
       <div class="iframe-label original"><span class="dot"></span>Target Output</div>
       <iframe id="compare-original" class="compare-frame" sandbox="allow-scripts allow-same-origin"></iframe>
     </div>
-    <div class="iframe-wrap">
+    <div class="iframe-wrap" id="generated-iframe-wrap">
       <div class="iframe-label generated"><span class="dot"></span>Your Generated Output</div>
       <iframe id="compare-generated" class="compare-frame" sandbox="allow-scripts allow-same-origin"></iframe>
     </div>
+  </div>
+  <div id="local-mode-banner" style="display:none;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--yellow);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.82rem;color:var(--text2)">
+    <strong style="color:var(--yellow)">Local scoring mode</strong> — Add a Gemini API key in ⚙ Settings to unlock side-by-side iframe comparison. Your score is based on keyword analysis of your prompt.
   </div>
 
   <div class="feedback-bottom">
@@ -953,9 +948,17 @@ function renderFeedback() {
   const origFrame = document.getElementById('compare-original');
   origFrame.src = round.outputFile;
   const genFrame = document.getElementById('compare-generated');
-  const blob = new Blob([Session.generatedHTML], { type: 'text/html' });
-  const blobUrl = URL.createObjectURL(blob);
-  genFrame.src = blobUrl;
+  const genWrap = document.getElementById('generated-iframe-wrap');
+  const localBanner = document.getElementById('local-mode-banner');
+  if (result.localMode || !Session.generatedHTML) {
+    if (genWrap) genWrap.style.display = 'none';
+    if (localBanner) localBanner.style.display = 'block';
+  } else {
+    if (genWrap) genWrap.style.display = '';
+    if (localBanner) localBanner.style.display = 'none';
+    const blob = new Blob([Session.generatedHTML], { type: 'text/html' });
+    genFrame.src = URL.createObjectURL(blob);
+  }
 
   // score bars
   const scores = result.scores;
@@ -1023,19 +1026,79 @@ function renderSummary() {
 
 function updateNavStats() {
   const el = document.getElementById('nav-rounds-done');
-  if (el) el.innerHTML = `Rounds: <strong>${State.data.totalRounds}</strong>`;
+  const hasKey = !!State.get('apiKey');
+  if (el) el.innerHTML = `Rounds: <strong>${State.data.totalRounds}</strong> &nbsp;·&nbsp; <span style="color:${hasKey?'var(--green)':'var(--text3)'}">${hasKey?'AI mode':'Local mode'}</span>`;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// EVALUATING SCREEN ANIMATION
+// LOCAL SCORING — works without any API key
+// ═══════════════════════════════════════════════════════════════
+function scoreLocally(prompt, round) {
+  const p = prompt.toLowerCase();
+  const words = prompt.trim().split(/\s+/).filter(Boolean).length;
+
+  // CONCISENESS: 8–25 words = peak, penalise over/under
+  let conciseness;
+  if (words >= 8 && words <= 25) conciseness = 100;
+  else if (words < 8) conciseness = Math.max(0, 100 - (8 - words) * 12);
+  else conciseness = Math.max(0, 100 - (words - 25) * 3);
+
+  // CONTEXT: keywords from idealPromptContext found in prompt
+  const ctxWords = [...new Set(
+    round.idealPromptContext.toLowerCase()
+      .split(/[\s,.:;()\[\]"'→]+/)
+      .filter(w => w.length > 4 && !['with','from','that','this','each','when','than','have','into','then','their','should','would','could'].includes(w))
+  )];
+  const ctxMatches = ctxWords.filter(w => p.includes(w)).length;
+  const context = Math.min(100, Math.round((ctxMatches / Math.max(ctxWords.length, 1)) * 130));
+
+  // TONE_FORMAT: format/structure keywords in prompt
+  const fmtWords = ['table','column','row','section','header','card','grid','list','bullet','format','layout','style','structured','numbered','sorted','ranked','chart','diagram','dark','template','panel','sidebar'];
+  const tone = Math.min(100, fmtWords.filter(w => p.includes(w)).length * 28);
+
+  // EXAMPLES: example anchors
+  const exPatterns = [' like ', 'e.g.', 'example:', 'format:', 'such as', 'for instance', 'sample', 'pattern', ': [', '→', '->', 'e.g', 'e.g '];
+  const examples = Math.min(100, exPatterns.filter(pat => p.includes(pat)).length * 45);
+
+  // Key elements: keyword presence check
+  const stopWords = new Set(['with','from','that','this','each','when','than','have','into','then','their','clearly','specified','explicitly','shown','named','implied','present','based']);
+  const elementsFound = round.keyElements.map(el => {
+    const kws = el.toLowerCase().split(/[\s,.:;()\[\]"'→\-]+/).filter(w => w.length > 4 && !stopWords.has(w));
+    return kws.length > 0 && kws.some(kw => p.includes(kw));
+  });
+
+  const elemScore = Math.round((elementsFound.filter(Boolean).length / round.keyElements.length) * 20);
+  const rawAvg = Math.round((conciseness + context + tone + examples) / 4);
+  const overall = Math.min(100, rawAvg + elemScore);
+
+  // Habit tip: use the seed for the lowest-scoring dimension
+  const dimScores = { conciseness, context, tone_format: tone, examples };
+  const lowestDim = Object.entries(dimScores).reduce((a, b) => b[1] < a[1] ? b : a)[0];
+  const tipMap = { conciseness: 'level3', context: 'level2', tone_format: 'level3', examples: 'level2' };
+  const habitTip = round.hintSeeds[tipMap[lowestDim]] || round.hintSeeds.level3;
+
+  const found = elementsFound.filter(Boolean).length;
+  return {
+    scores: { conciseness, context, tone, examples },
+    overall,
+    elementsFound,
+    habitTip,
+    strengths: found > 0 ? `Your prompt matched ${found}/${round.keyElements.length} key elements.` : 'Keep going — add more domain-specific terms to your prompt.',
+    improvements: round.hintSeeds.level4,
+    localMode: true
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EVALUATING SCREEN
 // ═══════════════════════════════════════════════════════════════
 async function runEvaluation(userPrompt) {
   const round = Session.currentRound;
+  const hasKey = !!(State.get('apiKey'));
   Router.go('evaluating');
 
   const steps = [1,2,3,4,5];
   const progress = [10, 30, 60, 80, 100];
-  let currentStep = 0;
 
   function activateStep(n) {
     steps.forEach(s => {
@@ -1047,26 +1110,36 @@ async function runEvaluation(userPrompt) {
     document.getElementById('eval-progress-fill').style.width = progress[n-1] + '%';
   }
 
-  try {
-    activateStep(1);
-    await sleep(400);
-    activateStep(2);
+  // ── LOCAL MODE (no API key) ──────────────────────────────────
+  if (!hasKey) {
+    activateStep(1); await sleep(350);
+    activateStep(4); await sleep(400);
+    activateStep(5); await sleep(350);
+    steps.forEach(s => {
+      const el = document.getElementById('eval-step-' + s);
+      el.className = 'eval-step done';
+      el.querySelector('.eval-step-icon').textContent = '✓';
+    });
+    document.getElementById('eval-progress-fill').style.width = '100%';
+    await sleep(300);
+    Session.generatedHTML = '';
+    const evaluation = scoreLocally(userPrompt, round);
+    const result = { roundId: round.id, score: evaluation.overall, scores: evaluation.scores, elementsFound: evaluation.elementsFound, habitTip: evaluation.habitTip, strengths: evaluation.strengths, improvements: evaluation.improvements, prompt: userPrompt, localMode: true };
+    Session.record(result);
+    Router.go('feedback');
+    return;
+  }
 
-    // Generate HTML from user's prompt
+  // ── API MODE (Gemini key present) ────────────────────────────
+  try {
+    activateStep(1); await sleep(400);
+    activateStep(2);
     const generatedHTML = await API.generateFromPrompt(userPrompt, round);
     Session.generatedHTML = generatedHTML;
-
-    activateStep(3);
-    await sleep(300);
+    activateStep(3); await sleep(300);
     activateStep(4);
-
-    // Compare and score
     const evaluation = await API.compareAndScore(round.outputFile, generatedHTML, round, userPrompt);
-
-    activateStep(5);
-    await sleep(300);
-
-    // Mark all done
+    activateStep(5); await sleep(300);
     steps.forEach(s => {
       const el = document.getElementById('eval-step-' + s);
       el.className = 'eval-step done';
@@ -1074,7 +1147,6 @@ async function runEvaluation(userPrompt) {
     });
     document.getElementById('eval-progress-fill').style.width = '100%';
     await sleep(400);
-
     const result = {
       roundId: round.id,
       score: evaluation.overall || Math.round((evaluation.scores.conciseness + evaluation.scores.context + evaluation.scores.tone + evaluation.scores.examples) / 4),
@@ -1083,15 +1155,19 @@ async function runEvaluation(userPrompt) {
       habitTip: evaluation.habitTip,
       strengths: evaluation.strengths,
       improvements: evaluation.improvements,
-      prompt: userPrompt
+      prompt: userPrompt,
+      localMode: false
     };
-
     Session.record(result);
     Router.go('feedback');
-
   } catch(err) {
-    showToast('Gemini error: ' + (err.message || 'Unknown error'));
-    Router.go('round');
+    // API failed — fall back to local scoring silently
+    Session.generatedHTML = '';
+    const evaluation = scoreLocally(userPrompt, round);
+    const result = { roundId: round.id, score: evaluation.overall, scores: evaluation.scores, elementsFound: evaluation.elementsFound, habitTip: evaluation.habitTip, strengths: evaluation.strengths, improvements: evaluation.improvements, prompt: userPrompt, localMode: true };
+    Session.record(result);
+    showToast('Gemini unavailable — using local scoring instead');
+    Router.go('feedback');
   }
 }
 
@@ -1119,17 +1195,24 @@ async function showHint() {
   levelEl.textContent = Session.hintLevel + '/4';
   content.innerHTML = '<div class="hint-loading"><div class="dot-anim"></div><div class="dot-anim"></div><div class="dot-anim"></div></div>';
 
+  const useSeed = () => {
+    content.textContent = round.hintSeeds[`level${Session.hintLevel}`] || round.hintSeeds.level4;
+    hintBtn.disabled = Session.hintLevel >= 4;
+    hintBtn.textContent = Session.hintLevel >= 4 ? 'No more hints' : `Hint ${Session.hintLevel + 1}`;
+  };
+
+  if (!State.get('apiKey')) {
+    useSeed();
+    return;
+  }
+
   try {
     const hint = await API.generateHint(round, Session.hintLevel);
     content.textContent = hint;
     hintBtn.disabled = Session.hintLevel >= 4;
     hintBtn.textContent = Session.hintLevel >= 4 ? 'No more hints' : `Hint ${Session.hintLevel + 1}`;
   } catch(err) {
-    // Fallback to seed text
-    const seeds = round.hintSeeds;
-    content.textContent = seeds[`level${Session.hintLevel}`] || seeds.level4;
-    hintBtn.disabled = Session.hintLevel >= 4;
-    hintBtn.textContent = Session.hintLevel >= 4 ? 'No more hints' : `Hint ${Session.hintLevel + 1}`;
+    useSeed();
   }
 }
 
@@ -1180,13 +1263,18 @@ document.body.addEventListener('click', async e => {
   if (action === 'save-key') {
     const key = document.getElementById('api-key-input').value.trim();
     const errEl = document.getElementById('key-error');
-    if (!key || !key.startsWith('AIza')) {
-      errEl.textContent = 'Please enter a valid Gemini API key (starts with AIza)';
+    if (key && !key.startsWith('AIza')) {
+      errEl.textContent = 'Key should start with AIza — check and try again';
       errEl.style.display = 'block';
       return;
     }
     errEl.style.display = 'none';
     State.set('apiKey', key);
+    Router.go('dashboard');
+  }
+
+  if (action === 'skip-key') {
+    State.set('apiKey', '');
     Router.go('dashboard');
   }
 
@@ -1197,6 +1285,7 @@ document.body.addEventListener('click', async e => {
 
   if (action === 'go-settings') {
     document.getElementById('api-key-input').value = State.get('apiKey') || '';
+    document.getElementById('key-error').style.display = 'none';
     Router.go('setup');
   }
 
@@ -1264,14 +1353,10 @@ function showToast(msg) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// BOOT
+// BOOT — always go to dashboard; API key is optional
 // ═══════════════════════════════════════════════════════════════
 State.load();
-if (State.get('apiKey')) {
-  Router.go('dashboard');
-} else {
-  Router.go('setup');
-}
+Router.go('dashboard');
 </script>
 </body>
 </html>
