@@ -610,7 +610,9 @@ const Session = {
   hintLevel: 0,
   currentRound: null,
   generatedHTML: '',
-  apiUnavailable: false,  // set true when quota/auth error detected this session
+  // persisted in sessionStorage so page refresh doesn't re-trigger the error
+  get apiUnavailable() { return sessionStorage.getItem('pg_api_dead') === '1'; },
+  set apiUnavailable(v) { v ? sessionStorage.setItem('pg_api_dead','1') : sessionStorage.removeItem('pg_api_dead'); },
 
   start(rounds) {
     this.rounds = shuffle([...rounds]);
@@ -618,7 +620,6 @@ const Session = {
     this.results = [];
     this.currentRound = null;
     this.generatedHTML = '';
-    // don't reset apiUnavailable — quota stays exhausted for the whole day
   },
 
   current() { return this.rounds[this.idx]; },
@@ -1206,23 +1207,10 @@ async function runEvaluation(userPrompt) {
     Session.record(result);
     Router.go('feedback');
   } catch(err) {
-    // Detect quota / auth errors — stop retrying for this session
-    const msg = err.message || '';
-    const isQuota = msg.includes('quota') || msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED');
-    const isAuth = msg.includes('API_KEY') || msg.includes('401') || msg.includes('403');
-    if (isQuota || isAuth) {
-      Session.apiUnavailable = true;
-      updateNavStats();
-      const tip = isQuota
-        ? 'Daily quota exhausted — get a fresh free key at aistudio.google.com, then update it in ⚙ Settings.'
-        : 'API key invalid — update it in ⚙ Settings.';
-      showToast(tip);
-    } else {
-      showToast('Gemini error — switched to local scoring for this session.');
-      Session.apiUnavailable = true;
-      updateNavStats();
-    }
-    // Fall back to local scoring
+    // Mark API as dead for this browser session — no more retries, no toast
+    Session.apiUnavailable = true;
+    updateNavStats();
+    // Silently fall back to local scoring
     Session.generatedHTML = '';
     const evaluation = scoreLocally(userPrompt, round);
     const result = { roundId: round.id, score: evaluation.overall, scores: evaluation.scores, elementsFound: evaluation.elementsFound, habitTip: evaluation.habitTip, strengths: evaluation.strengths, improvements: evaluation.improvements, prompt: userPrompt, localMode: true };
@@ -1330,6 +1318,8 @@ document.body.addEventListener('click', async e => {
     }
     errEl.style.display = 'none';
     State.set('apiKey', key);
+    Session.apiUnavailable = false;  // new key — reset the dead flag
+    updateNavStats();
     Router.go('dashboard');
   }
 
